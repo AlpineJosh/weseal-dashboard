@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.12.0/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs@20.14.0",
+    "turbo@2.0.6"
+  ],
+  "env": {
+    "DEVBOX_COREPACK_ENABLED": "true"
+  },
+  "shell": {
+    "init_hook": ["pnpm install"],
+    "scripts": {
+      "run_test": "pnpm run start"
+    }
+  }
+}
