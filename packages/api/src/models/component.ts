@@ -5,6 +5,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const componentRouter = createTRPCRouter({
   all: publicProcedure.query(() => {
-    return db.select().from(schema.sage.stockComponent);
+    console.log("here")
+    return db.select().from(schema.sage.stockComponent).limit(10);
   }),
 });

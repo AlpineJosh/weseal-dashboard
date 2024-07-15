@@ -3,5 +3,6 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "turbo.path": "/Users/josh/Development/weseal/dashboard/.devbox/nix/profile/default/bin/turbo"
 }

@@ -4,9 +4,9 @@ import { ZodError } from "zod";
 
 import { db } from "@repo/db/client";
 
-export const createTRPCContext = (opts: {headers: Headers}) => {
+export const createTRPCContext = () => {
+  console.log("Test")
   return {
-    
     db,
   };
 };
