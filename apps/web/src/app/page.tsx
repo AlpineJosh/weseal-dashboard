@@ -21,9 +21,13 @@ export default function HomePage() {
   });
 
   const signInWithSSO = async () => {
-    await supabase.auth.signInWithSSO({
+    const { data } = await supabase.auth.signInWithSSO({
       domain: "weseal.com",
     });
+
+    if (data) {
+      window.location.href = data.url
+    }
   };
 
 
