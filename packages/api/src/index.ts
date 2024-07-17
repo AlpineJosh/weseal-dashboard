@@ -1,6 +1,11 @@
-import { componentRouter } from "./models/component";
-import { createTRPCRouter, createCallerFactory , createTRPCContext} from "./trpc";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+
+import { componentRouter } from "./models/component";
+import {
+  createCallerFactory,
+  createTRPCContext,
+  createTRPCRouter,
+} from "./trpc";
 
 const appRouter = createTRPCRouter({
   component: componentRouter,

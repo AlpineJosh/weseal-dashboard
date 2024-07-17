@@ -1,6 +1,54 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "dotenv-cli@latest": {
+      "last_modified": "2024-07-10T06:55:44Z",
+      "resolved": "github:NixOS/nixpkgs/aa9461550594533c29866d42f861b6ff079a7fb6#dotenv-cli",
+      "source": "devbox-search",
+      "version": "7.4.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/182l5dj16c1xj22rpav3p0rhbiq7p5iy-dotenv-cli-7.4.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/182l5dj16c1xj22rpav3p0rhbiq7p5iy-dotenv-cli-7.4.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mh37dn3d2hwmrf4sj6xz5kh4qh25n496-dotenv-cli-7.4.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mh37dn3d2hwmrf4sj6xz5kh4qh25n496-dotenv-cli-7.4.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/3mwh1gq4hxphcr8pm5iy4zvv80dr152j-dotenv-cli-7.4.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/3mwh1gq4hxphcr8pm5iy4zvv80dr152j-dotenv-cli-7.4.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/v2q51a3fbkpd3492pbxbcdsvywy9ll9v-dotenv-cli-7.4.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/v2q51a3fbkpd3492pbxbcdsvywy9ll9v-dotenv-cli-7.4.3"
+        }
+      }
+    },
     "nodejs@20.14.0": {
       "last_modified": "2024-07-07T16:08:25Z",
       "plugin_version": "0.0.2",
@@ -63,6 +111,54 @@
             }
           ],
           "store_path": "/nix/store/ilkfhnqz4xczrliqjva8770x2svbfznd-nodejs-20.14.0"
+        }
+      }
+    },
+    "supabase-cli@latest": {
+      "last_modified": "2024-07-07T16:08:25Z",
+      "resolved": "github:NixOS/nixpkgs/ab82a9612aa45284d4adf69ee81871a389669a9e#supabase-cli",
+      "source": "devbox-search",
+      "version": "1.183.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mx81nxxpyqamkffa0nxw829c1v10y7wa-supabase-cli-1.183.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mx81nxxpyqamkffa0nxw829c1v10y7wa-supabase-cli-1.183.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/3cvrr1nkzxdsdn46jvby49ijxvqj6mny-supabase-cli-1.183.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/3cvrr1nkzxdsdn46jvby49ijxvqj6mny-supabase-cli-1.183.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/q7kz2js0y31x7402r7d47ijaqcylq7vp-supabase-cli-1.183.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/q7kz2js0y31x7402r7d47ijaqcylq7vp-supabase-cli-1.183.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/h00mrwshy6pw1z3prfjbrsbblb2i2ja7-supabase-cli-1.183.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/h00mrwshy6pw1z3prfjbrsbblb2i2ja7-supabase-cli-1.183.0"
         }
       }
     },

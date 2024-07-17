@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./tailwind": "./tailwind.ts"
+    ".": "./tailwind.ts"
   },
   "license": "MIT",
   "scripts": {

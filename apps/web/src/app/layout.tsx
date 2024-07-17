@@ -1,14 +1,15 @@
-import { cn } from "@repo/ui/utils";
 // import { ThemeProvider, ThemeToggle } from "@repo/ui/theme";
 // import { Toaster } from "@repo/ui/toast";
 
-import type { Metadata, Viewport } from "next";
+import type { Viewport } from "next";
+
+import { cn } from "@repo/ui";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
-import { env } from "~/env";
+// import { env } from "~/env";
 
 // export const metadata: Metadata = {
 //   metadataBase: new URL(
@@ -43,17 +44,15 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans text-foreground antialiased",
+          "bg-background text-foreground min-h-screen font-sans antialiased",
           // GeistSans.variable,
           // GeistMono.variable,
         )}
       >
         {/* <ThemeProvider attribute="class" defaultTheme="system" enableSystem> */}
-          <TRPCReactProvider>{props.children}</TRPCReactProvider>
-          <div className="absolute bottom-4 right-4">
-            {/* <ThemeToggle /> */}
-          </div>
-          {/* <Toaster /> */}
+        <TRPCReactProvider>{props.children}</TRPCReactProvider>
+        <div className="absolute bottom-4 right-4">{/* <ThemeToggle /> */}</div>
+        {/* <Toaster /> */}
         {/* </ThemeProvider> */}
       </body>
     </html>

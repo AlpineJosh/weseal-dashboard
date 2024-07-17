@@ -2,9 +2,6 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
-    "topo": {
-      "dependsOn": ["^topo"]
-    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
@@ -19,11 +16,11 @@
       "outputLogs": "new-only"
     },
     "lint": {
-      "dependsOn": ["^topo", "^build"],
+      "dependsOn": ["^build"],
       "outputs": ["node_modules/.cache/.eslintcache"]
     },
     "typecheck": {
-      "dependsOn": ["^topo", "^build"],
+      "dependsOn": ["^build"],
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "clean": {
@@ -31,11 +28,7 @@
     },
     "//#clean": {
       "cache": false
-    },
-    "push": {
-      "cache": false,
-      "interactive": true
     }
   },
-  "globalEnv": ["DATABASE_URL"]
+  "globalEnv": ["DATABASE_URL", "FONTAWESOME_PACKAGE_TOKEN"]
 }
