@@ -1,16 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 import { cn } from "@repo/ui";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@repo/ui/components/horizontal-navigation/horizontal-navigation";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -27,7 +19,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <ResizablePanelGroup
       direction="horizontal"
-      className="h-full items-stretch"
+      className="flex h-full flex-row items-stretch"
     >
       <ResizablePanel
         defaultSize={265}
@@ -38,32 +30,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
         onCollapse={() => setIsMenuCollapsed(true)}
         onExpand={() => setIsMenuCollapsed(false)}
         className={cn(
+          "flex flex-col justify-stretch",
           isMenuCollapsed &&
             "min-w-[50px] transition-all duration-300 ease-in-out",
         )}
       >
-        <NavigationMenu orientation="vertical" className="w-full p-4">
-          <NavigationMenuList className="flex w-full flex-col gap-2">
-            <NavigationMenuItem>
-              <Link href="/" passHref legacyBehavior>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Home
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/" passHref legacyBehavior>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Stock Components
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        <div className="h-16 border-b border-neutral-200"></div>
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel>
-        <div>{children}</div>
+        <div className="flex h-screen flex-col items-stretch">
+          <div className="h-16 flex-none border-b border-neutral-200"></div>
+          <div className="flex flex-col items-stretch overflow-auto">
+            {children}
+          </div>
+        </div>
       </ResizablePanel>
     </ResizablePanelGroup>
   );

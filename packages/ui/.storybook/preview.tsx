@@ -1,25 +1,23 @@
 import type { Preview } from "@storybook/react";
+import { ThemeProvider } from "next-themes";
 
-import "../src/tailwind.css";
+import "../src/globals.css";
 
 import React from "react";
-import { withThemeByClassName } from "@storybook/addon-themes";
+import {
+  DecoratorHelpers,
+  withThemeByClassName,
+  withThemeByDataAttribute,
+} from "@storybook/addon-themes";
 
 const preview: Preview = {
   parameters: {
-    layout: "fullscreen",
+    layout: "centered",
     controls: {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
-    },
-    backgrounds: {
-      default: "light",
-      values: [
-        { name: "light", value: "#fff" },
-        { name: "dark", value: "#000" },
-      ],
     },
   },
   decorators: [
@@ -30,11 +28,18 @@ const preview: Preview = {
       },
       defaultTheme: "light",
     }),
-    (Story) => (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-neutral-100 p-4 dark:bg-neutral-900">
-        <Story />
-      </div>
-    ),
+    (Story, context) => {
+      const theme = DecoratorHelpers.pluckThemeFromContext(context) ?? "light";
+      return (
+        <ThemeProvider
+          attribute="class"
+          themes={["light", "dark"]}
+          defaultTheme={theme}
+        >
+          <Story />
+        </ThemeProvider>
+      );
+    },
   ],
 };
 

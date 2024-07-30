@@ -1,0 +1,15 @@
+"use client"
+
+import type { ComponentPropsWithoutRef } from "react";
+import { forwardRef } from "react";
+
+export type {{properCase name}}Props = {
+  children: React.ReactNode;
+};
+
+export default {{properCase name}} = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithoutRef<"div"> & {{properCase name}}Props
+>((props, ref) => {
+  return <div ref={ref} {...props} />;
+});

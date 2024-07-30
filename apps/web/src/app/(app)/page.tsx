@@ -50,6 +50,19 @@ export default function HomePage() {
               accessorKey: "category",
               header: "Category",
             },
+            {
+              accessorKey: "quantity",
+              header: "Quantity",
+            },
+            {
+              accessorKey: "allocated",
+              header: "Quantity Allocated",
+            },
+            {
+              accessorKey: "sageQuantity",
+              header: "Quantity In Sage",
+            },
+
           ]}
           data={data?.data ?? []}
         />

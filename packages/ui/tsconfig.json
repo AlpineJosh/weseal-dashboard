@@ -4,8 +4,14 @@
     "lib": ["dom", "dom.iterable", "ES2022"],
     "jsx": "react-jsx",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/components/*": ["src/components/*"],
+      "@/providers/*": ["src/providers/*"],
+      "@/lib/*": ["src/lib/*"]
+    }
   },
   "include": ["*.ts", "src"],
-  "exclude": ["node_modules", ".storybook"]
+  "exclude": ["node_modules", ".storybook", "**/*.{spec,stories}.tsx", "turbo"]
 }

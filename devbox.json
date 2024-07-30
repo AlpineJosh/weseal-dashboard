@@ -10,7 +10,7 @@
     "DEVBOX_COREPACK_ENABLED": "true"
   },
   "shell": {
-    "init_hook": ["dotenv"],
+    "init_hook": [""],
     "scripts": {
       "run_test": "pnpm run start"
     }

@@ -1,6 +1,6 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
-import { componentRouter } from "./models/component";
+import { componentRouter } from "./routers/component";
 import {
   createCallerFactory,
   createTRPCContext,

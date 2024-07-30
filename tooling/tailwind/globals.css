@@ -1,0 +1,79 @@
+@import "./colors.css";
+
+@layer base {
+  :root {
+    --background: var(--slate-100);
+    --foreground: var(--slate-900);
+
+    --muted: var(--slate-100);
+    --muted-foreground: var(--slate-500);
+
+    --popover: var(--white);
+    --popover-foreground: var(--slate-900);
+
+    --border: var(--slate-300);
+    --input: var(--slate-300);
+
+    --card: var(--white);
+    --card-foreground: var(--slate-900);
+
+    --primary: var(--slate-900);
+    --primary-foreground: var(--slate-50);
+
+    --secondary: var(--slate-100);
+    --secondary-foreground: var(--slate-900);
+
+    --accent: var(--slate-200);
+    --accent-foreground: var(--slate-950);
+
+    --destructive: var(--red-600);
+    --destructive-foreground: var(--red-50);
+
+    --ring: var(--slate-400);
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: var(--slate-950);
+    --foreground: var(--slate-50);
+
+    --muted: var(--slate-900);
+    --muted-foreground: var(--slate-500);
+
+    --popover: var(--slate-900);
+    --popover-foreground: 215 20.2% 65.1%;
+
+    --border: var(--slate-700);
+    --input: var(--slate-700);
+
+    --card: var(--slate-900);
+    --card-foreground: var(--slate-50);
+
+    --primary: var(--slate-50);
+    --primary-foreground: var(--slate-900);
+
+    --secondary: var(--slate-900);
+    --secondary-foreground: var(--slate-50);
+
+    --destructive: var(--red-500);
+    --destructive-foreground: var(--red-50);
+
+    --accent: var(--slate-800);
+    --accent-foreground: var(--slate-50);
+
+    --ring: var(--slate-600);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  :root {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+}

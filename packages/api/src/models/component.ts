@@ -1,84 +1,86 @@
-import { z } from "zod";
-
-import { asc, count, desc, eq } from "@repo/db";
+import { and, eq, sql, sum } from "@repo/db";
 import { db } from "@repo/db/client";
-import { stockCategory, stockComponent } from "@repo/db/schema/sage";
-import { stockMeta } from "@repo/db/schema/stock";
+import {
+  department,
+  stockCategory,
+  stockComponent,
+} from "@repo/db/schema/sage";
+import {
+  batch,
+  productionJob,
+  productionJobItem,
+  stockMeta,
+  stockTransaction,
+  task,
+  taskItem,
+} from "@repo/db/schema/stock";
+import { coalesce } from "../lib/operators";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
-
-const componentQuerySchema = z.object({
-  search: z.string().max(256).optional(),
-  sort: z
-    .array(
-      z.object({
-        field: z.enum(["id", "description"]),
-        order: z.enum(["asc", "desc"]).default("asc"),
-      }),
-    )
-    .default([
-      {
-        field: "id",
-        order: "asc",
-      },
-    ]),
-  filter: z
-    .object({
-      categories: z.array(z.string()).optional(),
+const totalQuantity = db.$with("total_quantity").as(
+  db
+    .select({
+      componentId: batch.componentId,
+      quantity: sum(stockTransaction.quantity).as("quantity"),
     })
-    .optional(),
-  pagination: z
-    .object({
-      size: z.number().min(1).max(100),
-      page: z.number(),
+    .from(stockTransaction)
+    .leftJoin(batch, eq(stockTransaction.batchId, batch.id))
+    .groupBy(batch.componentId),
+);
+
+const taskQuantity = db.$with("task_quantity").as(
+  db
+    .select({
+      componentId: batch.componentId,
+      allocated: sum(taskItem.quantity).as("allocated_task"),
     })
-    .default({
-      size: 10,
-      page: 1,
-    }),
-});
+    .from(taskItem)
+    .leftJoin(batch, eq(taskItem.batchId, batch.id))
+    .leftJoin(task, eq(taskItem.taskId, task.id))
+    .where(and(eq(task.isCancelled, false), eq(taskItem.isComplete, false)))
+    .groupBy(batch.componentId),
+);
 
-export const componentRouter = createTRPCRouter({
-  all: publicProcedure.input(componentQuerySchema).query(async ({ input }) => {
-    let query = db
-      .select({
-        id: stockComponent.id,
-        description: stockComponent.description,
-        category: stockCategory.name,
-      })
-      .from(stockComponent)
-      .leftJoin(stockMeta, eq(stockComponent.id, stockMeta.componentId))
-      .$dynamic()
-      .leftJoin(
-        stockCategory,
-        eq(stockComponent.stockCategoryId, stockCategory.id),
-      )
-      .$dynamic();
+const productionQuantity = db.$with("production_quantity").as(
+  db
+    .select({
+      componentId: batch.componentId,
+      allocated: sum(
+        sql<number>`${productionJobItem.quantityAllocated} - ${productionJobItem.quantityUsed}`,
+      ).as("allocated_production"),
+    })
+    .from(productionJobItem)
+    .leftJoin(batch, eq(productionJobItem.batchId, batch.id))
+    .leftJoin(productionJob, eq(productionJobItem.jobId, productionJob.id))
+    .where(eq(productionJob.isActive, false))
+    .groupBy(batch.componentId),
+);
 
-    query = query
-      .orderBy(
-        ...input.sort.map((sort) => {
-          const column = stockComponent[sort.field];
-          return sort.order === "asc" ? asc(column) : desc(column);
-        }),
-      )
-      .$dynamic();
-
-    const total = await db.select({ total: count() }).from(query.as("t"));
-    const page = await query
-      .limit(input.pagination.size)
-      .offset((input.pagination.page - 1) * input.pagination.size);
-
-    return {
-      data: page,
-      pagination: {
-        page: input.pagination.page,
-        size: input.pagination.size,
-        total: total[0]?.total ?? 0,
-      },
-      filter: input.filter,
-      sort: input.sort,
-      search: input.search,
-    };
-  }),
-});
+export const componentOverview = db
+  .with(totalQuantity, taskQuantity, productionQuantity)
+  .select({
+    id: stockComponent.id,
+    description: stockComponent.description,
+    category: sql`${stockCategory.name}`.as("category"),
+    categoryId: sql`${stockCategory.id}`.as("categoryId"),
+    unitOfSale: stockComponent.unitOfSale,
+    sageQuantity: coalesce(stockComponent.quantityInStock, 0).as("sageQuantity"),
+    hasSubcomponents: stockComponent.hasSubcomponents,
+    department: sql`${department.name}`.as("department"),
+    departmentId: sql`${department.id}`.as("departmentId"),
+    quantity: coalesce(totalQuantity.quantity, 0).as("quantity"),
+    allocated:
+      coalesce(sql<number>`${taskQuantity.allocated} + ${productionQuantity.allocated}`, 0).as(
+        "allocated",
+      ),
+  })
+  .from(stockComponent)
+  .leftJoin(stockMeta, eq(stockComponent.id, stockMeta.componentId))
+  .leftJoin(stockCategory, eq(stockComponent.stockCategoryId, stockCategory.id))
+  .leftJoin(department, eq(stockComponent.departmentId, department.id))
+  .leftJoin(totalQuantity, eq(stockComponent.id, totalQuantity.componentId))
+  .leftJoin(taskQuantity, eq(stockComponent.id, taskQuantity.componentId))
+  .leftJoin(
+    productionQuantity,
+    eq(stockComponent.id, productionQuantity.componentId),
+  )
+  .as("component_overview");
