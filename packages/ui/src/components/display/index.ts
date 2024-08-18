@@ -1,1 +1,2 @@
-export * from "./icon";
+export * from "../element/icon";
+export * from "./table";

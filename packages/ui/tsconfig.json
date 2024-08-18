@@ -7,9 +7,8 @@
     "strictNullChecks": true,
     "baseUrl": "./",
     "paths": {
-      "@/components/*": ["src/components/*"],
-      "@/providers/*": ["src/providers/*"],
-      "@/lib/*": ["src/lib/*"]
+      "@repo/ui/components/*": ["src/components/*"],
+      "@repo/ui/lib/*": ["src/lib/*"]
     }
   },
   "include": ["*.ts", "src"],

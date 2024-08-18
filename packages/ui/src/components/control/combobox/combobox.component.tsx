@@ -1,20 +1,24 @@
-import type { DropdownSectionProps } from "@/components/control";
 import type {
   ComboBoxProps as AriaComboBoxProps,
   ListBoxItemProps,
 } from "react-aria-components";
 import React from "react";
-import { Button } from "@/components/button";
-import { DropdownItem, DropdownSection, Input } from "@/components/control";
-import { Icon } from "@/components/display";
-import { Popover } from "@/components/utilities";
-import { cn } from "@/lib/class-merge";
 import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import {
   ComboBox as AriaComboBox,
   Group,
   ListBox,
 } from "react-aria-components";
+
+import {
+  Input,
+  ListboxItem,
+  ListboxSection,
+} from "@repo/ui/components/control";
+import { Icon } from "@repo/ui/components/display";
+import { Button } from "@repo/ui/components/element";
+import { Popover } from "@repo/ui/components/utility";
+import { cn } from "@repo/ui/lib/class-merge";
 
 export interface ComboboxProps<T extends object>
   extends Omit<AriaComboBoxProps<T>, "children"> {
@@ -54,11 +58,11 @@ export function Combobox<T extends object>({
 }
 
 export function ComboboxItem(props: ListBoxItemProps) {
-  return <DropdownItem {...props} />;
+  return <ListboxItem {...props} />;
 }
 
 export function ComboboxSection<T extends object>(
-  props: DropdownSectionProps<T>,
+  props: ListboxSectionProps<T>,
 ) {
-  return <DropdownSection {...props} />;
+  return <ListboxSection {...props} />;
 }

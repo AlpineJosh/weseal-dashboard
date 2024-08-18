@@ -4,8 +4,6 @@ import type {
   SectionProps,
 } from "react-aria-components";
 import { forwardRef } from "react";
-import { Icon } from "@/components/display/icon";
-import { cn } from "@/lib/class-merge";
 import { faCheck } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import {
@@ -16,6 +14,9 @@ import {
   Header,
   Section,
 } from "react-aria-components";
+
+import { Icon } from "@repo/ui/components/element";
+import { cn } from "@repo/ui/lib/class-merge";
 
 export type ListboxProps<T> = Omit<
   AriaListBoxProps<T>,
@@ -29,6 +30,8 @@ export const Listbox = forwardRef(
   ) => {
     return (
       <AriaListBox
+        layout="stack"
+        orientation="vertical"
         {...props}
         className={cn(
           "space-y-0.5 rounded-lg border border-input p-1 outline-0",

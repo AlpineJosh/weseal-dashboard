@@ -2,15 +2,19 @@
 
 import type { Viewport } from "next";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 
 import { cn } from "@repo/ui";
-import { ThemeProvider } from "@repo/ui/components/theme/theme-provider";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
-import "~/app/globals.css";
+import "@repo/tailwind-config/globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -23,7 +27,9 @@ export const viewport: Viewport = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(inter.className, "min-h-screen antialiased")}>
+      <body
+        className={cn(inter.variable, "min-h-screen font-sans antialiased")}
+      >
         <ThemeProvider attribute="class" defaultTheme="light">
           <TRPCReactProvider>{props.children}</TRPCReactProvider>
         </ThemeProvider>

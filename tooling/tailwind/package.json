@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./config": "./tailwind.config.ts",
+    ".": "./tailwind.config.ts",
     "./globals.css": "./globals.css"
   },
   "license": "MIT",

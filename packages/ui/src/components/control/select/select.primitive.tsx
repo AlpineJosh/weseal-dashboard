@@ -1,18 +1,11 @@
 "use client";
 
-import type { ButtonProps } from "@/components/button";
-import type { IconProps } from "@/components/display/icon";
-import type { PopoverProps } from "@/components/utilities/popover/popover.component";
 import type {
   SelectProps as AriaSelectProps,
-  ListBoxItemProps,
   SelectValueProps,
 } from "react-aria-components";
 import React, { forwardRef } from "react";
-import { Button as ButtonPrimitive } from "@/components/button";
-import { Icon } from "@/components/display/icon";
-import { Popover as PopoverPrimitive } from "@/components/utilities/popover/popover.component";
-import { cn } from "@/lib/class-merge";
+import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import {
   Select as AriaSelect,
@@ -20,11 +13,13 @@ import {
   ListBox,
 } from "react-aria-components";
 
-import type {
-  DropdownSectionProps,
-  ListboxProps,
-} from "../listbox/listbox.component";
-import { DropdownItem, DropdownSection } from "../listbox/listbox.component";
+import type { ButtonProps, IconProps } from "@repo/ui/components/element";
+import type { PopoverProps } from "@repo/ui/components/utility";
+import { Button as ButtonPrimitive, Icon } from "@repo/ui/components/element";
+import { Popover as PopoverPrimitive } from "@repo/ui/components/utility";
+import { cn } from "@repo/ui/lib/class-merge";
+
+import type { ListboxProps } from "../listbox/listbox.component";
 
 const styles = cva(
   "dark:border-white/10 dark:bg-zinc-700 flex w-full min-w-[150px] cursor-default items-center gap-4 rounded-lg border py-2 pl-3 pr-2 text-start shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition dark:shadow-none",
@@ -79,7 +74,14 @@ const Value = forwardRef(
 
 const Arrow = forwardRef<SVGSVGElement, IconProps>(
   ({ className, ...props }, ref) => {
-    return <Icon ref={ref} {...props} className={cn("h-4 w-4", className)} />;
+    return (
+      <Icon
+        ref={ref}
+        {...props}
+        className={cn("h-4 w-4", className)}
+        icon={faChevronDown}
+      />
+    );
   },
 );
 
@@ -137,6 +139,6 @@ export default {
   Arrow,
   Popover,
   Options,
-  Option,
-  Section,
+  // Option,
+  // Section,
 };

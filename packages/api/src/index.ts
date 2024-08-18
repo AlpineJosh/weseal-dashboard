@@ -1,6 +1,7 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import { componentRouter } from "./routers/component";
+import { purchaseOrderRouter } from "./routers/purchase-order";
 import {
   createCallerFactory,
   createTRPCContext,
@@ -9,6 +10,7 @@ import {
 
 const appRouter = createTRPCRouter({
   component: componentRouter,
+  purchaseOrder: purchaseOrderRouter,
 });
 
 type AppRouter = typeof appRouter;

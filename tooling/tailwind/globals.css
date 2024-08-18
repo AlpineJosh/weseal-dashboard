@@ -1,35 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import "./colors.css";
 
 @layer base {
   :root {
+    /** Neutral */
     --background: var(--slate-100);
     --foreground: var(--slate-900);
 
-    --muted: var(--slate-100);
+    --muted: var(--slate-200);
     --muted-foreground: var(--slate-500);
 
-    --popover: var(--white);
-    --popover-foreground: var(--slate-900);
-
+    --card: var(--white);
     --border: var(--slate-300);
     --input: var(--slate-300);
 
-    --card: var(--white);
-    --card-foreground: var(--slate-900);
+    /** Primary */
+    --primary: var(--blue-600);
+    --primary-muted: var(--blue-100);
+    --primary-muted-foreground: var(--blue-800);
 
-    --primary: var(--slate-900);
-    --primary-foreground: var(--slate-50);
+    /** Secondary */
+    --secondary: var(--lime-700);
+    --secondary-muted: var(--lime-100);
+    --secondary-muted-foreground: var(--lime-800);
 
-    --secondary: var(--slate-100);
-    --secondary-foreground: var(--slate-900);
+    /** Accent */
+    --accent: var(--red-600);
+    --accent-muted: var(--red-100);
+    --accent-muted-foreground: var(--red-800);
 
-    --accent: var(--slate-200);
-    --accent-foreground: var(--slate-950);
-
-    --destructive: var(--red-600);
-    --destructive-foreground: var(--red-50);
-
-    --ring: var(--slate-400);
+    --ring: var(--blue-500);
 
     --radius: 0.5rem;
   }
@@ -38,31 +41,29 @@
     --background: var(--slate-950);
     --foreground: var(--slate-50);
 
-    --muted: var(--slate-900);
+    --muted: var(--slate-800);
     --muted-foreground: var(--slate-500);
 
-    --popover: var(--slate-900);
-    --popover-foreground: 215 20.2% 65.1%;
-
+    --card: var(--slate-900);
     --border: var(--slate-700);
     --input: var(--slate-700);
 
-    --card: var(--slate-900);
-    --card-foreground: var(--slate-50);
+    /** Primary */
+    --primary: var(--blue-500);
+    --primary-muted: var(--blue-700);
+    --primary-muted-foreground: var(--blue-100);
 
-    --primary: var(--slate-50);
-    --primary-foreground: var(--slate-900);
+    /** Secondary */
+    --secondary: var(--lime-500);
+    --secondary-muted: var(--lime-700);
+    --secondary-muted-foreground: var(--lime-100);
 
-    --secondary: var(--slate-900);
-    --secondary-foreground: var(--slate-50);
+    /** Accent */
+    --accent: var(--red-500);
+    --accent-muted: var(--red-700);
+    --accent-muted-foreground: var(--red-100);
 
-    --destructive: var(--red-500);
-    --destructive-foreground: var(--red-50);
-
-    --accent: var(--slate-800);
-    --accent-foreground: var(--slate-50);
-
-    --ring: var(--slate-600);
+    --ring: var(--blue-400);
   }
 }
 

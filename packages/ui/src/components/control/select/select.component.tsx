@@ -3,7 +3,6 @@ import type {
   ListBoxItemProps,
 } from "react-aria-components";
 import React from "react";
-import { cn } from "@/lib/class-merge";
 import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import {
@@ -13,10 +12,11 @@ import {
   SelectValue,
 } from "react-aria-components";
 
-import type { ListboxSectionProps } from "../listbox/listbox.component";
-import { Icon } from "../../display/icon";
-import { Popover } from "../../utilities/popover/popover.component";
-import { ListboxItem, ListboxSection } from "../listbox/listbox.component";
+import type { ListboxSectionProps } from "@repo/ui/components/control";
+import { ListboxItem, ListboxSection } from "@repo/ui/components/control";
+import { Icon } from "@repo/ui/components/element";
+import { Popover } from "@repo/ui/components/utility";
+import { cn } from "@repo/ui/lib/class-merge";
 
 const styles = cva(
   cn(
