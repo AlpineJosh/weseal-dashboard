@@ -1,0 +1,23 @@
+{
+  "connectors": {
+    "sage": {
+      "file": "\\\\192.168.26.21\\sage\\line50\\sagedata\\company.003\\accdata",
+      "user": "richard",
+      "password": "rphrph"
+    },
+    "bitSystems": {
+      "file": "./data/PurchaseLedger.json"
+    }
+  },
+  "database": {
+    "url": "${DATABASE_URL}"
+  },
+  "syncSchedules": {
+    "components": "0 0 * * *",
+    "despatching": "0 0 * * *",
+    "receiving": "0 0 * * *",
+    "production": "0 0 * * *",
+    "inventory": "0 0 * * *",
+    "misc": "0 0 * * *"
+  }
+}
