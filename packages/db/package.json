@@ -12,13 +12,9 @@
       "types": "./dist/client.d.ts",
       "default": "./src/client.ts"
     },
-    "./schema/sage": {
-      "types": "./dist/schema/sage.schema.d.ts",
-      "default": "./src/schema/sage.schema.ts"
-    },
-    "./schema/stock": {
-      "types": "./dist/schema/stock.schema.d.ts",
-      "default": "./src/schema/stock.schema.ts"
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./src/schema/index.ts"
     }
   },
   "license": "MIT",

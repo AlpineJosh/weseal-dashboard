@@ -12,7 +12,8 @@ import {
 import { VerticalNavigation } from "node_modules/@repo/ui/src/components/navigation/vertical-navigation";
 
 import { cn } from "@repo/ui";
-import { ResizablePanels } from "@repo/ui/components/layout";
+
+// import { ResizablePanels } from "@repo/ui/components/layout";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -22,16 +23,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
   return (
-    <ResizablePanels
-      direction="horizontal"
-      className="flex h-full flex-row items-stretch"
-    >
-      <ResizablePanels.Panel
-        defaultSize={20}
-        maxSize={20}
-        minSize={15}
-        className={cn("flex flex-col justify-stretch bg-card")}
-      >
+    <div className="flex h-full flex-row items-stretch">
+      <div className="flex w-[200px] flex-col items-stretch border-r bg-card">
         <div className="border-neutral-200 h-16 border-b"></div>
         <div className="flex flex-col items-stretch p-4">
           <VerticalNavigation.Nav>
@@ -58,21 +51,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 isActive={pathname.startsWith("/inventory/batch")}
               />
             </VerticalNavigation.ItemGroup>
-            <VerticalNavigation.ItemGroup title="Receipting" icon={faInboxIn}>
+            <VerticalNavigation.ItemGroup title="Receiving" icon={faInboxIn}>
               <VerticalNavigation.Item
-                href="/receipting"
+                href="/receiving"
                 title="Overview"
-                isActive={pathname === "/receipting"}
+                isActive={pathname === "/receiving"}
               />
               <VerticalNavigation.Item
-                href="/receipting/suppliers"
+                href="/receiving/suppliers"
                 title="Suppliers"
-                isActive={pathname.startsWith("/receipting/suppliers")}
+                isActive={pathname.startsWith("/receiving/suppliers")}
               />
               <VerticalNavigation.Item
-                href="/receipting/orders"
+                href="/receiving/orders"
                 title="Orders"
-                isActive={pathname.startsWith("/receipting/order")}
+                isActive={pathname.startsWith("/receiving/orders")}
               />
             </VerticalNavigation.ItemGroup>
             <VerticalNavigation.ItemGroup title="Despatching" icon={faInboxOut}>
@@ -82,14 +75,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 isActive={pathname === "/despatching"}
               />
               <VerticalNavigation.Item
-                href="/despatching/suppliers"
-                title="Suppliers"
-                isActive={pathname.startsWith("/despatching/suppliers")}
+                href="/despatching/customers"
+                title="Customers"
+                isActive={pathname.startsWith("/despatching/customers")}
               />
               <VerticalNavigation.Item
                 href="/despatching/orders"
                 title="Orders"
-                isActive={pathname.startsWith("/despatching/order")}
+                isActive={pathname.startsWith("/despatching/orders")}
               />
             </VerticalNavigation.ItemGroup>
             <VerticalNavigation.ItemGroup
@@ -131,16 +124,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </VerticalNavigation.ItemGroup>
           </VerticalNavigation.Nav>
         </div>
-      </ResizablePanels.Panel>
-      <ResizablePanels.Handle withHandle />
-      <ResizablePanels.Panel>
-        <div className="flex h-screen flex-col items-stretch">
-          <div className="h-16 flex-none border-b bg-card"></div>
-          <div className="flex flex-col items-stretch overflow-auto p-6">
-            {children}
-          </div>
+      </div>
+      <div className="flex h-screen grow flex-col items-stretch">
+        <div className="h-16 flex-none border-b bg-card"></div>
+        <div className="flex flex-col items-stretch overflow-auto p-6">
+          {children}
         </div>
-      </ResizablePanels.Panel>
-    </ResizablePanels>
+      </div>
+    </div>
   );
 }

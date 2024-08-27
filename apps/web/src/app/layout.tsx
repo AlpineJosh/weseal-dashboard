@@ -10,6 +10,8 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 import "@repo/tailwind-config/globals.css";
 
+import { ClientProviders } from "~/components/provider";
+
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -31,7 +33,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         className={cn(inter.variable, "min-h-screen font-sans antialiased")}
       >
         <ThemeProvider attribute="class" defaultTheme="light">
-          <TRPCReactProvider>{props.children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            <ClientProviders>{props.children}</ClientProviders>
+          </TRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>

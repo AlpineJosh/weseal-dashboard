@@ -1,7 +1,5 @@
-import * as sageSchema from "./sage.schema";
-import * as stockSchema from "./stock.schema";
-
-export const schema = {
-  sage: sageSchema,
-  stock: stockSchema,
-};
+export * from "./component.schema";
+export * from "./despatching.schema";
+export * from "./inventory.schema";
+export * from "./production.schema";
+export * from "./receiving.schema";

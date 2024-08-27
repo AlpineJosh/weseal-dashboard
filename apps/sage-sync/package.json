@@ -2,14 +2,37 @@
   "name": "sage-sync",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@repo/db": "workspace:*",
+    "odbc": "^2.4.9",
+    "reflect-metadata": "^0.2.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "stream-chain": "^3.0.1",
+    "stream-json": "^1.8.0",
+    "string-similarity": "^4.0.4",
+    "tsyringe": "^4.8.0",
+    "typedi": "^0.10.0"
+  },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@types/node": "^20.14.10",
+    "@types/sqlite3": "^3.1.11",
+    "@types/stream-chain": "^2.1.0",
+    "@types/stream-json": "^1.7.7",
+    "@types/string-similarity": "^4.0.2",
+    "tsx": "^4.17.0",
     "typescript": "^5.5.3"
-  }
+  },
+  "prettier": "@repo/prettier-config"
 }

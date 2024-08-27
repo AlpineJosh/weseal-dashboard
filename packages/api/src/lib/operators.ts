@@ -1,6 +1,6 @@
-
-import { sql, SQLChunk, StringChunk } from "@repo/db";
+import type { SQLChunk } from "@repo/db";
+import { sql, StringChunk } from "@repo/db";
 
 export const coalesce = (...values: SQLChunk[]) => {
-  return sql`coalesce(${sql.join(values, new StringChunk(", "))})`;
+  return sql<number>`coalesce(${sql.join(values, new StringChunk(", "))})`;
 };

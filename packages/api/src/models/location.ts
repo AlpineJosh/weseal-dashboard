@@ -1,88 +1,93 @@
 import { and, eq, sql, sum } from "@repo/db";
 import { db } from "@repo/db/client";
-import {
-  batch,
-  location,
-  locationType,
-  productionJob,
-  productionJobItem,
-  stockTransaction,
-  task,
-  taskItem,
-} from "@repo/db/schema/stock";
+import schema from "@repo/db/schema";
 
 const totalQuantity = db.$with("total_quantity").as(
   db
     .select({
-      batchId: stockTransaction.batchId,
-      locationId: stockTransaction.locationId,
-      quantity: sum(stockTransaction.quantity).as("quantity"),
+      batchId: schema.batchMovement.batchId,
+      locationId: schema.batchMovement.locationId,
+      quantity: sum(schema.batchMovement.quantity).as("quantity"),
     })
-    .from(stockTransaction)
-    .groupBy(stockTransaction.batchId, stockTransaction.locationId),
+    .from(schema.batchMovement)
+    .groupBy(schema.batchMovement.batchId, schema.batchMovement.locationId),
 );
 
 const taskQuantity = db.$with("task_quantity").as(
   db
     .select({
-      batchId: taskItem.batchId,
-      locationId: taskItem.pickLocationId,
-      allocated: sum(taskItem.quantity).as("allocated"),
+      batchId: schema.taskItem.batchId,
+      locationId: schema.taskItem.pickLocationId,
+      allocated: sum(schema.taskItem.quantity).as("allocated"),
     })
-    .from(taskItem)
-    .leftJoin(task, eq(taskItem.taskId, task.id))
-    .where(and(eq(task.isCancelled, false), eq(taskItem.isComplete, false)))
-    .groupBy(taskItem.batchId, taskItem.pickLocationId),
+    .from(schema.taskItem)
+    .leftJoin(schema.task, eq(schema.taskItem.taskId, schema.task.id))
+    .where(
+      and(
+        eq(schema.task.isCancelled, false),
+        eq(schema.taskItem.isComplete, false),
+      ),
+    )
+    .groupBy(schema.taskItem.batchId, schema.taskItem.pickLocationId),
 );
 
 const productionQuantity = db.$with("production_quantity").as(
   db
     .select({
-      batchId: productionJobItem.batchId,
-      locationId: productionJobItem.locationId,
+      batchId: schema.productionBatchIn.batchId,
+      locationId: schema.productionBatchIn.locationId,
       allocated: sum(
-        sql<number>`${productionJobItem.quantityAllocated} - ${productionJobItem.quantityUsed}`,
+        sql<number>`${schema.productionBatchIn.quantityAllocated} - ${schema.productionBatchIn.quantityUsed}`,
       ).as("allocated"),
     })
-    .from(productionJobItem)
-    .leftJoin(productionJob, eq(productionJobItem.jobId, productionJob.id))
-    .where(eq(productionJob.isActive, false))
-    .groupBy(productionJobItem.batchId, productionJobItem.locationId),
+    .from(schema.productionBatchIn)
+    .leftJoin(
+      schema.productionJob,
+      eq(schema.productionBatchIn.jobId, schema.productionJob.id),
+    )
+    .where(eq(schema.productionJob.isActive, false))
+    .groupBy(
+      schema.productionBatchIn.batchId,
+      schema.productionBatchIn.locationId,
+    ),
 );
 
 export const locationOverview = db
   .with(totalQuantity, taskQuantity, productionQuantity)
   .select({
-    locationId: location.id,
-    locationName: location.name,
-    batchId: batch.id,
-    componentId: batch.componentId,
-    batchNumber: batch.batchNumber,
-    batchDate: batch.date,
+    locationId: schema.location.id,
+    locationName: schema.location.name,
+    batchId: schema.batch.id,
+    componentId: schema.batch.componentId,
+    batchReference: schema.batch.batchReference,
+    entryDate: schema.batch.entryDate,
     quantity: totalQuantity.quantity,
-    isPickable: locationType.isPickable,
-    isTransient: locationType.isTransient,
+    isPickable: schema.locationType.isPickable,
+    isTransient: schema.locationType.isTransient,
     allocated:
       sql<number>`${taskQuantity.allocated} + ${productionQuantity.allocated}`.as(
         "allocated",
       ),
   })
   .from(totalQuantity)
-  .leftJoin(location, eq(totalQuantity.locationId, location.id))
-  .leftJoin(locationType, eq(location.typeId, locationType.id))
-  .leftJoin(batch, eq(totalQuantity.batchId, batch.id))
+  .leftJoin(schema.location, eq(totalQuantity.locationId, schema.location.id))
+  .leftJoin(
+    schema.locationType,
+    eq(schema.location.typeId, schema.locationType.id),
+  )
+  .leftJoin(schema.batch, eq(totalQuantity.batchId, schema.batch.id))
   .leftJoin(
     taskQuantity,
     and(
-      eq(batch.id, taskQuantity.batchId),
-      eq(location.id, taskQuantity.locationId),
+      eq(schema.batch.id, taskQuantity.batchId),
+      eq(schema.location.id, taskQuantity.locationId),
     ),
   )
   .leftJoin(
     productionQuantity,
     and(
-      eq(batch.id, productionQuantity.batchId),
-      eq(batch.id, productionQuantity.locationId),
+      eq(schema.batch.id, productionQuantity.batchId),
+      eq(schema.location.id, productionQuantity.locationId),
     ),
   )
   .as("location_overview");

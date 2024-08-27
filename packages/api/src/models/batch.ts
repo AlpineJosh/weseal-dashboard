@@ -1,65 +1,66 @@
 import { and, eq, sql, sum } from "@repo/db";
 import { db } from "@repo/db/client";
-import {
-  batch,
-  productionJob,
-  productionJobItem,
-  stockTransaction,
-  task,
-  taskItem,
-} from "@repo/db/schema/stock";
+import schema from "@repo/db/schema";
 
 const totalQuantity = db.$with("total_quantity").as(
   db
     .select({
-      batchId: stockTransaction.batchId,
-      quantity: sum(stockTransaction.quantity).as("quantity"),
+      batchId: schema.batchMovement.batchId,
+      quantity: sum(schema.batchMovement.quantity).as("quantity"),
     })
-    .from(stockTransaction)
-    .groupBy(stockTransaction.batchId),
+    .from(schema.batchMovement)
+    .groupBy(schema.batchMovement.batchId),
 );
 
 const taskQuantity = db.$with("task_quantity").as(
   db
     .select({
-      batchId: taskItem.batchId,
-      allocated: sum(taskItem.quantity).as("allocated"),
+      batchId: schema.taskItem.batchId,
+      allocated: sum(schema.taskItem.quantity).as("allocated"),
     })
-    .from(taskItem)
-    .leftJoin(task, eq(taskItem.taskId, task.id))
-    .where(and(eq(task.isCancelled, false), eq(taskItem.isComplete, false)))
-    .groupBy(taskItem.batchId),
+    .from(schema.taskItem)
+    .leftJoin(schema.task, eq(schema.taskItem.taskId, schema.task.id))
+    .where(
+      and(
+        eq(schema.task.isCancelled, false),
+        eq(schema.taskItem.isComplete, false),
+      ),
+    )
+    .groupBy(schema.taskItem.batchId),
 );
 
 const productionQuantity = db.$with("production_quantity").as(
   db
     .select({
-      batchId: productionJobItem.batchId,
+      batchId: schema.productionBatchIn.batchId,
       allocated: sum(
-        sql<number>`${productionJobItem.quantityAllocated} - ${productionJobItem.quantityUsed}`,
+        sql<number>`${schema.productionBatchIn.quantityAllocated} - ${schema.productionBatchIn.quantityUsed}`,
       ).as("allocated"),
     })
-    .from(productionJobItem)
-    .leftJoin(productionJob, eq(productionJobItem.jobId, productionJob.id))
-    .where(eq(productionJob.isActive, false))
-    .groupBy(productionJobItem.batchId),
+    .from(schema.productionBatchIn)
+    .leftJoin(
+      schema.productionJob,
+      eq(schema.productionBatchIn.jobId, schema.productionJob.id),
+    )
+    .where(eq(schema.productionJob.isActive, false))
+    .groupBy(schema.productionBatchIn.batchId),
 );
 
 export const batchOverview = db
   .with(totalQuantity, taskQuantity, productionQuantity)
   .select({
-    batchId: batch.id,
-    componentId: batch.componentId,
-    batchNumber: batch.batchNumber,
-    batchDate: batch.date,
+    batchId: schema.batch.id,
+    componentId: schema.batch.componentId,
+    batchReference: schema.batch.batchReference,
+    entryDate: schema.batch.entryDate,
     quantity: totalQuantity.quantity,
     allocated:
       sql<number>`${taskQuantity.allocated} + ${productionQuantity.allocated}`.as(
         "allocated",
       ),
   })
-  .from(batch)
-  .leftJoin(totalQuantity, eq(batch.id, totalQuantity.batchId))
-  .leftJoin(taskQuantity, eq(batch.id, taskQuantity.batchId))
-  .leftJoin(productionQuantity, eq(batch.id, productionQuantity.batchId))
+  .from(schema.batch)
+  .leftJoin(totalQuantity, eq(schema.batch.id, totalQuantity.batchId))
+  .leftJoin(taskQuantity, eq(schema.batch.id, taskQuantity.batchId))
+  .leftJoin(productionQuantity, eq(schema.batch.id, productionQuantity.batchId))
   .as("batch_overview");
