@@ -1,6 +1,6 @@
 import fs from "fs";
 
-export const config = JSON.parse(fs.readFileSync("./config.json", "utf8")) as {
+export const config = JSON.parse(fs.readFileSync("./src/config.json", "utf8")) as {
   connectors: {
     sage: {
       file: string;

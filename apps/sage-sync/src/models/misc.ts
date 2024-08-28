@@ -1,5 +1,5 @@
 import { sql } from "@repo/db";
-import { db } from "@repo/db/client";
+import { db } from "@repo/db/server";
 import schema from "@repo/db/schema";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
@@ -7,7 +7,7 @@ import { sage } from "~/lib/sage/sage";
 import { DEPARTMENT, STOCK_CAT } from "~/lib/sage/types";
 import { SyncParameters } from "./types";
 
-export async function syncDepartments(parameters: SyncParameters) {
+export async function syncDepartments(parameters?: SyncParameters) {
   const query = buildQuery("SELECT * FROM DEPARTMENT", parameters);
   const result = await sage().query<DEPARTMENT>(query);
 
@@ -34,14 +34,14 @@ export async function syncDepartments(parameters: SyncParameters) {
         target: schema.department.id,
         set: {
           name: sql<string>`excluded.name`,
-          lastModified: sql<Date>`excluded.lastModified`,
-          createdAt: sql<Date>`excluded.createdAt`,
+          lastModified: sql<Date>`excluded.last_modified`,
+          createdAt: sql<Date>`excluded.created_at`,
         },
       });
   });
 }
 
-export async function syncStockCategories(parameters: SyncParameters) {
+export async function syncStockCategories(_?: SyncParameters) {
   const query = "SELECT * FROM STOCK_CAT";
   const result = await sage().query<STOCK_CAT>(query);
 

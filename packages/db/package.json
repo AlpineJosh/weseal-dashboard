@@ -12,6 +12,10 @@
       "types": "./dist/client.d.ts",
       "default": "./src/client.ts"
     },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "default": "./src/server.ts"
+    },
     "./schema": {
       "types": "./dist/schema/index.d.ts",
       "default": "./src/schema/index.ts"

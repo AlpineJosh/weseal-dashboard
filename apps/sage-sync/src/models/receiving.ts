@@ -1,5 +1,5 @@
 import { sql } from "@repo/db";
-import { db } from "@repo/db/client";
+import { db } from "@repo/db/server";
 import schema from "@repo/db/schema";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
@@ -34,8 +34,8 @@ export async function syncPurchaseLedger(parameters?: SyncParameters) {
         target: schema.supplier.id,
         set: {
           name: sql<string>`excluded.name`,
-          lastModified: sql<Date>`excluded.lastModified`,
-          createdAt: sql<Date>`excluded.createdAt`,
+          lastModified: sql<Date>`excluded.last_modified`,
+          createdAt: sql<Date>`excluded.created_at`,
         },
       });
   });
@@ -71,13 +71,13 @@ export async function syncPurchaseOrders(parameters?: SyncParameters) {
       .onConflictDoUpdate({
         target: schema.purchaseOrder.id,
         set: {
-          supplierId: sql<string>`excluded.supplierId`,
-          isQuote: sql<boolean>`excluded.isQuote`,
-          isComplete: sql<boolean>`excluded.isComplete`,
-          isCancelled: sql<boolean>`excluded.isCancelled`,
-          orderDate: sql<Date>`excluded.orderDate`,
-          lastModified: sql<Date>`excluded.lastModified`,
-          createdAt: sql<Date>`excluded.createdAt`,
+          supplierId: sql<string>`excluded.supplier_id`,
+          isQuote: sql<boolean>`excluded.is_quote`,
+          isComplete: sql<boolean>`excluded.is_complete`,
+          isCancelled: sql<boolean>`excluded.is_cancelled`,
+          orderDate: sql<Date>`excluded.order_date`,
+          lastModified: sql<Date>`excluded.last_modified`,
+          createdAt: sql<Date>`excluded.created_at`,
         },
       });
   });
@@ -92,6 +92,10 @@ export async function syncPurchaseOrderItems(parameters?: SyncParameters) {
 
   result.map((row) => {
     if (row.RECORD_DELETED === 1) {
+      return;
+    }
+
+    if (["M", "S1", "S2", "S3"].includes(row.STOCK_CODE)) {
       return;
     }
 
@@ -112,11 +116,11 @@ export async function syncPurchaseOrderItems(parameters?: SyncParameters) {
       .onConflictDoUpdate({
         target: schema.purchaseOrderItem.id,
         set: {
-          orderId: sql<number>`excluded.orderId`,
-          componentId: sql<string>`excluded.componentId`,
-          quantityOrdered: sql<number>`excluded.quantityOrdered`,
-          lastModified: sql<Date>`excluded.lastModified`,
-          createdAt: sql<Date>`excluded.createdAt`,
+          orderId: sql<number>`excluded.order_id`,
+          componentId: sql<string>`excluded.component_id`,
+          quantityOrdered: sql<number>`excluded.quantity_ordered`,
+          lastModified: sql<Date>`excluded.last_modified`,
+          createdAt: sql<Date>`excluded.created_at`,
         },
       });
   });

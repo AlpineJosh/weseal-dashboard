@@ -1,5 +1,5 @@
 import { inArray, sql } from "@repo/db";
-import { db } from "@repo/db/client";
+import { db } from "@repo/db/server";
 import schema from "@repo/db/schema";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
@@ -34,7 +34,8 @@ export async function syncComponents(parameters?: SyncParameters) {
       }))
       .filter(
         (subcomponent) =>
-          subcomponent.id !== null && subcomponent.quantity !== null,
+          subcomponent.id?.length > 1 &&
+          subcomponent.quantity
       )
       .forEach((subcomponent) => {
         subcomponents.push({
