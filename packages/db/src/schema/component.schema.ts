@@ -23,6 +23,7 @@ export const department = pgTable("department", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const departmentRelations = relations(department, ({ many }) => ({
@@ -39,6 +40,7 @@ export const componentCategory = pgTable("component_category", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const componentCategoryRelations = relations(
@@ -69,6 +71,7 @@ export const component = pgTable("component", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const componentSelectSchema = createSelectSchema(component);

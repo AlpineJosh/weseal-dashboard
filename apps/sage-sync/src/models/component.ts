@@ -1,6 +1,6 @@
 import { inArray, sql } from "@repo/db";
-import { db } from "@repo/db/server";
 import schema from "@repo/db/schema";
+import { db } from "@repo/db/server";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
 import { sage } from "~/lib/sage/sage";
@@ -25,6 +25,7 @@ export async function syncComponents(parameters?: SyncParameters) {
       departmentId: row.DEPT_NUMBER,
       createdAt: new Date(row.RECORD_CREATE_DATE),
       lastModified: new Date(row.RECORD_MODIFY_DATE),
+      isDeleted: row.RECORD_DELETED === 1,
     });
 
     Array.from({ length: 50 })
@@ -33,9 +34,7 @@ export async function syncComponents(parameters?: SyncParameters) {
         quantity: row[`COMPONENT_QTY_${i}` as keyof STOCK] as number,
       }))
       .filter(
-        (subcomponent) =>
-          subcomponent.id?.length > 1 &&
-          subcomponent.quantity
+        (subcomponent) => subcomponent.id?.length > 1 && subcomponent.quantity,
       )
       .forEach((subcomponent) => {
         subcomponents.push({
@@ -59,6 +58,7 @@ export async function syncComponents(parameters?: SyncParameters) {
           hasSubcomponents: sql`excluded.has_subcomponents`,
           sageQuantity: sql`excluded.sage_quantity`,
           departmentId: sql`excluded.department_id`,
+          isDeleted: sql<boolean>`excluded.is_deleted`,
         },
       });
 

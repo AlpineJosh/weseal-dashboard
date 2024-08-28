@@ -1,5 +1,5 @@
 {
-  "id": "23cd43f0-0d6d-4074-a5ce-445b78f83dfd",
+  "id": "6f0d9ec5-4d7a-4f99-93c8-6c065fbf9e64",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -90,6 +90,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -166,6 +173,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -202,6 +216,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -319,6 +340,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -332,7 +360,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -408,7 +436,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -533,6 +561,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -576,8 +611,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "quantity": {
-          "name": "quantity",
+        "quantity_ordered": {
+          "name": "quantity_ordered",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sage_quantity_despatched": {
+          "name": "sage_quantity_despatched",
           "type": "real",
           "primaryKey": false,
           "notNull": true
@@ -595,6 +636,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -1048,20 +1096,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "production_job_item_id": {
-          "name": "production_job_item_id",
+        "production_job_id": {
+          "name": "production_job_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "purchase_receipt_item_id": {
-          "name": "purchase_receipt_item_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sales_despatch_item_id": {
-          "name": "sales_despatch_item_id",
+        "sales_despatch_id": {
+          "name": "sales_despatch_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1083,12 +1125,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "task_production_job_item_id_production_batch_in_id_fk": {
-          "name": "task_production_job_item_id_production_batch_in_id_fk",
+        "task_production_job_id_production_job_id_fk": {
+          "name": "task_production_job_id_production_job_id_fk",
           "tableFrom": "task",
-          "tableTo": "production_batch_in",
+          "tableTo": "production_job",
           "columnsFrom": [
-            "production_job_item_id"
+            "production_job_id"
           ],
           "columnsTo": [
             "id"
@@ -1096,25 +1138,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "task_purchase_receipt_item_id_purchase_receipt_item_id_fk": {
-          "name": "task_purchase_receipt_item_id_purchase_receipt_item_id_fk",
+        "task_sales_despatch_id_sales_despatch_id_fk": {
+          "name": "task_sales_despatch_id_sales_despatch_id_fk",
           "tableFrom": "task",
-          "tableTo": "purchase_receipt_item",
+          "tableTo": "sales_despatch",
           "columnsFrom": [
-            "purchase_receipt_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "task_sales_despatch_item_id_sales_despatch_item_id_fk": {
-          "name": "task_sales_despatch_item_id_sales_despatch_item_id_fk",
-          "tableFrom": "task",
-          "tableTo": "sales_despatch_item",
-          "columnsFrom": [
-            "sales_despatch_item_id"
+            "sales_despatch_id"
           ],
           "columnsTo": [
             "id"
@@ -1418,49 +1447,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.production_job_status": {
-      "name": "production_job_status",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "last_modified": {
-          "name": "last_modified",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.purchase_order": {
       "name": "purchase_order",
       "schema": "",
@@ -1517,6 +1503,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -1566,6 +1559,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "sage_quantity_received": {
+          "name": "sage_quantity_received",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -1579,6 +1578,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -1619,7 +1625,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -1688,7 +1694,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -1786,6 +1792,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},

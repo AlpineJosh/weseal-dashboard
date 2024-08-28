@@ -1,6 +1,6 @@
 import { sql } from "@repo/db";
-import { db } from "@repo/db/server";
 import schema from "@repo/db/schema";
+import { db } from "@repo/db/server";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
 import { sage } from "~/lib/sage/sage";
@@ -14,15 +14,12 @@ export async function syncDepartments(parameters?: SyncParameters) {
   const departments: (typeof schema.department.$inferInsert)[] = [];
 
   result.map((row) => {
-    if (row.RECORD_DELETED === 1) {
-      return;
-    }
-
     departments.push({
       id: row.NUMBER,
       name: row.NAME,
       lastModified: new Date(row.RECORD_MODIFY_DATE),
       createdAt: new Date(row.RECORD_CREATE_DATE),
+      isDeleted: row.RECORD_DELETED === 1,
     });
   });
 
@@ -36,6 +33,7 @@ export async function syncDepartments(parameters?: SyncParameters) {
           name: sql<string>`excluded.name`,
           lastModified: sql<Date>`excluded.last_modified`,
           createdAt: sql<Date>`excluded.created_at`,
+          isDeleted: sql<boolean>`excluded.is_deleted`,
         },
       });
   });

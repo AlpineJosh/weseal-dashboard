@@ -15,9 +15,10 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { component } from "./component.schema";
-import { salesDespatchItem } from "./despatching.schema";
-import { productionBatchIn } from "./production.schema";
-import { purchaseReceiptItem } from "./receiving.schema";
+import { salesDespatch } from "./despatching.schema";
+import { productionJob } from "./production.schema";
+
+import "./receiving.schema";
 
 export const batchMovementType = pgEnum("batch_movement_type", [
   "despatch",
@@ -108,14 +109,11 @@ export const task = pgTable("task", {
   isCancelled: boolean("is_cancelled").notNull().default(false),
   assignedToId: varchar("assigned_to_user_id").notNull(),
   createdById: varchar("created_by_user_id").notNull(),
-  productionJobItemId: integer("production_job_item_id").references(
-    () => productionBatchIn.id,
+  productionJobId: integer("production_job_id").references(
+    () => productionJob.id,
   ),
-  purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
-    () => purchaseReceiptItem.id,
-  ),
-  salesDespatchItemId: integer("sales_despatch_item_id").references(
-    () => salesDespatchItem.id,
+  salesDespatchId: integer("sales_despatch_id").references(
+    () => salesDespatch.id,
   ),
   createdAt: timestamp("created_at")
     .notNull()
@@ -128,17 +126,13 @@ export const task = pgTable("task", {
 
 export const taskRelations = relations(task, ({ one, many }) => ({
   items: many(taskItem),
-  productionJobItem: one(productionBatchIn, {
-    fields: [task.productionJobItemId],
-    references: [productionBatchIn.id],
+  productionJob: one(productionJob, {
+    fields: [task.productionJobId],
+    references: [productionJob.id],
   }),
-  purchaseReceiptItem: one(purchaseReceiptItem, {
-    fields: [task.purchaseReceiptItemId],
-    references: [purchaseReceiptItem.id],
-  }),
-  salesDespatchItem: one(salesDespatchItem, {
-    fields: [task.salesDespatchItemId],
-    references: [salesDespatchItem.id],
+  salesDespatch: one(salesDespatch, {
+    fields: [task.salesDespatchId],
+    references: [salesDespatch.id],
   }),
 }));
 

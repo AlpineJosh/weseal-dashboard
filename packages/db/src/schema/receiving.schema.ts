@@ -4,6 +4,7 @@ import {
   integer,
   pgTable,
   real,
+  serial,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -21,6 +22,7 @@ export const supplier = pgTable("supplier", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const supplierRelations = relations(supplier, ({ many }) => ({
@@ -43,6 +45,7 @@ export const purchaseOrder = pgTable("purchase_order", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const purchaseOrderRelations = relations(
@@ -66,6 +69,7 @@ export const purchaseOrderItem = pgTable("purchase_order_item", {
     .notNull()
     .references(() => component.id),
   quantityOrdered: real("quantity_ordered"),
+  sageQuantityReceived: real("sage_quantity_received"),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -73,6 +77,7 @@ export const purchaseOrderItem = pgTable("purchase_order_item", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const purchaseOrderItemRelations = relations(
@@ -90,7 +95,7 @@ export const purchaseOrderItemRelations = relations(
 );
 
 export const purchaseReceipt = pgTable("purchase_receipt", {
-  id: integer("id").primaryKey(),
+  id: serial("id").primaryKey(),
   orderId: integer("order_id")
     .notNull()
     .references(() => purchaseOrder.id),
@@ -118,7 +123,7 @@ export const purchaseReceiptRelations = relations(
 );
 
 export const purchaseReceiptItem = pgTable("purchase_receipt_item", {
-  id: integer("id").primaryKey(),
+  id: serial("id").primaryKey(),
   receiptId: integer("receipt_id")
     .notNull()
     .references(() => purchaseReceipt.id),

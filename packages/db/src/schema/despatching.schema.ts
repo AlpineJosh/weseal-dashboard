@@ -4,6 +4,7 @@ import {
   integer,
   pgTable,
   real,
+  serial,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -21,6 +22,7 @@ export const customer = pgTable("customer", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const customerRelations = relations(customer, ({ many }) => ({
@@ -43,6 +45,7 @@ export const salesOrder = pgTable("sales_order", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const salesOrderRelations = relations(salesOrder, ({ one, many }) => ({
@@ -62,7 +65,8 @@ export const salesOrderItem = pgTable("sales_order_item", {
   componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
-  quantity: real("quantity").notNull(),
+  quantityOrdered: real("quantity_ordered").notNull(),
+  sageQuantityDespatched: real("sage_quantity_despatched").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -70,6 +74,7 @@ export const salesOrderItem = pgTable("sales_order_item", {
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const salesOrderItemRelations = relations(salesOrderItem, ({ one }) => ({
@@ -84,7 +89,7 @@ export const salesOrderItemRelations = relations(salesOrderItem, ({ one }) => ({
 }));
 
 export const salesDespatch = pgTable("sales_despatch", {
-  id: integer("id").primaryKey(),
+  id: serial("id").primaryKey(),
   orderId: integer("order_id")
     .notNull()
     .references(() => salesOrder.id),
@@ -109,7 +114,7 @@ export const salesDespatchRelations = relations(salesDespatch, ({ one }) => ({
 }));
 
 export const salesDespatchItem = pgTable("sales_despatch_item", {
-  id: integer("id").primaryKey(),
+  id: serial("id").primaryKey(),
   despatchId: integer("despatch_id")
     .notNull()
     .references(() => salesDespatch.id),

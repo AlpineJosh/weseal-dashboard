@@ -1,6 +1,6 @@
 import { sql } from "@repo/db";
-import { db } from "@repo/db/server";
 import schema from "@repo/db/schema";
+import { db } from "@repo/db/server";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
 import { sage } from "~/lib/sage/sage";
@@ -14,15 +14,12 @@ export async function syncPurchaseLedger(parameters?: SyncParameters) {
   const purchaseLedger: (typeof schema.supplier.$inferInsert)[] = [];
 
   result.map((row) => {
-    if (row.RECORD_DELETED === 1) {
-      return;
-    }
-
     purchaseLedger.push({
       id: row.ACCOUNT_REF,
       name: row.NAME,
       lastModified: new Date(row.RECORD_MODIFY_DATE),
       createdAt: new Date(row.RECORD_CREATE_DATE),
+      isDeleted: row.RECORD_DELETED === 1,
     });
   });
 
@@ -36,6 +33,7 @@ export async function syncPurchaseLedger(parameters?: SyncParameters) {
           name: sql<string>`excluded.name`,
           lastModified: sql<Date>`excluded.last_modified`,
           createdAt: sql<Date>`excluded.created_at`,
+          isDeleted: sql<boolean>`excluded.is_deleted`,
         },
       });
   });
@@ -48,10 +46,6 @@ export async function syncPurchaseOrders(parameters?: SyncParameters) {
   const purchaseOrders: (typeof schema.purchaseOrder.$inferInsert)[] = [];
 
   result.map((row) => {
-    if (row.RECORD_DELETED === 1) {
-      return;
-    }
-
     purchaseOrders.push({
       id: row.ORDER_NUMBER,
       supplierId: row.ACCOUNT_REF,
@@ -61,6 +55,7 @@ export async function syncPurchaseOrders(parameters?: SyncParameters) {
       orderDate: new Date(row.ORDER_DATE),
       lastModified: new Date(row.RECORD_MODIFY_DATE),
       createdAt: new Date(row.RECORD_CREATE_DATE),
+      isDeleted: row.RECORD_DELETED === 1,
     });
   });
 
@@ -78,6 +73,7 @@ export async function syncPurchaseOrders(parameters?: SyncParameters) {
           orderDate: sql<Date>`excluded.order_date`,
           lastModified: sql<Date>`excluded.last_modified`,
           createdAt: sql<Date>`excluded.created_at`,
+          isDeleted: sql<boolean>`excluded.is_deleted`,
         },
       });
   });
@@ -91,10 +87,6 @@ export async function syncPurchaseOrderItems(parameters?: SyncParameters) {
     [];
 
   result.map((row) => {
-    if (row.RECORD_DELETED === 1) {
-      return;
-    }
-
     if (["M", "S1", "S2", "S3"].includes(row.STOCK_CODE)) {
       return;
     }
@@ -104,8 +96,10 @@ export async function syncPurchaseOrderItems(parameters?: SyncParameters) {
       orderId: row.ORDER_NUMBER,
       componentId: row.STOCK_CODE,
       quantityOrdered: row.QTY_ORDER,
+      sageQuantityReceived: row.QTY_DELIVERED,
       createdAt: new Date(row.RECORD_CREATE_DATE),
       lastModified: new Date(row.RECORD_MODIFY_DATE),
+      isDeleted: row.RECORD_DELETED === 1,
     });
   });
 
@@ -119,8 +113,10 @@ export async function syncPurchaseOrderItems(parameters?: SyncParameters) {
           orderId: sql<number>`excluded.order_id`,
           componentId: sql<string>`excluded.component_id`,
           quantityOrdered: sql<number>`excluded.quantity_ordered`,
+          sageQuantityReceived: sql<number>`excluded.sage_quantity_received`,
           lastModified: sql<Date>`excluded.last_modified`,
           createdAt: sql<Date>`excluded.created_at`,
+          isDeleted: sql<boolean>`excluded.is_deleted`,
         },
       });
   });

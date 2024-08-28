@@ -17,21 +17,24 @@ CREATE TABLE IF NOT EXISTS "component" (
 	"requires_quality_check" boolean DEFAULT false,
 	"quality_check_details" varchar,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "component_category" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "department" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "subcomponent" (
@@ -48,11 +51,12 @@ CREATE TABLE IF NOT EXISTS "customer" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sales_despatch" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"order_id" integer NOT NULL,
 	"expected_despatch_date" timestamp,
 	"despatch_date" timestamp,
@@ -63,7 +67,7 @@ CREATE TABLE IF NOT EXISTS "sales_despatch" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sales_despatch_item" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"despatch_id" integer NOT NULL,
 	"batch_id" integer NOT NULL,
 	"quantity" real NOT NULL,
@@ -79,16 +83,19 @@ CREATE TABLE IF NOT EXISTS "sales_order" (
 	"is_cancelled" boolean DEFAULT false NOT NULL,
 	"is_complete" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sales_order_item" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"order_id" integer NOT NULL,
 	"component_id" varchar NOT NULL,
-	"quantity" real NOT NULL,
+	"quantity_ordered" real NOT NULL,
+	"sage_quantity_despatched" real NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "batch" (
@@ -153,9 +160,8 @@ CREATE TABLE IF NOT EXISTS "task" (
 	"is_cancelled" boolean DEFAULT false NOT NULL,
 	"assigned_to_user_id" varchar NOT NULL,
 	"created_by_user_id" varchar NOT NULL,
-	"production_job_item_id" integer,
-	"purchase_receipt_item_id" integer,
-	"sales_despatch_item_id" integer,
+	"production_job_id" integer,
+	"sales_despatch_id" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"last_modified" timestamp DEFAULT now() NOT NULL
 );
@@ -193,14 +199,6 @@ CREATE TABLE IF NOT EXISTS "production_job" (
 	"last_modified" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "production_job_status" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar NOT NULL,
-	"is_active" boolean DEFAULT false NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "purchase_order" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"supplier_id" varchar NOT NULL,
@@ -209,7 +207,8 @@ CREATE TABLE IF NOT EXISTS "purchase_order" (
 	"is_cancelled" boolean DEFAULT false NOT NULL,
 	"order_date" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "purchase_order_item" (
@@ -217,12 +216,14 @@ CREATE TABLE IF NOT EXISTS "purchase_order_item" (
 	"order_id" integer NOT NULL,
 	"component_id" varchar NOT NULL,
 	"quantity_ordered" real,
+	"sage_quantity_received" real,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "purchase_receipt" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"order_id" integer NOT NULL,
 	"expected_receipt_date" timestamp,
 	"receipt_date" timestamp,
@@ -232,7 +233,7 @@ CREATE TABLE IF NOT EXISTS "purchase_receipt" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "purchase_receipt_item" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"receipt_id" integer NOT NULL,
 	"batch_id" integer NOT NULL,
 	"quantity" real,
@@ -244,7 +245,8 @@ CREATE TABLE IF NOT EXISTS "supplier" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"last_modified" timestamp DEFAULT now() NOT NULL
+	"last_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -350,19 +352,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "task" ADD CONSTRAINT "task_production_job_item_id_production_batch_in_id_fk" FOREIGN KEY ("production_job_item_id") REFERENCES "public"."production_batch_in"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "task" ADD CONSTRAINT "task_production_job_id_production_job_id_fk" FOREIGN KEY ("production_job_id") REFERENCES "public"."production_job"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "task" ADD CONSTRAINT "task_purchase_receipt_item_id_purchase_receipt_item_id_fk" FOREIGN KEY ("purchase_receipt_item_id") REFERENCES "public"."purchase_receipt_item"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "task" ADD CONSTRAINT "task_sales_despatch_item_id_sales_despatch_item_id_fk" FOREIGN KEY ("sales_despatch_item_id") REFERENCES "public"."sales_despatch_item"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "task" ADD CONSTRAINT "task_sales_despatch_id_sales_despatch_id_fk" FOREIGN KEY ("sales_despatch_id") REFERENCES "public"."sales_despatch"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

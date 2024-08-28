@@ -12,19 +12,6 @@ import {
 import { component } from "./component.schema";
 import { batch, location } from "./inventory.schema";
 
-export const productionJobStatus = pgTable("production_job_status", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").notNull(),
-  isActive: boolean("is_active").notNull().default(false),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`now()`),
-  lastModified: timestamp("last_modified")
-    .notNull()
-    .default(sql`now()`)
-    .$onUpdate(() => new Date()),
-});
-
 export const productionJob = pgTable("production_job", {
   id: serial("id").notNull().primaryKey(),
   componentId: varchar("component_id")
