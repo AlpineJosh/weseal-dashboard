@@ -22,7 +22,8 @@
     "stream-json": "^1.8.0",
     "string-similarity": "^4.0.4",
     "tsyringe": "^4.8.0",
-    "typedi": "^0.10.0"
+    "typedi": "^0.10.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
