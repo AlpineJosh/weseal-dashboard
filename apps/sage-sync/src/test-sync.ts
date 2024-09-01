@@ -6,8 +6,7 @@ import { parser } from "stream-json";
 import { streamArray } from "stream-json/streamers/StreamArray";
 import { compareTwoStrings } from "string-similarity";
 
-import * as schema from "@repo/db/schema";
-
+import * as schema from "../../../packages/db/dist/tables";
 import {
   Bin,
   StockItem,

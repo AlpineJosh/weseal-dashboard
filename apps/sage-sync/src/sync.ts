@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import schema from "@repo/db/schema";
 import { db } from "@repo/db/server";
 
+import schema from "../../../packages/db/dist/tables";
 import { bitSystems, initBitSystems } from "./lib/bit-systems/bit-systems";
 import { Bin, TraceableItem, Warehouse } from "./lib/bit-systems/types";
 import { asyncBatch } from "./lib/helpers";
