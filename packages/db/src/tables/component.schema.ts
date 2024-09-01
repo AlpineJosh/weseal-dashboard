@@ -9,9 +9,8 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-zod";
 
-import { location } from "./inventory.schema";
+import { batch, location } from "./inventory.schema";
 
 export const department = pgTable("department", {
   id: integer("id").primaryKey(),
@@ -74,8 +73,6 @@ export const component = pgTable("component", {
   isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
-export const componentSelectSchema = createSelectSchema(component);
-
 export const componentRelations = relations(component, ({ one, many }) => ({
   subcomponents: many(subcomponent),
   department: one(department, {
@@ -85,6 +82,11 @@ export const componentRelations = relations(component, ({ one, many }) => ({
   category: one(componentCategory, {
     fields: [component.categoryId],
     references: [componentCategory.id],
+  }),
+  batches: many(batch),
+  defaultLocation: one(location, {
+    fields: [component.defaultLocationId],
+    references: [location.id],
   }),
 }));
 

@@ -2,7 +2,7 @@ import { Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 
 import { env } from "./env";
-import * as schema from "./schema";
+import schema from "./schema";
 
 const client = new Pool({ connectionString: env.DATABASE_URL });
 

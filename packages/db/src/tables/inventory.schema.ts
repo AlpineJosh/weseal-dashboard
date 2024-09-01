@@ -20,6 +20,8 @@ import { productionJob } from "./production.schema";
 
 import "./receiving.schema";
 
+import { batchLocationQuantity } from "../views/overview";
+
 export const batchMovementType = pgEnum("batch_movement_type", [
   "despatch",
   "receipt",
@@ -239,6 +241,7 @@ export const locationRelations = relations(location, ({ one, many }) => ({
     references: [locationType.id],
   }),
   batchMovements: many(batchMovement),
+  quantities: many(batchLocationQuantity),
 }));
 
 export const batch = pgTable("batch", {
@@ -263,4 +266,5 @@ export const batchRelations = relations(batch, ({ one, many }) => ({
     references: [component.id],
   }),
   movements: many(batchMovement),
+  locations: many(batchLocationQuantity),
 }));

@@ -1,10 +1,9 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import { componentRouter } from "./routers/component";
-import { salesAccountRouter } from "./routers/customer";
-import { purchaseOrderRouter } from "./routers/purchase-order";
-import { salesOrderRouter } from "./routers/sales-order";
-import { purchaseAccountRouter } from "./routers/supplier";
+import { despatchingRouter } from "./routers/despatching";
+import { productionRouter } from "./routers/production";
+import { receivingRouter } from "./routers/receiving";
 import { taskRouter } from "./routers/task";
 import {
   createCallerFactory,
@@ -14,10 +13,9 @@ import {
 
 const appRouter = createTRPCRouter({
   component: componentRouter,
-  purchaseOrder: purchaseOrderRouter,
-  salesOrder: salesOrderRouter,
-  salesAccount: salesAccountRouter,
-  purchaseAccount: purchaseAccountRouter,
+  production: productionRouter,
+  despatching: despatchingRouter,
+  receiving: receivingRouter,
   task: taskRouter,
 });
 
