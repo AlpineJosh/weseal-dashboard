@@ -1,10 +1,11 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
-import { createTRPCRouter, publicProcedure } from "../../trpc";
+import { publicProcedure } from "../../trpc";
 
 const uniqueSupplierInput = z.object({
   id: z.string(),
@@ -25,7 +26,7 @@ const listSupplierInput = z
     },
   });
 
-export const supplierRouter = createTRPCRouter({
+export const supplierRouter = {
   list: publicProcedure.input(listSupplierInput).query(async ({ input }) => {
     return db.query.supplier.findMany({
       limit: input.pagination.size,
@@ -37,4 +38,4 @@ export const supplierRouter = createTRPCRouter({
       where: eq(schema.supplier.id, input.id),
     });
   }),
-});
+} satisfies TRPCRouterRecord;

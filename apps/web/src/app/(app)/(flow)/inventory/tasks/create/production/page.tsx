@@ -1,36 +1,108 @@
 "use client";
 
-import { useState } from "react";
-import { faCheck } from "@fortawesome/pro-light-svg-icons";
-import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { useImmer } from "use-immer";
 
-import { RouterInputs, RouterOutputs } from "@repo/api";
+import type { RouterInputs, RouterOutputs } from "@repo/api";
+import type { FlowStepRendererProps } from "@repo/ui/components/navigation";
 import { Input } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
-import { Button, Icon } from "@repo/ui/components/element";
-import { Field, Form } from "@repo/ui/components/form";
+import { Button } from "@repo/ui/components/element";
 import { Card } from "@repo/ui/components/layout";
+import { Flow } from "@repo/ui/components/navigation";
 
 import { api } from "~/trpc/react";
 
-export default function CreateProductionTask() {
-  const [task, setTask] = useImmer<RouterInputs["task"]["create"]>({
-    type: "production",
-  });
+// const SearchableListbox: React.FC<any> = (props) => {
+//   return <div>Placeholder</div>;
+// };
 
-  const [component, setComponent] = useImmer<
+export default function CreateProductionTask() {
+  //   const [task, setTask] = useImmer<RouterInputs["task"]["create"]>({
+  //     type: "production",
+  //     assignedToId: "",
+  //   });
+
+  const [_component, setComponent] = useImmer<
     RouterOutputs["component"]["get"] | undefined
   >(undefined);
 
-  const [quantity, setQuantity] = useImmer<number>(1);
+  //   const [quantity, setQuantity] = useImmer<number>(1);
   // const [subcomponents, setSubcomponents] = useImmer<
   //   RouterOutputs["component"]["subcomponents"] | undefined
   // >(undefined);
 
   return (
-    <Card>
-      <Tabs>
+    <Card className="relative flex h-full max-h-[calc(100vh-10rem)] flex-col">
+      <Flow className="relative max-h-full overflow-y-auto">
+        <Flow.Step
+          className="flex flex-1 flex-col overflow-y-auto"
+          title="Select Component"
+          id="component"
+        >
+          {({ nextStep }: FlowStepRendererProps) => (
+            <SelectComponent
+              onSelect={(component) => {
+                setComponent(component);
+                nextStep();
+              }}
+            />
+            // <SearchableListbox
+            //   placeholder="Search by stock code or description"
+            //   onSelect={(item) => {
+            //     setComponent(item);
+            //     next();
+            //   }}
+            //   endpoint={api.component.list}
+            //   query={({ query }) => ({ filter: { search: query } })}
+            // >
+            //   {(component) => (
+            //     <SearchableListbox.Item>
+            //       <div className="flex grow flex-col">
+            //         <div className="font-semibold">{component.id}</div>
+            //         <div className="text-sm font-medium text-muted-foreground">
+            //           {component.description}
+            //         </div>
+            //       </div>
+            //       <div className="flex flex-col">{component.totalQuantity}</div>
+            //     </SearchableListbox.Item>
+            //   )}
+            // </SearchableListbox>
+          )}
+        </Flow.Step>
+        <Flow.Step title="Production Job" id="production-job">
+          {({ nextStep, previousStep }) => (
+            <div>
+              <Button onPress={previousStep}>Previous</Button>
+              <Button onPress={nextStep}>Next</Button>
+            </div>
+          )}
+        </Flow.Step>
+        <Flow.Step title="Quantity" id="quantity">
+          {({ nextStep, previousStep }) => (
+            <div>
+              <Button onPress={previousStep}>Previous</Button>
+              <Button onPress={nextStep}>Next</Button>
+            </div>
+          )}
+        </Flow.Step>
+        <Flow.Step title="Locations" id="locations">
+          {({ nextStep, previousStep }) => (
+            <div>
+              <Button onPress={previousStep}>Previous</Button>
+              <Button onPress={nextStep}>Next</Button>
+            </div>
+          )}
+        </Flow.Step>
+        <Flow.Step title="Review" id="review">
+          {({ previousStep }) => (
+            <div>
+              <Button onPress={previousStep}>Previous</Button>
+              <Button onPress={previousStep}>Prev</Button>
+            </div>
+          )}
+        </Flow.Step>
+      </Flow>
+      {/* <Tabs>
         <TabList className="flex flex-row border-b">
           <Tab
             className="group flex flex-1 items-center px-6 py-4 text-sm font-medium"
@@ -75,22 +147,25 @@ export default function CreateProductionTask() {
         </TabPanel>
         <TabPanel id="quantity">Quantity</TabPanel>
         <TabPanel id="pick-locations">
-          <PickLocations />
+          <PickLocations components={component?.subcomponents} />
         </TabPanel>
-      </Tabs>
+      </Tabs> */}
     </Card>
   );
 }
 
-const SelectComponent = () => {
-  const [query, setQuery] = useState("");
-  const { data, isLoading } = api.component.all.useQuery({ search: query });
-  const [selectedComponent, setSelectedComponent] = useImmer<
-    RouterOutputs["component"]["get"] | undefined
-  >(undefined);
+const SelectComponent = ({
+  onSelect,
+}: {
+  onSelect: (component: RouterOutputs["component"]["get"]) => void;
+}) => {
+  const [query, setQuery] = useImmer("");
+  const { data, isLoading } = api.component.list.useQuery({
+    filter: { search: query, hasSubcomponents: true },
+  });
 
   return (
-    <Card className="flex flex-col items-stretch">
+    <>
       <div className="border-b border-border p-4">
         <h1>Select Component</h1>
         <Input
@@ -99,34 +174,54 @@ const SelectComponent = () => {
           placeholder="Search by stock code or description"
         />
       </div>
-      <div className="max-h-[calc(100vh-10rem)] flex-1 overflow-y-auto">
-        <ul>
-          {data?.data.map((component) => (
-            <li key={component.id}>
-              <button
-                className="flex w-full flex-row border-b p-2 text-left"
-                type="button"
-                onClick={() => setSelectedComponent(component)}
-              >
-                <div className="flex grow flex-col">
-                  <div className="font-semibold">{component.id}</div>
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {component.description}
+      <ul className="flex-1 overflow-y-auto">
+        {data ? (
+          data
+            .filter((component) => component.subcomponents.length > 0)
+            .map((component) => (
+              <li key={component.id}>
+                <button
+                  className="flex w-full flex-row border-b p-2 text-left"
+                  type="button"
+                  onClick={() => onSelect(component)}
+                >
+                  <div className="flex grow flex-col">
+                    <div className="font-semibold">{component.id}</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {component.description}
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col">
-                  {component.quantity as number}
-                </div>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Card>
+                  <div className="flex flex-col">{component.totalQuantity}</div>
+                </button>
+              </li>
+            ))
+        ) : (
+          <div>{isLoading ? "Loading..." : "No components found"}</div>
+        )}
+      </ul>
+    </>
   );
 };
 
-const PickLocations = () => {
+interface PickLocationsProps {
+  components: {
+    id: string;
+    quantityRequired: number;
+    locations: {
+      batch: {
+        id: number;
+      };
+      location: {
+        id: number;
+        name: string;
+      };
+      quantityFree: number;
+      quantityPicked: number;
+    }[];
+  }[];
+}
+
+const PickLocations = ({ components }: PickLocationsProps) => {
   const data = [
     {
       id: "Test",

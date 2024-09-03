@@ -1,10 +1,11 @@
-import { createTRPCRouter } from "../../trpc";
+import type { TRPCRouterRecord } from "@trpc/server";
+
 import { customerRouter } from "./customer";
 import { salesOrderRouter } from "./order";
 
-export const despatchingRouter = createTRPCRouter({
+export const despatchingRouter = {
   customer: customerRouter,
   order: salesOrderRouter,
-});
+} satisfies TRPCRouterRecord;
 
 export type DespatchingRouter = typeof despatchingRouter;

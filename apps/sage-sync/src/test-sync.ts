@@ -6,7 +6,8 @@ import { parser } from "stream-json";
 import { streamArray } from "stream-json/streamers/StreamArray";
 import { compareTwoStrings } from "string-similarity";
 
-import * as schema from "../../../packages/db/dist/tables";
+import schema from "@repo/db/schema";
+
 import {
   Bin,
   StockItem,
@@ -255,7 +256,7 @@ const main = async () => {
       id: currentId++,
       batchId: 0,
       // date,
-      receiptId: receipt.id,
+      receiptId: receipt.id!,
       quantity: item.QTY_RECEIVED,
     });
   });
@@ -294,7 +295,8 @@ const main = async () => {
     component._connected.salesOrderItems.push({
       id: item.ITEMID,
       componentId: item.STOCK_CODE,
-      quantity: item.QTY_ORDER,
+      quantityOrdered: item.QTY_ORDER || 0,
+      sageQuantityDespatched: item.QTY_DESPATCH || 0,
       orderId: item.ORDER_NUMBER,
       _connected: {
         despatchItems: [],
@@ -351,7 +353,7 @@ const main = async () => {
     salesOrderItem._connected.despatchItems.push({
       id: currentId++,
       batchId: 0,
-      despatchId: despatch.id,
+      despatchId: despatch.id!,
       quantity: item.QTY_DESPATCHED,
     });
   });

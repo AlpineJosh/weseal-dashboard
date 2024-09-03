@@ -1,10 +1,11 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { asc, desc, eq, ilike, or } from "@repo/db";
+import { and, asc, desc, eq, ilike, or } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { publicProcedure } from "../trpc";
 
 export const uniqueComponentSchema = z.object({
   id: z.string(),
@@ -38,6 +39,7 @@ export const listComponentSchema = z.object({
   filter: z
     .object({
       search: z.string(),
+      hasSubcomponents: z.boolean().optional(),
     })
     .optional(),
 });
@@ -49,7 +51,7 @@ export const updateComponentSchema = z.object({
   }),
 });
 
-export const componentRouter = createTRPCRouter({
+export const componentRouter = {
   get: publicProcedure.input(uniqueComponentSchema).query(async ({ input }) => {
     return await db.query.componentOverview.findFirst({
       where: eq(schema.component.id, input.id),
@@ -69,12 +71,17 @@ export const componentRouter = createTRPCRouter({
         department: true,
         category: true,
       },
-      where: input.filter?.search
-        ? or(
-            ilike(schema.component.description, `%${input.filter.search}%`),
-            ilike(schema.component.id, input.filter.search),
-          )
-        : undefined,
+      where: and(
+        input.filter?.hasSubcomponents
+          ? eq(schema.component.hasSubcomponents, true)
+          : undefined,
+        input.filter?.search
+          ? or(
+              ilike(schema.component.description, `%${input.filter.search}%`),
+              ilike(schema.component.id, input.filter.search),
+            )
+          : undefined,
+      ),
       orderBy: input.sort?.map((sort) =>
         sort.order === "asc"
           ? asc(schema.componentOverview[sort.field])
@@ -91,6 +98,6 @@ export const componentRouter = createTRPCRouter({
         .where(eq(schema.component.id, input.id))
         .returning();
     }),
-});
+} satisfies TRPCRouterRecord;
 
 export type ComponentRouter = typeof componentRouter;

@@ -1,11 +1,11 @@
-import type { AnyRouter } from "@trpc/server";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { publicProcedure } from "../trpc";
 
 const uniqueTaskInput = z.object({
   id: z.number(),
@@ -19,9 +19,9 @@ const taskInput = z.object({
   type: z.enum(["transfer", "production", "despatch", "receipt"]),
 });
 
-export const taskRouter: AnyRouter = createTRPCRouter({
+export const taskRouter = {
   get: publicProcedure.input(uniqueTaskInput).query(async ({ input }) => {
-    const t = await db.query.task.findFirst({
+    return await db.query.task.findFirst({
       where: eq(schema.task.id, input.id),
       with: {
         productionJob: true,
@@ -29,10 +29,9 @@ export const taskRouter: AnyRouter = createTRPCRouter({
         items: true,
       },
     });
-    return t;
   }),
   list: publicProcedure.input(taskInput).query(async ({ input }) => {
-    const t = await db.query.task.findMany({
+    return await db.query.task.findMany({
       where: eq(schema.task.type, input.type),
       with: {
         productionJob: true,
@@ -40,30 +39,31 @@ export const taskRouter: AnyRouter = createTRPCRouter({
         items: true,
       },
     });
-    return t;
   }),
   create: publicProcedure.input(taskInput).mutation(async ({ input }) => {
-    const t = await db.insert(schema.task).values({
-      ...input,
-      createdById: "",
-    });
-    return t;
+    return await db
+      .insert(schema.task)
+      .values({
+        ...input,
+        createdById: "",
+      })
+      .returning();
   }),
   completeItem: publicProcedure
     .input(uniqueTaskInput)
     .mutation(async ({ input }) => {
-      const t = await db
+      return await db
         .update(schema.taskItem)
         .set({
           isComplete: true,
         })
-        .where(eq(schema.taskItem.id, input.id));
-      return t;
+        .where(eq(schema.taskItem.id, input.id))
+        .returning();
     }),
   delete: publicProcedure.input(uniqueTaskInput).mutation(async ({ input }) => {
-    const t = await db.delete(schema.task).where(eq(schema.task.id, input.id));
-    return t;
+    return await db
+      .delete(schema.task)
+      .where(eq(schema.task.id, input.id))
+      .returning();
   }),
-});
-
-export type TaskRouter = typeof taskRouter;
+} satisfies TRPCRouterRecord;

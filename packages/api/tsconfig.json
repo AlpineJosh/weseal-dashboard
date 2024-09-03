@@ -3,9 +3,6 @@
   "compilerOptions": {
     "outDir": "dist",
     "incremental": true,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false,
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": ["src"],

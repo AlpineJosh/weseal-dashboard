@@ -1,10 +1,11 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
-import { createTRPCRouter, publicProcedure } from "../../trpc";
+import { publicProcedure } from "../../trpc";
 import { productionJobOutputRouter } from "./output";
 import { productionJobResourcesRouter } from "./resources";
 
@@ -34,7 +35,7 @@ export const updateProductionJobInput = z.object({
   isActive: z.boolean(),
 });
 
-export const productionRouter = createTRPCRouter({
+export const productionRouter = {
   get: publicProcedure
     .input(uniqueProductionJobInput)
     .query(async ({ input }) => {
@@ -75,6 +76,6 @@ export const productionRouter = createTRPCRouter({
     }),
   resources: productionJobResourcesRouter,
   output: productionJobOutputRouter,
-});
+} satisfies TRPCRouterRecord;
 
 export type ProductionRouter = typeof productionRouter;

@@ -1,10 +1,11 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
-import { createTRPCRouter, publicProcedure } from "../../trpc";
+import { publicProcedure } from "../../trpc";
 
 const addProductionJobResourcesInput = z.array(
   z.object({
@@ -20,7 +21,7 @@ const processProductionJobResourcesInput = z.object({
   quantity: z.number(),
 });
 
-export const productionJobResourcesRouter = createTRPCRouter({
+export const productionJobResourcesRouter = {
   add: publicProcedure
     .input(addProductionJobResourcesInput)
     .mutation(async ({ input }) => {
@@ -59,4 +60,4 @@ export const productionJobResourcesRouter = createTRPCRouter({
 
       return;
     }),
-});
+} satisfies TRPCRouterRecord;
