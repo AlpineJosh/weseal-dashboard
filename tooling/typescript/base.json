@@ -3,8 +3,8 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "ES2022",
-    "lib": ["ES2022"],
+    "target": "esnext",
+    "lib": ["esnext"],
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",
@@ -12,15 +12,15 @@
 
     "incremental": true,
     "disableSourceOfProjectReferenceRedirect": true,
+    "tsBuildInfoFile": "${configDir}/.cache/tsbuildinfo.json",
 
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "checkJs": true,
 
-    "module": "Preserve",
-    "moduleResolution": "Bundler",
-    "noEmit": true,
-    "strictNullChecks": true
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true
   },
   "exclude": ["node_modules", "build", "dist", ".next", ".expo"]
 }

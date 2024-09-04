@@ -6,7 +6,7 @@ import type { RouterInputs, RouterOutputs } from "@repo/api";
 import type { FlowStepRendererProps } from "@repo/ui/components/navigation";
 import { Input } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
-import { Button } from "@repo/ui/components/element";
+import { Badge, Button } from "@repo/ui/components/element";
 import { Card } from "@repo/ui/components/layout";
 import { Flow } from "@repo/ui/components/navigation";
 
@@ -38,32 +38,30 @@ export default function CreateProductionTask() {
       <Flow className="relative max-h-full overflow-y-auto">
         <Flow.Step
           className="flex flex-1 flex-col overflow-y-auto"
-          title="Select Component"
-          id="component"
+          title="Select Purchase Order"
+          id="order"
         >
           {({ nextStep }: FlowStepRendererProps) => (
             <SearchableListbox
-              useQuery={(query) =>
-                api.component.list.useQuery({
-                  filter: { search: query, hasSubcomponents: true },
-                })
-              }
+              useQuery={(query) => api.receiving.order.list.useQuery()}
               onSelect={(component) => {
-                setComponent(component);
+                // setComponent(component);
                 nextStep();
               }}
-              item={(component) => (
+              item={(order) => (
                 <>
                   <div className="flex grow flex-col">
-                    <div className="font-semibold">{component.id}</div>
+                    <div className="font-semibold">{order.id}</div>
                     <div className="text-sm font-medium text-muted-foreground">
-                      {component.description}
+                      {order.supplier.name}
                     </div>
                   </div>
-                  <div className="flex flex-col">{component.totalQuantity}</div>
+                  <div className="flex flex-col">
+                    <Badge>{order.isComplete ? "Complete" : "Pending"}</Badge>
+                  </div>
                 </>
               )}
-              empty={<div>No components found</div>}
+              empty={<div>No orders found</div>}
               loading={<div>Loading...</div>}
             />
           )}

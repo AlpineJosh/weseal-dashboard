@@ -9,15 +9,15 @@ import { Modal } from "@repo/ui/components/overlay";
 import { api } from "~/trpc/react";
 
 export default function ReceivingPage() {
-  const { data } = api.receiving.order.list.useQuery();
+  const { data } = api.despatching.order.list.useQuery();
   return (
     <div className="flex flex-col space-y-4">
-      <h1 className="text-2xl font-semibold">Purchase Orders</h1>
+      <h1 className="text-2xl font-semibold">Sales Orders</h1>
       <Card>
         <Table className="border-b">
           <Table.Header>
             <Table.Row>
-              <Table.Head>Purchase Order</Table.Head>
+              <Table.Head className="whitespace-nowrap">Sales Order</Table.Head>
               <Table.Head>Account</Table.Head>
               <Table.Head>Status</Table.Head>
               <Table.Head>Order Date</Table.Head>
@@ -28,19 +28,26 @@ export default function ReceivingPage() {
             {data?.map((order) => (
               <Table.Row key={order.id}>
                 <Table.Cell>{order.id}</Table.Cell>
-                <Table.Cell>{order.supplier.name}</Table.Cell>
+                <Table.Cell className="truncate">
+                  {order.customer.name}
+                </Table.Cell>
                 <Table.Cell>
-                  <Badge>{order.isComplete ? "Received" : "Pending"}</Badge>
+                  <Badge>{order.isComplete ? "Despatched" : "Pending"}</Badge>
                 </Table.Cell>
                 <Table.Cell>{order.orderDate?.toLocaleDateString()}</Table.Cell>
-                <Table.Cell className="flex gap-2 p-0">
-                  <Modal.Trigger>
-                    <Link>Receive</Link>
-                    <Modal.Content>
-                      <p>Hello</p>
-                    </Modal.Content>
-                  </Modal.Trigger>
-                  <Button variant="ghost">View Details</Button>
+                <Table.Cell className="flex flex-row items-center space-x-2">
+                  <Link
+                    className="whitespace-nowrap"
+                    href="/inventory/tasks/create/despatching"
+                  >
+                    Despatch
+                  </Link>
+                  <Link
+                    className="whitespace-nowrap"
+                    href={`/receiving/orders/${order.id}`}
+                  >
+                    View Details
+                  </Link>
                 </Table.Cell>
               </Table.Row>
             ))}

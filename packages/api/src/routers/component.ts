@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, desc, eq, ilike, or } from "@repo/db";
+import { and, asc, desc, eq, ilike, not, or } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
@@ -38,8 +38,9 @@ export const listComponentSchema = z.object({
     .optional(),
   filter: z
     .object({
-      search: z.string(),
+      search: z.string().optional(),
       hasSubcomponents: z.boolean().optional(),
+      discrepancy: z.boolean().optional(),
     })
     .optional(),
 });
@@ -59,6 +60,13 @@ export const componentRouter = {
         subcomponents: true,
         department: true,
         category: true,
+        locations: {
+          with: {
+            batch: true,
+            location: true,
+          },
+          where: not(eq(schema.batchLocationQuantity.total, 0)),
+        },
       },
     });
   }),
@@ -73,13 +81,19 @@ export const componentRouter = {
       },
       where: and(
         input.filter?.hasSubcomponents
-          ? eq(schema.component.hasSubcomponents, true)
+          ? eq(schema.componentOverview.hasSubcomponents, true)
           : undefined,
         input.filter?.search
           ? or(
-              ilike(schema.component.description, `%${input.filter.search}%`),
-              ilike(schema.component.id, input.filter.search),
+              ilike(
+                schema.componentOverview.description,
+                `%${input.filter.search}%`,
+              ),
+              ilike(schema.componentOverview.id, input.filter.search),
             )
+          : undefined,
+        input.filter?.discrepancy
+          ? not(eq(schema.componentOverview.sageDiscrepancy, 0))
           : undefined,
       ),
       orderBy: input.sort?.map((sort) =>

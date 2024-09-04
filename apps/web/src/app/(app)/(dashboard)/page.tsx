@@ -1,26 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { ComboboxItem } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
-import { useAsyncList } from "react-stately";
-
-import { Combobox } from "@repo/ui/components/control";
+import { Table } from "@repo/ui/components/display";
 import { Button } from "@repo/ui/components/element";
-import { Field, Form } from "@repo/ui/components/form";
 import { Card } from "@repo/ui/components/layout";
-import { Modal } from "@repo/ui/components/overlay";
+
+import { api } from "~/trpc/react";
 
 // import { DataTable } from "@repo/ui/components/datatable/datatable";
 
 // import { supabase } from "~/supabase/client";
-import { api } from "~/trpc/react";
 
 export const runtime = "edge";
 
 export default function HomePage() {
-  const [query, setQuery] = useState("");
   // You can await this here if you don't want to show Suspense fallback below
-  const { data } = api.purchaseOrder.all.useQuery({ query });
+  // const { data } = api.purchaseOrder.all.useQuery({ query });
 
   // const signInWithSSO = async () => {
   //   const { data } = await supabase.auth.signInWithSSO({
@@ -32,34 +26,54 @@ export default function HomePage() {
   //   }
   // };
 
-  console.log(data);
-  return (
-    <div>
-      <Modal.Trigger>
-        <Button>Log Delivery</Button>
+  // console.log(data);
 
-        <Modal.Content isDismissable className="isolate p-8">
-          <h1>Select Delivery</h1>
-          <Form onSubmit={() => {}}>
-            <Field.Root name="purchaseOrderId">
-              <Field.Label>Delivery</Field.Label>
-              <Field.Control>
-                <Combobox
-                  items={data?.data ?? []}
-                  onInputChange={(value) => setQuery(value)}
-                >
-                  {(item) => (
-                    <ComboboxItem id={item.id} textValue={item.id.toString()}>
-                      {item.id}
-                    </ComboboxItem>
-                  )}
-                </Combobox>
-              </Field.Control>
-            </Field.Root>
-            <Button type="submit">Submit</Button>
-          </Form>
-        </Modal.Content>
-      </Modal.Trigger>
+  const { data } = api.component.list.useQuery({
+    filter: {
+      discrepancy: true,
+    },
+  });
+
+  return (
+    <div className="flex flex-col space-y-2">
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <div className="w-full border-b"></div>
+      <h3 className="font-medium text-muted-foreground">Quick Actions</h3>
+      <div className="flex flex-row items-stretch space-x-4">
+        <Button variant="primary">Record Receipt</Button>
+        <Button variant="primary">Prepare Despatch</Button>
+        <Button variant="primary">BOM Build</Button>
+        <Button variant="primary">Transfer</Button>
+      </div>
+
+      <div className="w-full border-b"></div>
+      <h3 className="font-medium text-muted-foreground">Sage Discrepancies</h3>
+      {data && (
+        <Card>
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>Component</Table.Head>
+                <Table.Head>Description</Table.Head>
+                <Table.Head>Total Quantity</Table.Head>
+                <Table.Head>Sage Quantity</Table.Head>
+                <Table.Head>Discrepancy</Table.Head>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {data.map((component) => (
+                <Table.Row key={component.id}>
+                  <Table.Cell>{component.id}</Table.Cell>
+                  <Table.Cell>{component.description}</Table.Cell>
+                  <Table.Cell>{component.totalQuantity}</Table.Cell>
+                  <Table.Cell>{component.sageQuantity}</Table.Cell>
+                  <Table.Cell>{component.sageDiscrepancy}</Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </Card>
+      )}
     </div>
     // <main className="container h-screen p-16">
     //   <div className="flex flex-col items-stretch justify-center gap-4">

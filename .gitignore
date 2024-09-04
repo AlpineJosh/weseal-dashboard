@@ -24,9 +24,8 @@ coverage
 
 # Build Outputs
 .next/
-out/
-build
-dist
+dist/
+.cache
 
 
 # Debug

@@ -31,11 +31,22 @@ export const salesOrderRouter = {
     return db.query.salesOrder.findMany({
       limit: input.pagination.size,
       offset: (input.pagination.page - 1) * input.pagination.size,
+      with: {
+        customer: true,
+      },
     });
   }),
   get: publicProcedure.input(uniqueOrderInput).query(async ({ input }) => {
     return db.query.salesOrder.findFirst({
       where: eq(schema.salesOrder.id, input.id),
+      with: {
+        customer: true,
+        items: {
+          with: {
+            component: true,
+          },
+        },
+      },
     });
   }),
 } satisfies TRPCRouterRecord;

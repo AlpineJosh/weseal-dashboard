@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import {
   faBoxes,
+  faChevronDown,
   faFluxCapacitor,
   faHome,
   faInboxIn,
@@ -12,6 +13,8 @@ import {
 import { VerticalNavigation } from "node_modules/@repo/ui/src/components/navigation/vertical-navigation";
 
 import { cn } from "@repo/ui";
+import { Input } from "@repo/ui/components/control";
+import { Menu } from "@repo/ui/components/element";
 
 // import { ResizablePanels } from "@repo/ui/components/layout";
 
@@ -24,9 +27,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="flex h-full flex-row items-stretch">
-      <div className="flex w-[200px] flex-col items-stretch border-r bg-card">
-        <div className="border-neutral-200 h-16 border-b"></div>
-        <div className="flex flex-col items-stretch p-4">
+      <div className="flex w-[250px] flex-col items-stretch border-r bg-card">
+        <div className="flex h-16 items-center justify-center border-b">
+          <span className="text-lg font-semibold text-muted-foreground">
+            We Seal Dashboard
+          </span>
+        </div>
+        <div className="flex h-full flex-col items-stretch justify-between p-4">
           <VerticalNavigation.Nav>
             <VerticalNavigation.Item
               href="/"
@@ -123,10 +130,32 @@ export default function AppLayout({ children }: AppLayoutProps) {
               />
             </VerticalNavigation.ItemGroup>
           </VerticalNavigation.Nav>
+          <div className="flex flex-col items-center border-t p-2 text-sm">
+            <span className="font-medium text-muted-foreground">
+              Last Sage Sync
+            </span>
+            <span className="font-medium text-accent">1/9/2024 10:27</span>
+          </div>
         </div>
       </div>
       <div className="flex h-screen grow flex-col items-stretch">
-        <div className="h-16 flex-none border-b bg-card"></div>
+        <div className="flex h-16 flex-none flex-row items-center space-x-10 border-b bg-card px-4">
+          <Input placeholder="Search..." />
+          <div className="flex flex-row items-center space-x-2">
+            <div className="flex flex-col space-y-0.5 text-sm">
+              <span className="font-semibold text-muted-foreground">
+                Josh Hobson
+              </span>
+              <span className="font-light text-muted-foreground">
+                josh.hobson@weseal.com
+              </span>
+            </div>
+            <Menu icon={faChevronDown} variant={"ghost"}>
+              <Menu.Item>Switch User</Menu.Item>
+              <Menu.Item>Log Out</Menu.Item>
+            </Menu>
+          </div>
+        </div>
         <div className="flex flex-col items-stretch overflow-auto p-6">
           {children}
         </div>

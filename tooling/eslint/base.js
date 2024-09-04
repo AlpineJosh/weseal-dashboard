@@ -1,5 +1,7 @@
 /// <reference types="./types.d.ts" />
 
+import path from "node:path";
+import { includeIgnoreFile } from "@eslint/compat";
 import eslint from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import turboPlugin from "eslint-plugin-turbo";
@@ -9,6 +11,7 @@ import tseslint from "typescript-eslint";
  * All packages that leverage t3-env should use this rule
  */
 export const restrictEnvAccess = tseslint.config({
+  ignores: ["**/env.ts"],
   files: ["**/*.js", "**/*.ts", "**/*.tsx"],
   rules: {
     "no-restricted-properties": [
@@ -33,6 +36,7 @@ export const restrictEnvAccess = tseslint.config({
 });
 
 export default tseslint.config(
+  includeIgnoreFile(path.join(import.meta.dirname, "../../.gitignore")),
   {
     // Globally ignored files
     ignores: ["**/*.config.*"],

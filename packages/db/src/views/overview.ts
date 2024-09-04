@@ -27,6 +27,24 @@ export const batchLocationQuantity = pgTable("batch_location_quantity", {
   free: real("free").notNull(),
 });
 
+export const batchLocationQuantityRelations = relations(
+  batchLocationQuantity,
+  ({ one }) => ({
+    location: one(location, {
+      fields: [batchLocationQuantity.locationId],
+      references: [location.id],
+    }),
+    batch: one(batch, {
+      fields: [batchLocationQuantity.batchId],
+      references: [batch.id],
+    }),
+    component: one(componentOverview, {
+      fields: [batchLocationQuantity.componentId],
+      references: [componentOverview.id],
+    }),
+  }),
+);
+
 export const componentOverview = pgTable("component_overview", {
   id: varchar("id"),
   description: varchar("description"),
@@ -65,6 +83,7 @@ export const componentOverviewRelations = relations(
       fields: [componentOverview.defaultLocationId],
       references: [location.id],
     }),
+    locations: many(batchLocationQuantity),
   }),
 );
 

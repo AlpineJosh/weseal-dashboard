@@ -13,24 +13,24 @@ export default function ReceivingPage({
 }: {
   params: { orderId: string };
 }) {
-  const { data } = api.receiving.order.get.useQuery({ id: +params.orderId });
+  const { data } = api.despatching.order.get.useQuery({ id: +params.orderId });
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex w-full flex-row items-center">
         <div className="grow">
           <span className="flex flex-row items-baseline space-x-2">
             <span className="text-sm font-medium text-muted-foreground">
-              Purchase Order
+              Sales Order
             </span>
             <Badge variant="primary">
               {data?.isComplete ? "Complete" : "Pending"}
             </Badge>
           </span>
           <h1 className="text-2xl font-semibold"># {params.orderId}</h1>
-          <h3 className="font-medium">{data?.supplier.name}</h3>
+          <h3 className="font-medium">{data?.customer.name}</h3>
         </div>
         <div>
-          <Button variant="primary">Receive Goods</Button>
+          <Button variant="primary">Despatch Goods</Button>
         </div>
       </div>
       <div className="w-full border-b" />
@@ -59,10 +59,10 @@ export default function ReceivingPage({
       </Card>
       <div className="w-full border-b" />
       <div className="flex flex-row items-center justify-between">
-        <h3 className="font-semibold text-muted-foreground">Deliveries</h3>
+        <h3 className="font-semibold text-muted-foreground">Despatches</h3>
         <Button variant="primary">
           <Icon icon={faPlus} />
-          Add Delivery
+          Add Despatch
         </Button>
       </div>
       <Card>
@@ -77,7 +77,7 @@ export default function ReceivingPage({
           <Table.Body>
             <Table.Row>
               <Table.Cell className="col-span-3">
-                No deliveries planned
+                No despatches planned
               </Table.Cell>
             </Table.Row>
           </Table.Body>

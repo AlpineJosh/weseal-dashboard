@@ -2,8 +2,8 @@
   "lockfile_version": "1",
   "packages": {
     "dotenv-cli@latest": {
-      "last_modified": "2024-07-10T06:55:44Z",
-      "resolved": "github:NixOS/nixpkgs/aa9461550594533c29866d42f861b6ff079a7fb6#dotenv-cli",
+      "last_modified": "2024-08-31T10:12:23Z",
+      "resolved": "github:NixOS/nixpkgs/5629520edecb69630a3f4d17d3d33fc96c13f6fe#dotenv-cli",
       "source": "devbox-search",
       "version": "7.4.3",
       "systems": {
@@ -11,48 +11,48 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/182l5dj16c1xj22rpav3p0rhbiq7p5iy-dotenv-cli-7.4.3",
+              "path": "/nix/store/fs7y5s6h55s8s8nj1677ppkpbvadmz5v-dotenv-cli-7.4.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/182l5dj16c1xj22rpav3p0rhbiq7p5iy-dotenv-cli-7.4.3"
+          "store_path": "/nix/store/fs7y5s6h55s8s8nj1677ppkpbvadmz5v-dotenv-cli-7.4.3"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/mh37dn3d2hwmrf4sj6xz5kh4qh25n496-dotenv-cli-7.4.3",
+              "path": "/nix/store/7i2j8av2ycjxmq03zhs8whdvgf85v72l-dotenv-cli-7.4.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/mh37dn3d2hwmrf4sj6xz5kh4qh25n496-dotenv-cli-7.4.3"
+          "store_path": "/nix/store/7i2j8av2ycjxmq03zhs8whdvgf85v72l-dotenv-cli-7.4.3"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3mwh1gq4hxphcr8pm5iy4zvv80dr152j-dotenv-cli-7.4.3",
+              "path": "/nix/store/w678k438cbxxn30mw5zdn4lw2yk8m22n-dotenv-cli-7.4.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3mwh1gq4hxphcr8pm5iy4zvv80dr152j-dotenv-cli-7.4.3"
+          "store_path": "/nix/store/w678k438cbxxn30mw5zdn4lw2yk8m22n-dotenv-cli-7.4.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/v2q51a3fbkpd3492pbxbcdsvywy9ll9v-dotenv-cli-7.4.3",
+              "path": "/nix/store/5i1r7k2hx7wsyrcvyshx5s9ivydl69f8-dotenv-cli-7.4.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/v2q51a3fbkpd3492pbxbcdsvywy9ll9v-dotenv-cli-7.4.3"
+          "store_path": "/nix/store/5i1r7k2hx7wsyrcvyshx5s9ivydl69f8-dotenv-cli-7.4.3"
         }
       }
     },
     "nodejs@20.14.0": {
-      "last_modified": "2024-07-07T16:08:25Z",
+      "last_modified": "2024-07-10T06:55:44Z",
       "plugin_version": "0.0.2",
-      "resolved": "github:NixOS/nixpkgs/ab82a9612aa45284d4adf69ee81871a389669a9e#nodejs_20",
+      "resolved": "github:NixOS/nixpkgs/aa9461550594533c29866d42f861b6ff079a7fb6#nodejs_20",
       "source": "devbox-search",
       "version": "20.14.0",
       "systems": {
@@ -60,15 +60,15 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/pvq8wjlmm8sh7b90nx731yhid328h21g-nodejs-20.14.0",
+              "path": "/nix/store/sqnbldm1fjw88v23yq4v6531y4m7v2fh-nodejs-20.14.0",
               "default": true
             },
             {
               "name": "libv8",
-              "path": "/nix/store/8nr69w0gqwnm9sq76a0i3gkfb54yj0r9-nodejs-20.14.0-libv8"
+              "path": "/nix/store/1i0rb2axkrxvsq5pz8s2q07ard2p36a1-nodejs-20.14.0-libv8"
             }
           ],
-          "store_path": "/nix/store/pvq8wjlmm8sh7b90nx731yhid328h21g-nodejs-20.14.0"
+          "store_path": "/nix/store/sqnbldm1fjw88v23yq4v6531y4m7v2fh-nodejs-20.14.0"
         },
         "aarch64-linux": {
           "outputs": [
@@ -88,15 +88,15 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3m1pb6p2kpwyhn1im7mimz3ps4dx7z14-nodejs-20.14.0",
+              "path": "/nix/store/wzgnws4r1c98vzj5q6gq4drz2jfq7d5q-nodejs-20.14.0",
               "default": true
             },
             {
               "name": "libv8",
-              "path": "/nix/store/q09kcg4qcl1mjga8spfjgzwmp5clhkfw-nodejs-20.14.0-libv8"
+              "path": "/nix/store/gc2gnkc8hvkh51ab3a29fvgzy2qsqb2s-nodejs-20.14.0-libv8"
             }
           ],
-          "store_path": "/nix/store/3m1pb6p2kpwyhn1im7mimz3ps4dx7z14-nodejs-20.14.0"
+          "store_path": "/nix/store/wzgnws4r1c98vzj5q6gq4drz2jfq7d5q-nodejs-20.14.0"
         },
         "x86_64-linux": {
           "outputs": [
@@ -115,98 +115,98 @@
       }
     },
     "supabase-cli@latest": {
-      "last_modified": "2024-07-07T16:08:25Z",
-      "resolved": "github:NixOS/nixpkgs/ab82a9612aa45284d4adf69ee81871a389669a9e#supabase-cli",
+      "last_modified": "2024-08-31T10:12:23Z",
+      "resolved": "github:NixOS/nixpkgs/5629520edecb69630a3f4d17d3d33fc96c13f6fe#supabase-cli",
       "source": "devbox-search",
-      "version": "1.183.0",
+      "version": "1.191.3",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/mx81nxxpyqamkffa0nxw829c1v10y7wa-supabase-cli-1.183.0",
+              "path": "/nix/store/4sg06zmp2s7x756nixi341argfbwqmh5-supabase-cli-1.191.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/mx81nxxpyqamkffa0nxw829c1v10y7wa-supabase-cli-1.183.0"
+          "store_path": "/nix/store/4sg06zmp2s7x756nixi341argfbwqmh5-supabase-cli-1.191.3"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3cvrr1nkzxdsdn46jvby49ijxvqj6mny-supabase-cli-1.183.0",
+              "path": "/nix/store/1ngmgda6s975by4k8ipbcz62plk2vkrl-supabase-cli-1.191.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3cvrr1nkzxdsdn46jvby49ijxvqj6mny-supabase-cli-1.183.0"
+          "store_path": "/nix/store/1ngmgda6s975by4k8ipbcz62plk2vkrl-supabase-cli-1.191.3"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/q7kz2js0y31x7402r7d47ijaqcylq7vp-supabase-cli-1.183.0",
+              "path": "/nix/store/irvh7vy73qqcab7xvsfa7accfn2mhqz7-supabase-cli-1.191.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/q7kz2js0y31x7402r7d47ijaqcylq7vp-supabase-cli-1.183.0"
+          "store_path": "/nix/store/irvh7vy73qqcab7xvsfa7accfn2mhqz7-supabase-cli-1.191.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/h00mrwshy6pw1z3prfjbrsbblb2i2ja7-supabase-cli-1.183.0",
+              "path": "/nix/store/pw7h6a0shqk68wwq1gj0kwn0nfpz60m3-supabase-cli-1.191.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/h00mrwshy6pw1z3prfjbrsbblb2i2ja7-supabase-cli-1.183.0"
+          "store_path": "/nix/store/pw7h6a0shqk68wwq1gj0kwn0nfpz60m3-supabase-cli-1.191.3"
         }
       }
     },
     "turbo@latest": {
-      "last_modified": "2024-07-07T16:08:25Z",
-      "resolved": "github:NixOS/nixpkgs/ab82a9612aa45284d4adf69ee81871a389669a9e#turbo",
+      "last_modified": "2024-08-31T10:12:23Z",
+      "resolved": "github:NixOS/nixpkgs/5629520edecb69630a3f4d17d3d33fc96c13f6fe#turbo",
       "source": "devbox-search",
-      "version": "1.13.2",
+      "version": "2.0.12",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2rqr6gl3dn7x7zr4nkj4x8msrxnkxhn5-turbo-1.13.2",
+              "path": "/nix/store/slq52hj5dpgy5sl2mkw5496ckqc52ia1-turbo-2.0.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2rqr6gl3dn7x7zr4nkj4x8msrxnkxhn5-turbo-1.13.2"
+          "store_path": "/nix/store/slq52hj5dpgy5sl2mkw5496ckqc52ia1-turbo-2.0.12"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/xyjq8543gjg9xrsja1ac4lzq3x3axg8b-turbo-1.13.2",
+              "path": "/nix/store/nagg0ac4p1rwj69r509ib1l9b6ci66ga-turbo-2.0.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/xyjq8543gjg9xrsja1ac4lzq3x3axg8b-turbo-1.13.2"
+          "store_path": "/nix/store/nagg0ac4p1rwj69r509ib1l9b6ci66ga-turbo-2.0.12"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/k552zrg79jxhfq734z23fw7kjrzwpbcx-turbo-1.13.2",
+              "path": "/nix/store/zcdylqfvrlc4sgmq0q21rl063kdi2isv-turbo-2.0.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/k552zrg79jxhfq734z23fw7kjrzwpbcx-turbo-1.13.2"
+          "store_path": "/nix/store/zcdylqfvrlc4sgmq0q21rl063kdi2isv-turbo-2.0.12"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6smn1ziy5c0v3gqlkkwkwy14xlwng652-turbo-1.13.2",
+              "path": "/nix/store/1vb50z44lrcbs3rp9v0cbiv8dldqjyz1-turbo-2.0.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/6smn1ziy5c0v3gqlkkwkwy14xlwng652-turbo-1.13.2"
+          "store_path": "/nix/store/1vb50z44lrcbs3rp9v0cbiv8dldqjyz1-turbo-2.0.12"
         }
       }
     }
