@@ -1,4 +1,5 @@
 import fs from "fs";
+import Fuse from "fuse.js";
 import { parse } from "json2csv";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
@@ -27,7 +28,14 @@ const processFile = async <T extends object>(
   });
 };
 
-let currentId = 0;
+const extractAndRemove = <T>(
+  array: T[],
+  criteria: (item: T) => boolean,
+): T[] => {
+  const extracted = array.filter(criteria);
+  array = array.filter((item) => !criteria(item));
+  return extracted;
+};
 
 const ignoredStockCodes = new Set<string>(["S1", "S2", "S3", "M"]);
 
@@ -35,7 +43,6 @@ const main = async () => {
   const components = new Map<
     string,
     {
-      transactions: STOCK_TRAN[];
       jobs: {
         quantity: number;
         inputs: {
@@ -46,6 +53,7 @@ const main = async () => {
       stockCode: string;
       grns: GRN_ITEM[];
       gdns: GDN_ITEM[];
+      corrections: STOCK_TRAN[];
     }
   >();
 
@@ -85,14 +93,16 @@ const main = async () => {
     return stockCode;
   };
 
+  const transactions: STOCK_TRAN[] = [];
+
   await processFile<STOCK>("data/StockComponent.json", (stock) => {
     if (stock.RECORD_DELETED === 0) {
       components.set(stock.STOCK_CODE, {
         stockCode: stock.STOCK_CODE,
-        transactions: [],
         jobs: [],
         grns: [],
         gdns: [],
+        corrections: [],
       });
     }
   });
@@ -102,9 +112,8 @@ const main = async () => {
       return;
     }
 
-    const component = getComponent(transaction.STOCK_CODE);
     if (transaction.RECORD_DELETED === 0) {
-      component.transactions.push(transaction);
+      transactions.push(transaction);
     }
   });
 
@@ -130,294 +139,148 @@ const main = async () => {
     }
   });
 
-  // const largeComponent = components.get("CAP02930293251T")!;
+  const totalTransactions = transactions.length;
+  console.log(`Total Transactions: ${totalTransactions}`);
 
-  // let cumulativeQuantity = 0;
-  // const trans = largeComponent.transactions.map((t) => {
-  //   cumulativeQuantity += t.QUANTITY;
-  //   if (t.REFERENCE === "BOM OUT (PSS)") {
-  //     t.TYPE = "MO";
-  //   }
-  //   return {
-  //     ...t,
-  //     CUMULATIVE_QUANTITY: cumulativeQuantity,
-  //   };
-  // });
+  let manufacturingInputs: STOCK_TRAN[] = [];
+  let manufacturingOutputs: STOCK_TRAN[] = [];
+  const remainingTransactions: STOCK_TRAN[] = [];
 
-  // fs.writeFileSync("transactions.csv", parse(trans));
-  // fs.writeFileSync("grns.json", parse(largeComponent.grns));
-  // fs.writeFileSync("gdns.json", parse(largeComponent.gdns));
-  // return;
-  let shouldBreak = false;
-  console.log(components.size);
-  let componentsProcessed = 0;
-
-  const productionsJobs: {
-    stockCode: string;
-    date: string;
-    in: {
-      stockCode: string;
-      quantity: number;
-      raw: STOCK_TRAN;
-    }[];
-
-    out: {
-      stockCode: string;
-      quantity: number;
-      raw: STOCK_TRAN;
-    }[];
-  }[] = [];
-
-  const remainingGrns: GRN_ITEM[] = [];
-
-  for (const component of components.values()) {
-    let runningTotal = 0;
-
-    const transactions = component.transactions;
-    for (const transaction of transactions) {
-      if (
-        transaction.TYPE === "MO" ||
-        transaction.REFERENCE === "BOM OUT (PSS)"
-      ) {
-        if (transaction.STOCK_CODE === transaction.DETAILS) {
-          continue;
-        }
-
-        const cleanedDetails = cleanStockCode(transaction.DETAILS);
-
-        if (!components.has(cleanedDetails)) {
-          console.log(cleanedDetails);
-        }
-
-        const job = productionsJobs.find(
-          (j) => j.stockCode === cleanedDetails && j.date === transaction.DATE,
-        );
-
-        if (job === undefined) {
-          productionsJobs.push({
-            stockCode: cleanedDetails,
-            date: transaction.DATE,
-            in: [
-              {
-                stockCode: transaction.STOCK_CODE,
-                quantity: transaction.QUANTITY,
-                raw: transaction,
-              },
-            ],
-            out: [],
-          });
-        } else {
-          job.in.push({
-            stockCode: transaction.STOCK_CODE,
-            quantity: transaction.QUANTITY,
-            raw: transaction,
-          });
-        }
+  for (const transaction of transactions) {
+    const component = getComponent(transaction.STOCK_CODE);
+    if (
+      transaction.TYPE === "MO" ||
+      transaction.REFERENCE === "BOM OUT (PSS)"
+    ) {
+      manufacturingInputs.push(transaction);
+      continue;
+    } else if (
+      transaction.TYPE === "MI" ||
+      transaction.REFERENCE === "BOM IN (PSS)"
+    ) {
+      manufacturingOutputs.push(transaction);
+      continue;
+    } else if (transaction.TYPE === "GI") {
+      const grnIndex = component.grns.findIndex(
+        (grn) =>
+          grn.STOCK_CODE === transaction.STOCK_CODE &&
+          grn.DATE === transaction.DATE &&
+          grn.QTY_RECEIVED === transaction.QUANTITY,
+      );
+      if (grnIndex !== -1) {
+        component.grns.splice(grnIndex, 1);
+        // TODO track matched grn
+        continue;
       }
-    }
-    for (const transaction of transactions) {
-      if (
-        transaction.TYPE === "MI" ||
-        transaction.REFERENCE === "BOM IN (PSS)"
-      ) {
-        const cleanedStockCode = cleanStockCode(transaction.STOCK_CODE);
-
-        const job = productionsJobs.find(
-          (j) =>
-            (j.stockCode === cleanedStockCode ||
-              j.stockCode ===
-                cleanedStockCode.slice(0, cleanedStockCode.length - 2)) &&
-            j.date === transaction.DATE,
-        );
-
-        if (job === undefined) {
-          productionsJobs.push({
-            stockCode: cleanedStockCode,
-            date: transaction.DATE,
-            in: [],
-            out: [
-              {
-                stockCode: transaction.STOCK_CODE,
-                quantity: transaction.QUANTITY,
-                raw: transaction,
-              },
-            ],
-          });
-        } else {
-          job.out.push({
-            stockCode: transaction.STOCK_CODE,
-            quantity: transaction.QUANTITY,
-            raw: transaction,
-          });
-        }
+    } else if (transaction.TYPE === "GO") {
+      const gdnIndex = component.gdns.findIndex(
+        (gdn) =>
+          gdn.STOCK_CODE === transaction.STOCK_CODE &&
+          gdn.DATE === transaction.DATE &&
+          gdn.QTY_DESPATCHED === -transaction.QUANTITY,
+      );
+      if (gdnIndex !== -1) {
+        component.gdns.splice(gdnIndex, 1);
+        // TODO track matched gdn
+        continue;
       }
     }
 
-    // while (component.grns.length > 0) {
-    //   const grn = component.grns.shift()!;
-
-    // if (grn.ACCOUNT_REF === "PROSPOOL" || grn.STOCK_CODE === "NSTOCK") {
-    //   return;
-    // }
-
-    // if (
-    //   [14929, 3475, 2027, 14932, 2893, 2299, 14925, 10353, 14931].includes(
-    //     grn.GRN_NUMBER,
-    //   )
-    // ) {
-    //   // Skip for now
-    //   return;
-    // }
-
-    // if (
-    //   [
-    //     "00307676",
-    //     "00352003",
-    //     "SBS763",
-    //     "00311378",
-    //     "SBS775",
-    //     "MISC",
-    //     "CAP02930293251T",
-    //     "CPZ09380584B",
-    //   ].includes(grn.STOCK_CODE)
-    // ) {
-    //   // Skip for now
-    //   return;
-    // }
-
-    // if (grn.STOCK_CODE.startsWith("SBS")) {
-    //   // Skip for now
-    //   return;
-    // }
-
-    // const transactionIndex = transactions.findIndex(
-    //   (t) =>
-    //     t.DATE === grn.DATE &&
-    //     t.TYPE === "GI" &&
-    //     t.QUANTITY === grn.QTY_RECEIVED,
-    // );
-
-    // if (transactionIndex === -1) {
-    // console.log("No GI found for GRN");
-    // console.log(grn);
-    // shouldBreak = true;
-    // const others = component.transactions.filter(
-    //   (t) =>
-    //     Math.abs(
-    //       new Date(t.DATE).getTime() - new Date(grn.DATE).getTime(),
-    //     ) <
-    //     1000 * 60 * 60 * 24 * 7,
-    // );
-    // console.log(others);
-    //     remainingGrns.push(grn);
-    //   } else {
-    //     transactions.splice(transactionIndex, 1);
-    //   }
-    // }
-
-    // if (["01300237", "00100171", "16553"].includes(component.stockCode)) {
-    //   continue;
-    // }
-
-    // for (const transaction of transactions) {
-    //   if (transaction.TYPE === "GI") {
-    //     console.log(transaction);
-    //     console.log(remainingGrns);
-    //     shouldBreak = true;
-    //   }
-    // }
-
-    componentsProcessed++;
-    // component.transactions.forEach((transaction, index) => {
-    //   runningTotal += transaction.QUANTITY;
-    //   if (transaction.TYPE === "GO") {
-    //     const gdn = component.gdns.findIndex(
-    //       (gd) =>
-    //         gd.DATE === transaction.DATE &&
-    //         gd.QTY_DESPATCHED === -transaction.QUANTITY,
-    //     );
-
-    //     if (gdn !== -1) {
-    //       // Successfully found a GDN for this GO
-    //       component.gdns.splice(gdn, 1);
-
-    //       // Now create a delivery and attach this transaction
-    //     } else if (index === 0) {
-    //       // This is the initial transaction so we don't need to worry about GDNs
-    //     } else {
-    //       console.log("No GDN found for GO");
-    //       console.log(transaction);
-    //       shouldBreak = true;
-    //     }
-    //   } else if (transaction.TYPE === "GI") {
-    //     const grn = component.grns.findIndex(
-    //       (gd) =>
-    //         gd.DATE === transaction.DATE &&
-    //         gd.QTY_RECEIVED === transaction.QUANTITY,
-    //     );
-
-    //     if (grn !== -1) {
-    //       // Successfully found a GDN for this GO
-    //       component.grns.splice(grn, 1);
-
-    //       // Now create a delivery and attach this transaction
-    //       // } else if (index === 0) {
-    //       //   // This is the initial transaction so we don't need to worry about GDNs
-    //     } else {
-    //       console.log("No GRN found for GI");
-    //       console.log(transaction);
-    //       shouldBreak = true;
-    //     }
-    //   } else if (transaction.TYPE === "AI" || transaction.TYPE === "AO") {
-    //     corrections.push(transaction);
-    //   } else {
-    //     console.log(transaction);
-    //     shouldBreak = true;
-    //   }
-    // });
-
-    // const dailyCorrections: Map<Date, number> = new Map();
-
-    // for (const correction of corrections) {
-    //   const date = new Date(correction.DATE);
-    //   if (!dailyCorrections.has(date)) {
-    //     dailyCorrections.set(date, 0);
-    //   }
-
-    //   dailyCorrections.set(
-    //     date,
-    //     dailyCorrections.get(date)! + correction.QUANTITY,
-    //   );
-    // }
-
-    if (shouldBreak || runningTotal < 0) {
-      break;
-    }
+    component.corrections.push(transaction);
   }
 
-  console.log(productionsJobs.length);
+  // const fuse = new Fuse(Array.from(components.keys()), {
+  //   includeScore: true,
+  //   threshold: 0.6,
+  // });
 
-  const noInput = productionsJobs.filter((j) => j.in.length === 0);
-  console.log(noInput.length);
-  console.log(JSON.stringify(noInput.slice(0, 1), null, 2));
-  // console.log(new Set(noInput.map((j) => j.stockCode)));
+  const remainingManufacturingInputs: STOCK_TRAN[] = [];
+  console.log(`Manufacturing Inputs: ${manufacturingInputs.length}`);
 
-  const noOutput = productionsJobs.filter((j) => j.out.length === 0);
-  console.log(noOutput.length);
-  // console.log(JSON.stringify(noOutput.slice(0, 10), null, 2));
-  // console.log(new Set(noOutput.map((j) => j.stockCode)));
+  for (const manufacturingInput of manufacturingInputs) {
+    // const details = manufacturingInput.DETAILS;
+    // if (!components.has(details)) {
+    //   console.log(details);
+    //   const results = fuse.search(details);
+    //   console.log(results);
+    //   process.exit(1);
+    // }
 
-  // console.log(
-  //   JSON.stringify(
-  //     productionsJobs.filter(
-  //       (j) => j.date === "2016-07-01" && j.stockCode.startsWith("ML"),
-  //     ),
-  //     null,
-  //     2,
-  //   ),
-  // );
+    const outputs = manufacturingOutputs.filter(
+      (output) => output.DATE === manufacturingInput.DATE,
+    );
 
-  console.log(componentsProcessed);
+    let manufacturingOutput = outputs.find(
+      (output) => output.STOCK_CODE === manufacturingInput.DETAILS,
+    );
+
+    if (manufacturingOutput) {
+      continue;
+    }
+
+    const fuse = new Fuse(outputs, {
+      includeScore: true,
+      threshold: 0.6,
+      keys: ["STOCK_CODE"],
+    });
+
+    const potentials = fuse.search(manufacturingInput.DETAILS);
+
+    if (potentials[0] && potentials[0].score && potentials[0].score < 0.3) {
+      continue;
+    }
+
+    components
+      .get(manufacturingInput.STOCK_CODE)!
+      .corrections.push(manufacturingInput);
+  }
+
+  console.log(
+    Array.from(components.values()).flatMap(
+      (component) => component.corrections,
+    ).length,
+  );
+
+  components.forEach((component) => {
+    const remaining: STOCK_TRAN[] = [];
+    let currentDay = "";
+    let runningTotal = 0;
+    for (let ii = 0; ii < component.corrections.length; ii++) {
+      const transaction = component.corrections[ii]!;
+      if (currentDay !== transaction.DATE) {
+        remaining.push({
+          TRAN_NUMBER: transaction.TRAN_NUMBER,
+          TYPE: runningTotal > 0 ? "AI" : "AO",
+          DATE: currentDay,
+          QUANTITY: runningTotal,
+          STOCK_CODE: component.stockCode,
+          DETAILS: "",
+          REFERENCE: "",
+          REFERENCE_NUMERIC: 0,
+          COST_PRICE: 0,
+          SALES_PRICE: 0,
+          QTY_USED: 0,
+          GRN_NUMBER: 0,
+          ISP_REFERENCE: 0,
+          ARTEFACT_TYPE: 0,
+          GDN_NUMBER: 0,
+          RECORD_DELETED: 0,
+          RECORD_MODIFY_DATE: "",
+          RECORD_CREATE_DATE: "",
+        });
+        currentDay = transaction.DATE;
+        runningTotal = 0;
+      }
+      runningTotal += transaction.QUANTITY;
+    }
+
+    component.corrections = remaining;
+  });
+  console.log(
+    Array.from(components.values()).flatMap(
+      (component) => component.corrections,
+    ).length,
+  );
 };
 
 main();

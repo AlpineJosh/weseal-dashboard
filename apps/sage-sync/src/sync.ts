@@ -1,8 +1,9 @@
 import { z } from "zod";
 
+import schema from "@repo/db/schema";
 import { db } from "@repo/db/server";
 
-import schema from "../../../packages/db/dist/tables";
+import { fullSync } from ".";
 import { bitSystems, initBitSystems } from "./lib/bit-systems/bit-systems";
 import { Bin, TraceableItem, Warehouse } from "./lib/bit-systems/types";
 import { asyncBatch } from "./lib/helpers";
@@ -13,34 +14,78 @@ const main = async () => {
   await initSage();
   await initBitSystems();
 
-  await syncWarehouses();
+  await clearData();
+  await fullSync();
   await syncLocations();
-  await syncTransactions();
+
+  // await syncTransactions();
 };
 
-async function syncWarehouses() {
-  const result = await bitSystems().all<Warehouse[]>(
+async function clearData() {
+  await db.delete(schema.batchMovementCorrection);
+  await db.delete(schema.batchMovement);
+
+  await db.delete(schema.productionBatchInput);
+  await db.delete(schema.productionBatchOutput);
+  await db.delete(schema.productionJob);
+
+  await db.delete(schema.purchaseReceiptItem);
+  await db.delete(schema.purchaseReceipt);
+
+  await db.delete(schema.salesDespatchItem);
+  await db.delete(schema.salesDespatch);
+
+  await db.delete(schema.taskItem);
+  await db.delete(schema.task);
+
+  await db.delete(schema.batch);
+
+  await db.delete(schema.location);
+  await db.delete(schema.locationGroup);
+  await db.delete(schema.locationType);
+}
+
+async function syncLocations() {
+  await db.delete(schema.location);
+  await db.delete(schema.locationGroup);
+  await db.delete(schema.locationType);
+
+  const locationTypes = await db
+    .insert(schema.locationType)
+    .values([
+      { name: "Storage", isPickable: true, isTransient: false },
+      { name: "Production In", isPickable: true, isTransient: false },
+      { name: "Production Out", isPickable: true, isTransient: true },
+      { name: "Receipt In", isPickable: true, isTransient: true },
+      { name: "Despatch Out", isPickable: false, isTransient: false },
+      { name: "Engineer Stock", isPickable: false, isTransient: false },
+      { name: "Quarantine", isPickable: false, isTransient: false },
+    ])
+    .returning({ name: schema.locationType.name, id: schema.locationType.id });
+
+  const defaultLocationTypeId = locationTypes.find(
+    (locationType) => locationType.name === "Storage",
+  )!.id;
+
+  const warehouses = await bitSystems().all<Warehouse[]>(
     "SELECT * FROM Warehouses",
   );
 
   await db.insert(schema.locationGroup).values(
-    result.map((warehouse) => ({
+    warehouses.map((warehouse) => ({
       id: warehouse.pk_Warehouse_ID,
       name: warehouse.Name,
       details: warehouse.Description,
     })),
   );
-}
-
-async function syncLocations() {
-  const result = await bitSystems().all<Bin[]>("SELECT * FROM Bins");
+  const bins = await bitSystems().all<Bin[]>("SELECT * FROM Bins");
 
   await db.insert(schema.location).values(
-    result.map((bin) => ({
+    bins.map((bin) => ({
       id: bin.pk_Bin_ID,
       name: bin.Name,
       groupId: bin.fk_Warehouse_ID,
-      typeId: 1,
+      typeId: defaultLocationTypeId,
     })),
   );
 }

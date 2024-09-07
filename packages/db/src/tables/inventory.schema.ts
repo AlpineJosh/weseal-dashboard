@@ -15,12 +15,17 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { component } from "./component.schema";
-import { salesDespatch } from "./despatching.schema";
-import { productionJob } from "./production.schema";
+import { salesDespatch, salesDespatchItem } from "./despatching.schema";
+import {
+  productionBatchInput,
+  productionBatchOutput,
+  productionJob,
+} from "./production.schema";
 
 import "./receiving.schema";
 
 import { batchLocationQuantity } from "../views/overview";
+import { purchaseReceiptItem } from "./receiving.schema";
 
 export const batchMovementType = pgEnum("batch_movement_type", [
   "despatch",
@@ -45,6 +50,18 @@ export const batchMovement = pgTable("batch_movement", {
   quantity: real("quantity").notNull(),
   userId: varchar("user_id").notNull(),
   type: batchMovementType("type").notNull(),
+  purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
+    () => purchaseReceiptItem.id,
+  ),
+  salesDespatchItemId: integer("sales_despatch_item_id").references(
+    () => salesDespatchItem.id,
+  ),
+  productionBatchInputId: integer("production_batch_input_id").references(
+    () => productionBatchInput.id,
+  ),
+  productionBatchOutputId: integer("production_batch_output_id").references(
+    () => productionBatchOutput.id,
+  ),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),

@@ -14,10 +14,13 @@ import { batch, location } from "./inventory.schema";
 
 export const productionJob = pgTable("production_job", {
   id: serial("id").notNull().primaryKey(),
-  componentId: varchar("component_id")
+  outputComponentId: varchar("output_component_id")
     .notNull()
     .references(() => component.id),
   batchNumber: varchar("batch_number"),
+  outputLocationId: integer("output_location_id")
+    .notNull()
+    .references(() => location.id),
   targetQuantity: integer("target_quantity").notNull().default(0),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at")
@@ -32,15 +35,20 @@ export const productionJob = pgTable("production_job", {
 export const productionJobRelations = relations(
   productionJob,
   ({ one, many }) => ({
-    component: one(component, {
-      fields: [productionJob.componentId],
+    outputComponent: one(component, {
+      fields: [productionJob.outputComponentId],
       references: [component.id],
     }),
-    batchesIn: many(productionBatchIn),
+    outputLocation: one(location, {
+      fields: [productionJob.outputLocationId],
+      references: [location.id],
+    }),
+    inputs: many(productionBatchInput),
+    outputs: many(productionBatchOutput),
   }),
 );
 
-export const productionBatchIn = pgTable("production_batch_in", {
+export const productionBatchInput = pgTable("production_batch_input", {
   id: serial("id").notNull().primaryKey(),
   jobId: integer("job_id")
     .notNull()
@@ -62,20 +70,55 @@ export const productionBatchIn = pgTable("production_batch_in", {
     .$onUpdate(() => new Date()),
 });
 
-export const productionJobBatchRelations = relations(
-  productionBatchIn,
+export const productionBatchInputRelations = relations(
+  productionBatchInput,
   ({ one }) => ({
     job: one(productionJob, {
-      fields: [productionBatchIn.jobId],
+      fields: [productionBatchInput.jobId],
       references: [productionJob.id],
     }),
     batch: one(batch, {
-      fields: [productionBatchIn.batchId],
+      fields: [productionBatchInput.batchId],
       references: [batch.id],
     }),
     location: one(location, {
-      fields: [productionBatchIn.locationId],
+      fields: [productionBatchInput.locationId],
       references: [location.id],
+    }),
+  }),
+);
+
+export const productionBatchOutput = pgTable("production_batch_output", {
+  id: serial("id").notNull().primaryKey(),
+  jobId: integer("job_id")
+    .notNull()
+    .references(() => productionJob.id),
+  batchId: integer("batch_id")
+    .notNull()
+    .references(() => batch.id),
+  productionQuantity: real("production_quantity").notNull().default(0),
+  productionDate: timestamp("production_date")
+    .notNull()
+    .default(sql`now()`),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`now()`),
+  lastModified: timestamp("last_modified")
+    .notNull()
+    .default(sql`now()`)
+    .$onUpdate(() => new Date()),
+});
+
+export const productionBatchOutputRelations = relations(
+  productionBatchOutput,
+  ({ one }) => ({
+    job: one(productionJob, {
+      fields: [productionBatchOutput.jobId],
+      references: [productionJob.id],
+    }),
+    batch: one(batch, {
+      fields: [productionBatchOutput.batchId],
+      references: [batch.id],
     }),
   }),
 );

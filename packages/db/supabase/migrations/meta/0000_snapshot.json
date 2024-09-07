@@ -1,5 +1,5 @@
 {
-  "id": "6f0d9ec5-4d7a-4f99-93c8-6c065fbf9e64",
+  "id": "fc60a0cb-68a3-418c-a580-b6c281e0c021",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -786,6 +786,30 @@
           "primaryKey": false,
           "notNull": true
         },
+        "purchase_receipt_item_id": {
+          "name": "purchase_receipt_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sales_despatch_item_id": {
+          "name": "sales_despatch_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_batch_input_id": {
+          "name": "production_batch_input_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_batch_output_id": {
+          "name": "production_batch_output_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -822,6 +846,58 @@
           "tableTo": "location",
           "columnsFrom": [
             "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "batch_movement_purchase_receipt_item_id_purchase_receipt_item_id_fk": {
+          "name": "batch_movement_purchase_receipt_item_id_purchase_receipt_item_id_fk",
+          "tableFrom": "batch_movement",
+          "tableTo": "purchase_receipt_item",
+          "columnsFrom": [
+            "purchase_receipt_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "batch_movement_sales_despatch_item_id_sales_despatch_item_id_fk": {
+          "name": "batch_movement_sales_despatch_item_id_sales_despatch_item_id_fk",
+          "tableFrom": "batch_movement",
+          "tableTo": "sales_despatch_item",
+          "columnsFrom": [
+            "sales_despatch_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "batch_movement_production_batch_input_id_production_batch_input_id_fk": {
+          "name": "batch_movement_production_batch_input_id_production_batch_input_id_fk",
+          "tableFrom": "batch_movement",
+          "tableTo": "production_batch_input",
+          "columnsFrom": [
+            "production_batch_input_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "batch_movement_production_batch_output_id_production_batch_output_id_fk": {
+          "name": "batch_movement_production_batch_output_id_production_batch_output_id_fk",
+          "tableFrom": "batch_movement",
+          "tableTo": "production_batch_output",
+          "columnsFrom": [
+            "production_batch_output_id"
           ],
           "columnsTo": [
             "id"
@@ -1275,8 +1351,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.production_batch_in": {
-      "name": "production_batch_in",
+    "public.production_batch_input": {
+      "name": "production_batch_input",
       "schema": "",
       "columns": {
         "id": {
@@ -1334,9 +1410,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_batch_in_job_id_production_job_id_fk": {
-          "name": "production_batch_in_job_id_production_job_id_fk",
-          "tableFrom": "production_batch_in",
+        "production_batch_input_job_id_production_job_id_fk": {
+          "name": "production_batch_input_job_id_production_job_id_fk",
+          "tableFrom": "production_batch_input",
           "tableTo": "production_job",
           "columnsFrom": [
             "job_id"
@@ -1347,9 +1423,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "production_batch_in_batch_id_batch_id_fk": {
-          "name": "production_batch_in_batch_id_batch_id_fk",
-          "tableFrom": "production_batch_in",
+        "production_batch_input_batch_id_batch_id_fk": {
+          "name": "production_batch_input_batch_id_batch_id_fk",
+          "tableFrom": "production_batch_input",
           "tableTo": "batch",
           "columnsFrom": [
             "batch_id"
@@ -1360,12 +1436,95 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "production_batch_in_location_id_location_id_fk": {
-          "name": "production_batch_in_location_id_location_id_fk",
-          "tableFrom": "production_batch_in",
+        "production_batch_input_location_id_location_id_fk": {
+          "name": "production_batch_input_location_id_location_id_fk",
+          "tableFrom": "production_batch_input",
           "tableTo": "location",
           "columnsFrom": [
             "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.production_batch_output": {
+      "name": "production_batch_output",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "production_quantity": {
+          "name": "production_quantity",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "production_date": {
+          "name": "production_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "production_batch_output_job_id_production_job_id_fk": {
+          "name": "production_batch_output_job_id_production_job_id_fk",
+          "tableFrom": "production_batch_output",
+          "tableTo": "production_job",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "production_batch_output_batch_id_batch_id_fk": {
+          "name": "production_batch_output_batch_id_batch_id_fk",
+          "tableFrom": "production_batch_output",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
           ],
           "columnsTo": [
             "id"
@@ -1387,8 +1546,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "component_id": {
-          "name": "component_id",
+        "output_component_id": {
+          "name": "output_component_id",
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
@@ -1398,6 +1557,12 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "output_location_id": {
+          "name": "output_location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
         },
         "target_quantity": {
           "name": "target_quantity",
@@ -1430,12 +1595,25 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_job_component_id_component_id_fk": {
-          "name": "production_job_component_id_component_id_fk",
+        "production_job_output_component_id_component_id_fk": {
+          "name": "production_job_output_component_id_component_id_fk",
           "tableFrom": "production_job",
           "tableTo": "component",
           "columnsFrom": [
-            "component_id"
+            "output_component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "production_job_output_location_id_location_id_fk": {
+          "name": "production_job_output_location_id_location_id_fk",
+          "tableFrom": "production_job",
+          "tableTo": "location",
+          "columnsFrom": [
+            "output_location_id"
           ],
           "columnsTo": [
             "id"

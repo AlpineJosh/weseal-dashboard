@@ -115,6 +115,10 @@ CREATE TABLE IF NOT EXISTS "batch_movement" (
 	"quantity" real NOT NULL,
 	"user_id" varchar NOT NULL,
 	"type" "batch_movement_type" NOT NULL,
+	"purchase_receipt_item_id" integer,
+	"sales_despatch_item_id" integer,
+	"production_batch_input_id" integer,
+	"production_batch_output_id" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"last_modified" timestamp DEFAULT now() NOT NULL
 );
@@ -178,7 +182,7 @@ CREATE TABLE IF NOT EXISTS "task_item" (
 	"last_modified" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "production_batch_in" (
+CREATE TABLE IF NOT EXISTS "production_batch_input" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"job_id" integer NOT NULL,
 	"batch_id" integer NOT NULL,
@@ -189,10 +193,21 @@ CREATE TABLE IF NOT EXISTS "production_batch_in" (
 	"last_modified" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "production_batch_output" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"job_id" integer NOT NULL,
+	"batch_id" integer NOT NULL,
+	"production_quantity" real DEFAULT 0 NOT NULL,
+	"production_date" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"last_modified" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "production_job" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"component_id" varchar NOT NULL,
+	"output_component_id" varchar NOT NULL,
 	"batch_number" varchar,
+	"output_location_id" integer NOT NULL,
 	"target_quantity" integer DEFAULT 0 NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -334,6 +349,30 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "batch_movement" ADD CONSTRAINT "batch_movement_purchase_receipt_item_id_purchase_receipt_item_id_fk" FOREIGN KEY ("purchase_receipt_item_id") REFERENCES "public"."purchase_receipt_item"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "batch_movement" ADD CONSTRAINT "batch_movement_sales_despatch_item_id_sales_despatch_item_id_fk" FOREIGN KEY ("sales_despatch_item_id") REFERENCES "public"."sales_despatch_item"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "batch_movement" ADD CONSTRAINT "batch_movement_production_batch_input_id_production_batch_input_id_fk" FOREIGN KEY ("production_batch_input_id") REFERENCES "public"."production_batch_input"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "batch_movement" ADD CONSTRAINT "batch_movement_production_batch_output_id_production_batch_output_id_fk" FOREIGN KEY ("production_batch_output_id") REFERENCES "public"."production_batch_output"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "location" ADD CONSTRAINT "location_group_id_location_group_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."location_group"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -388,25 +427,43 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "production_batch_in" ADD CONSTRAINT "production_batch_in_job_id_production_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."production_job"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "production_batch_input" ADD CONSTRAINT "production_batch_input_job_id_production_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."production_job"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "production_batch_in" ADD CONSTRAINT "production_batch_in_batch_id_batch_id_fk" FOREIGN KEY ("batch_id") REFERENCES "public"."batch"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "production_batch_input" ADD CONSTRAINT "production_batch_input_batch_id_batch_id_fk" FOREIGN KEY ("batch_id") REFERENCES "public"."batch"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "production_batch_in" ADD CONSTRAINT "production_batch_in_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "production_batch_input" ADD CONSTRAINT "production_batch_input_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "production_job" ADD CONSTRAINT "production_job_component_id_component_id_fk" FOREIGN KEY ("component_id") REFERENCES "public"."component"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "production_batch_output" ADD CONSTRAINT "production_batch_output_job_id_production_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."production_job"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "production_batch_output" ADD CONSTRAINT "production_batch_output_batch_id_batch_id_fk" FOREIGN KEY ("batch_id") REFERENCES "public"."batch"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "production_job" ADD CONSTRAINT "production_job_output_component_id_component_id_fk" FOREIGN KEY ("output_component_id") REFERENCES "public"."component"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "production_job" ADD CONSTRAINT "production_job_output_location_id_location_id_fk" FOREIGN KEY ("output_location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
