@@ -17,13 +17,13 @@ import {
 export async function fullSync() {
   await initSage();
 
-  await syncDepartments();
-  await syncStockCategories();
-  await syncComponents();
-  await syncPurchaseLedger();
-  console.log("Purchase ledger synced");
-  await syncPurchaseOrders();
-  console.log("Purchase orders synced");
+  // await syncDepartments();
+  // await syncStockCategories();
+  // await syncComponents();
+  // await syncPurchaseLedger();
+  // console.log("Purchase ledger synced");
+  // await syncPurchaseOrders();
+  // console.log("Purchase orders synced");
   await syncPurchaseOrderItems();
   console.log("Purchase order items synced");
   await syncSalesLedger();

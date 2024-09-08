@@ -1,7 +1,7 @@
 {
   "connectors": {
     "sage": {
-      "file": "\\\\192.168.26.21\\sage\\line50\\sagedata\\company.003\\accdata",
+      "file": "//192.168.26.21/sage/line50/sagedata/company.003/accdata",
       "user": "richard",
       "password": "rphrph"
     },

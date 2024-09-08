@@ -1,10 +1,10 @@
 import { sql } from "@repo/db";
+import schema from "@repo/db/schema";
 import { db } from "@repo/db/server";
 
 import { asyncBatch, buildQuery } from "~/lib/helpers";
 import { sage } from "~/lib/sage/sage";
 import { DEPARTMENT, STOCK_CAT } from "~/lib/sage/types";
-import schema from "../../../../packages/db/dist/tables";
 import { SyncParameters } from "./types";
 
 export async function syncDepartments(parameters?: SyncParameters) {

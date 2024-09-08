@@ -6,7 +6,7 @@
   "scripts": {
     "run": "pnpm with-env tsx src/index.ts",
     "with-env": "dotenv -e ../../.env --",
-    "test": "pnpm with-env tsx src/test-transactions.ts"
+    "sync": "pnpm with-env tsx src/sync.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,8 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "@repo/db": "workspace:*",
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
     "fuse": "^0.12.1",
     "fuse.js": "^7.0.0",
     "json2csv": "6.0.0-alpha.2",
