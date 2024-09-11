@@ -24,7 +24,8 @@ export const listProductionJobInput = z.object({
 });
 
 export const createProductionJobInput = z.object({
-  componentId: z.string(),
+  outputComponentId: z.string(),
+  outputLocationId: z.number(),
   batchReference: z.string(),
   targetQuantity: z.number(),
 });
@@ -42,7 +43,8 @@ export const productionRouter = {
       return await db.query.productionJob.findFirst({
         where: eq(schema.productionJob.id, input.id),
         with: {
-          batchesIn: true,
+          inputs: true,
+          outputs: true,
         },
       });
     }),
@@ -53,10 +55,11 @@ export const productionRouter = {
         limit: input.pagination.size,
         offset: (input.pagination.page - 1) * input.pagination.size,
         where: input.filter.componentId
-          ? eq(schema.productionJob.componentId, input.filter.componentId)
+          ? eq(schema.productionJob.outputComponentId, input.filter.componentId)
           : undefined,
         with: {
-          batchesIn: true,
+          inputs: true,
+          outputs: true,
         },
       });
     }),

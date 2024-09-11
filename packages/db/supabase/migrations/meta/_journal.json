@@ -15,6 +15,13 @@
       "when": 1725785781304,
       "tag": "0001_high_sabretooth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1726080610081,
+      "tag": "0002_robust_fat_cobra",
+      "breakpoints": true
     }
   ]
 }

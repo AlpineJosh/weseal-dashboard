@@ -75,7 +75,9 @@ export const component = pgTable("component", {
 });
 
 export const componentRelations = relations(component, ({ one, many }) => ({
-  subcomponents: many(subcomponent),
+  subcomponents: many(subcomponent, {
+    relationName: "subcomponentComponent",
+  }),
   department: one(department, {
     fields: [component.departmentId],
     references: [department.id],
@@ -114,13 +116,21 @@ export const subcomponentRelations = relations(subcomponent, ({ one }) => ({
   component: one(component, {
     fields: [subcomponent.componentId],
     references: [component.id],
+    relationName: "subcomponentComponent",
   }),
   subcomponent: one(component, {
     fields: [subcomponent.subcomponentId],
     references: [component.id],
+    relationName: "subcomponentSubcomponent",
   }),
   componentOverview: one(componentOverview, {
     fields: [subcomponent.componentId],
     references: [componentOverview.id],
+    relationName: "subcomponentComponentOverview",
+  }),
+  subcomponentOverview: one(componentOverview, {
+    fields: [subcomponent.subcomponentId],
+    references: [componentOverview.id],
+    relationName: "subcomponentSubcomponentOverview",
   }),
 }));

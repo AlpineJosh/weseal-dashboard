@@ -1,3 +1,5 @@
+"use client";
+
 import type { ComponentPropsWithoutRef } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 import { createContext, forwardRef, useContext, useId } from "react";
@@ -43,13 +45,15 @@ const useFormField = () => {
 };
 
 const Root = forwardRef<HTMLDivElement, FieldProps>(
-  ({ children, ...props }, _) => {
+  ({ children, className, ...props }, _) => {
     const id = useId();
 
     props.id = props.id ?? id;
     return (
       <FieldContext.Provider value={{ id: props.id, name: props.name }}>
-        {children}
+        <div className={cn("flex flex-col space-y-1", className)} {...props}>
+          {children}
+        </div>
       </FieldContext.Provider>
     );
   },
@@ -132,7 +136,11 @@ const Message = forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("text-destructive text-[0.8rem] font-medium", className)}
+      className={cn(
+        "text-[0.8rem] font-medium",
+        error ? "text-accent" : "text-muted-foreground",
+        className,
+      )}
       {...props}
     >
       {body}
@@ -141,10 +149,9 @@ const Message = forwardRef<
 });
 Message.displayName = "Field.Message";
 
-export const Field = {
-  Root,
+export const Field = Object.assign(Root, {
   Label,
   Control,
   Description,
   Message,
-};
+});

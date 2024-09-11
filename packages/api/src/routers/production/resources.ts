@@ -26,7 +26,7 @@ export const productionJobResourcesRouter = {
     .input(addProductionJobResourcesInput)
     .mutation(async ({ input }) => {
       return await db
-        .insert(schema.productionBatchIn)
+        .insert(schema.productionBatchInput)
         .values(input)
         .returning();
     }),
@@ -35,11 +35,11 @@ export const productionJobResourcesRouter = {
     .mutation(async ({ input }) => {
       await db.transaction(async (tx) => {
         const results = await tx
-          .update(schema.productionBatchIn)
+          .update(schema.productionBatchInput)
           .set({
             quantityUsed: input.quantity,
           })
-          .where(eq(schema.productionBatchIn.id, input.id))
+          .where(eq(schema.productionBatchInput.id, input.id))
           .returning();
 
         const batchIn = results[0];

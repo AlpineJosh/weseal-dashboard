@@ -2,15 +2,14 @@
 
 import type { Viewport } from "next";
 import { Inter } from "next/font/google";
+import { TRPCReactProvider } from "@/utils/trpc/react";
 import { ThemeProvider } from "next-themes";
 
 import { cn } from "@repo/ui";
 
-import { TRPCReactProvider } from "~/trpc/react";
-
 import "@repo/tailwind-config/globals.css";
 
-import { ClientProviders } from "~/components/provider";
+import { ClientProviders } from "@/components/provider";
 
 const inter = Inter({
   subsets: ["latin"],

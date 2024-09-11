@@ -28,7 +28,7 @@ export const productionJobOutputRouter = {
       let batch = await db.query.batch.findFirst({
         where: and(
           eq(schema.batch.batchReference, job.batchNumber ?? ""),
-          eq(schema.batch.componentId, job.componentId),
+          eq(schema.batch.componentId, job.outputComponentId),
           sql<boolean>`${schema.batch.entryDate}::date = CURRENT_DATE`,
         ),
       });
@@ -38,7 +38,7 @@ export const productionJobOutputRouter = {
           .insert(schema.batch)
           .values({
             batchReference: job.batchNumber ?? "",
-            componentId: job.componentId,
+            componentId: job.outputComponentId,
             entryDate: new Date(),
           })
           .returning();

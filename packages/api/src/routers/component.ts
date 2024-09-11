@@ -57,7 +57,11 @@ export const componentRouter = {
     return await db.query.componentOverview.findFirst({
       where: eq(schema.component.id, input.id),
       with: {
-        subcomponents: true,
+        subcomponents: {
+          with: {
+            subcomponentOverview: true,
+          },
+        },
         department: true,
         category: true,
         locations: {

@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
-export const sageSchema = pgSchema("SAGE");
+export const sageSchema = pgSchema("sage");
 
 export const AUDIT_HEADER = sageSchema.table("AUDIT_HEADER", {
   TRAN_NUMBER: integer("TRAN_NUMBER"),

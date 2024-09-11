@@ -69,7 +69,9 @@ export const componentOverview = pgTable("component_overview", {
 export const componentOverviewRelations = relations(
   componentOverview,
   ({ one, many }) => ({
-    subcomponents: many(subcomponent),
+    subcomponents: many(subcomponent, {
+      relationName: "subcomponentComponentOverview",
+    }),
     department: one(department, {
       fields: [componentOverview.departmentId],
       references: [department.id],
