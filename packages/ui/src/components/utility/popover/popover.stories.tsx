@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { faQuestionCircle } from "@fortawesome/pro-solid-svg-icons";
 
+import { faQuestionCircle } from "@repo/pro-solid-svg-icons";
 import { Button } from "@repo/ui/components/element";
 
 import type { PopoverProps } from "./popover.component";

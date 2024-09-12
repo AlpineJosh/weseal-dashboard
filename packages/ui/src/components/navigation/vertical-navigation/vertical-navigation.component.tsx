@@ -1,12 +1,12 @@
 "use client";
 
-import type { IconDefinition } from "@fortawesome/pro-light-svg-icons";
 import type { ComponentPropsWithoutRef } from "react";
 import { forwardRef, useState } from "react";
-import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import { Link as AriaLink } from "react-aria-components";
 
+import type { IconDefinition } from "@repo/pro-light-svg-icons";
+import { faChevronDown } from "@repo/pro-light-svg-icons";
 import { Icon } from "@repo/ui/components/display";
 import { cn } from "@repo/ui/lib/class-merge";
 

@@ -5,7 +5,6 @@ import type {
   SelectValueProps,
 } from "react-aria-components";
 import React, { forwardRef } from "react";
-import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import {
   Select as AriaSelect,
@@ -15,6 +14,7 @@ import {
 
 import type { ButtonProps, IconProps } from "@repo/ui/components/element";
 import type { PopoverProps } from "@repo/ui/components/utility";
+import { faChevronDown } from "@repo/pro-light-svg-icons";
 import { Button as ButtonPrimitive, Icon } from "@repo/ui/components/element";
 import { Popover as PopoverPrimitive } from "@repo/ui/components/utility";
 import { cn } from "@repo/ui/lib/class-merge";

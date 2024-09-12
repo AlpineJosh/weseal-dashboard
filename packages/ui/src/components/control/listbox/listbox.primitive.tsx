@@ -4,7 +4,6 @@ import type {
   SectionProps,
 } from "react-aria-components";
 import { forwardRef } from "react";
-import { faCheck } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import {
   ListBox as AriaListBox,
@@ -15,6 +14,7 @@ import {
   Section,
 } from "react-aria-components";
 
+import { faCheck } from "@repo/pro-light-svg-icons";
 import { Icon } from "@repo/ui/components/element";
 import { cn } from "@repo/ui/lib/class-merge";
 

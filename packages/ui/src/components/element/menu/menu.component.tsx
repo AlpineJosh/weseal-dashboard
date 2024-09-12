@@ -1,9 +1,9 @@
 "use client";
 
-import { IconDefinition } from "@fortawesome/pro-light-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MenuTriggerProps } from "react-aria-components";
 
+import { IconDefinition } from "@repo/pro-light-svg-icons";
 import { Popover } from "@repo/ui/components/utility";
 
 import { Button, ButtonProps } from "../button";

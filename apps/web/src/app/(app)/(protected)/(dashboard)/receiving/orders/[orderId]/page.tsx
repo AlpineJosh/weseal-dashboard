@@ -1,8 +1,8 @@
 "use client";
 
 import { api } from "@/utils/trpc/react";
-import { faPlus } from "@fortawesome/pro-solid-svg-icons";
 
+import { faPlus } from "@repo/pro-solid-svg-icons";
 import { Icon, Table } from "@repo/ui/components/display";
 import { Badge, Button } from "@repo/ui/components/element";
 import { Card } from "@repo/ui/components/layout";

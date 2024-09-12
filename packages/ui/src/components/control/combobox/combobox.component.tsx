@@ -3,13 +3,13 @@ import type {
   ListBoxItemProps,
 } from "react-aria-components";
 import React from "react";
-import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import {
   ComboBox as AriaComboBox,
   Group,
   ListBox,
 } from "react-aria-components";
 
+import { faChevronDown } from "@repo/pro-light-svg-icons";
 import {
   Input,
   ListboxItem,

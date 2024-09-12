@@ -2,9 +2,9 @@
 
 import type { Key } from "react-aria-components";
 import React, { useState } from "react";
-import { faCheck, faCircle } from "@fortawesome/pro-solid-svg-icons";
 import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 
+import { faCheck, faCircle } from "@repo/pro-solid-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
 
 import { Icon } from "../../element";

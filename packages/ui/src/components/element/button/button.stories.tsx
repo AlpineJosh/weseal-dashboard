@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { faPlus } from "@fortawesome/pro-light-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { faPlus } from "@repo/pro-light-svg-icons";
 
 import type { ButtonProps } from "./button.component";
 import { Button } from "./button.component";

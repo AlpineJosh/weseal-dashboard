@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import type { ComponentType } from "react";
+
 import {
   faBox,
   faBoxes,
   faForklift,
   faHome,
   faTasks,
-} from "@fortawesome/pro-light-svg-icons";
+} from "@repo/pro-light-svg-icons";
 
 import type { VerticalNavigationProps } from "./vertical-navigation.component";
 import { VerticalNavigation } from "./vertical-navigation.component";

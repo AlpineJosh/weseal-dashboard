@@ -1,0 +1,30 @@
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+var prefix = 'fal';
+var iconName = 'landmark-magnifying-glass';
+var width = 640;
+var height = 512;
+var aliases = [];
+var unicode = 'e622';
+var svgPathData = 'M448 288c-11 0-21.7-1.1-32-3.2V352H336V242.3c-5.8-5.7-11.1-11.8-16-18.3H304V352H208V224H176V352H96V224H64V352c-8.8 0-16 7.2-16 16s7.2 16 16 16H448c8.8 0 16-7.2 16-16s-7.2-16-16-16V288zM263.9 2.1C259-.7 253-.7 248.1 2.1L15.8 133.7C6 139.3 0 149.6 0 160.8C0 178 14 192 31.2 192H301.3c-4.4-10.2-7.9-20.9-10.1-32H34.3L256 34.4l46.7 26.5c4.5-9.8 10-19 16.3-27.6L263.9 2.1zM24 432c0 8.8 7.2 16 16 16H472c8.8 0 16-7.2 16-16s-7.2-16-16-16H40c-8.8 0-16 7.2-16 16zM0 496c0 8.8 7.2 16 16 16H496c8.8 0 16-7.2 16-16s-7.2-16-16-16H16c-8.8 0-16 7.2-16 16zM448 32.1a96 96 0 1 1 0 192 96 96 0 1 1 0-192zm0 224c29.6 0 56.8-10 78.5-26.9l86.2 86.2c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-86.2-86.2C566 185 576 157.7 576 128.2c0-70.7-57.3-128-128-128s-128 57.3-128 128s57.3 128 128 128z';
+
+exports.definition = {
+  prefix: prefix,
+  iconName: iconName,
+  icon: [
+    width,
+    height,
+    aliases,
+    unicode,
+    svgPathData
+  ]};
+
+exports.faLandmarkMagnifyingGlass = exports.definition;
+exports.prefix = prefix;
+exports.iconName = iconName;
+exports.width = width;
+exports.height = height;
+exports.ligatures = aliases;
+exports.unicode = unicode;
+exports.svgPathData = svgPathData;
+exports.aliases = aliases;

@@ -3,7 +3,6 @@ import type {
   ListBoxItemProps,
 } from "react-aria-components";
 import React from "react";
-import { faChevronDown } from "@fortawesome/pro-light-svg-icons";
 import { cva } from "class-variance-authority";
 import {
   Select as AriaSelect,
@@ -13,6 +12,7 @@ import {
 } from "react-aria-components";
 
 import type { ListboxSectionProps } from "@repo/ui/components/control";
+import { faChevronDown } from "@repo/pro-light-svg-icons";
 import { ListboxItem, ListboxSection } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Popover } from "@repo/ui/components/utility";

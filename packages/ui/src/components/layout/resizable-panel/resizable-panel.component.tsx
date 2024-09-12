@@ -1,8 +1,8 @@
 "use client";
 
-import { faGripDotsVertical } from "@fortawesome/pro-light-svg-icons";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
+import { faGripDotsVertical } from "@repo/pro-light-svg-icons";
 import { Icon } from "@repo/ui/components/display";
 import { cn } from "@repo/ui/lib/class-merge";
 

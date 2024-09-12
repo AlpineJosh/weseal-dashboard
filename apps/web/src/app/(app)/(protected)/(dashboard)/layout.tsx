@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { VerticalNavigation } from "node_modules/@repo/ui/src/components/navigation/vertical-navigation";
+
 import {
   faBoxes,
   faChevronDown,
@@ -9,9 +11,7 @@ import {
   faInboxIn,
   faInboxOut,
   faWrench,
-} from "@fortawesome/pro-light-svg-icons";
-import { VerticalNavigation } from "node_modules/@repo/ui/src/components/navigation/vertical-navigation";
-
+} from "@repo/pro-light-svg-icons";
 import { cn } from "@repo/ui";
 import { Input } from "@repo/ui/components/control";
 import { Menu } from "@repo/ui/components/element";
