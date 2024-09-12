@@ -1,10 +1,9 @@
 import { Suspense, useEffect } from "react";
+import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 
 import type { RouterOutputs } from "@repo/api";
 import { Table } from "@repo/ui/components/display";
-
-import { api } from "~/trpc/react";
 
 export interface LocationPickerProps {
   components: {
