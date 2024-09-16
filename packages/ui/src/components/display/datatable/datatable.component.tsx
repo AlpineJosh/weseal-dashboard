@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { useImmer } from "use-immer";
 
 import {
@@ -19,6 +19,7 @@ type Accessor<TData> = keyof TData | ((row: TData) => any);
 type DatatableColumn<TData extends object> = {
   label: string;
   accessor: Accessor<TData>;
+  cell?: (row: TData) => ReactNode;
 };
 
 type DataPagination = {
@@ -142,13 +143,17 @@ export const Datatable = <TData extends object>({
           ) : rows.length > 0 ? (
             rows.map((row, index) => (
               <Table.Row key={index}>
-                {columns.map((column) => (
-                  <Table.Cell key={column.label}>
-                    {typeof column.accessor === "function"
-                      ? String(column.accessor(row))
-                      : String(row[column.accessor])}
-                  </Table.Cell>
-                ))}
+                {columns.map((column) =>
+                  column.cell ? (
+                    column.cell(row)
+                  ) : (
+                    <Table.Cell key={column.label}>
+                      {typeof column.accessor === "function"
+                        ? String(column.accessor(row))
+                        : String(row[column.accessor])}
+                    </Table.Cell>
+                  ),
+                )}
               </Table.Row>
             ))
           ) : (

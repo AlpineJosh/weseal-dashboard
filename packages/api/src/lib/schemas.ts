@@ -3,8 +3,11 @@ import { z } from "zod";
 import {
   and,
   AnyColumn,
+  AnyTable,
+  asc,
   between,
   Column,
+  desc,
   eq,
   gt,
   gte,
@@ -14,6 +17,7 @@ import {
   lte,
   not,
   notInArray,
+  or,
   SQL,
 } from "@repo/db";
 
@@ -136,4 +140,54 @@ export const handleStringFilter = (
   );
 
   return where;
+};
+
+export const searchFilterSchema = () =>
+  z
+    .object({
+      query: z.string(),
+    })
+    .optional();
+
+export type DrizzleTable<T> = {
+  [K in keyof T]: Column<any>;
+};
+
+export const handleSearchFilter = <T extends DrizzleTable<T>>(
+  columns: AnyColumn[],
+  filter: z.infer<ReturnType<typeof searchFilterSchema>>,
+) => {
+  if (!filter) {
+    return undefined;
+  }
+
+  const where = or(
+    ...columns.map((column) => ilike(column, `%${filter.query}%`)),
+  );
+
+  return where;
+};
+
+export const handleSort = <T extends DrizzleTable<T>>(
+  table: T,
+  sort: z.infer<ReturnType<typeof sortSchema>>,
+) => {
+  const orderBy = sort.map((item) =>
+    item.order === "asc"
+      ? asc(table[item.field as keyof T] as any)
+      : desc(table[item.field as keyof T] as any),
+  );
+
+  return orderBy;
+};
+
+export const handlePagination = (
+  pagination: z.infer<ReturnType<typeof paginationSchema>>,
+) => {
+  const { page, size } = pagination;
+  const offset = (page - 1) * size;
+  return {
+    limit: size,
+    offset,
+  };
 };

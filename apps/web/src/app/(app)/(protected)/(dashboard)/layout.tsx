@@ -1,8 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 import { api } from "@/utils/trpc/react";
+import { User } from "@supabase/supabase-js";
 import { VerticalNavigation } from "node_modules/@repo/ui/src/components/navigation/vertical-navigation";
+import { useImmer } from "use-immer";
 
 import {
   faBoxes,
@@ -23,10 +26,18 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+const supabase = createClient();
+
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
+  const [user, setUser] = useImmer<User | null>(null);
+
   const resetInventory = api.resetInventory.useMutation();
+
+  supabase.auth.getUser().then(({ data }) => {
+    setUser(data.user);
+  });
 
   return (
     <div className="flex h-full flex-row items-stretch">
@@ -51,14 +62,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 isActive={pathname === "/inventory"}
               />
               <VerticalNavigation.Item
-                href="/inventory/tasks"
-                title="Tasks"
-                isActive={pathname.startsWith("/inventory/tasks")}
-              />
-              <VerticalNavigation.Item
-                href="/inventory/batch"
-                title="Batch Tracing"
-                isActive={pathname.startsWith("/inventory/batch")}
+                href="/inventory/components"
+                title="Components"
+                isActive={pathname.startsWith("/inventory/components")}
               />
             </VerticalNavigation.ItemGroup>
             <VerticalNavigation.ItemGroup title="Receiving" icon={faInboxIn}>
@@ -74,7 +80,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               />
               <VerticalNavigation.Item
                 href="/receiving/orders"
-                title="Orders"
+                title="PurchaseOrders"
                 isActive={pathname.startsWith("/receiving/orders")}
               />
             </VerticalNavigation.ItemGroup>
@@ -91,7 +97,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               />
               <VerticalNavigation.Item
                 href="/despatching/orders"
-                title="Orders"
+                title="Sales Orders"
                 isActive={pathname.startsWith("/despatching/orders")}
               />
             </VerticalNavigation.ItemGroup>
@@ -154,10 +160,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <div className="flex flex-row items-center space-x-2">
             <div className="flex flex-col space-y-0.5 text-sm">
               <span className="font-semibold text-muted-foreground">
-                Josh Hobson
-              </span>
-              <span className="font-light text-muted-foreground">
-                josh.hobson@weseal.com
+                {user?.email}
               </span>
             </div>
             <Menu icon={faChevronDown} variant={"ghost"}>

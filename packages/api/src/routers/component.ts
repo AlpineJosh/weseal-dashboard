@@ -160,6 +160,16 @@ export const componentRouter = {
       sort: input.sort ?? [],
     };
   }),
+  subcomponents: publicProcedure
+    .input(z.object({ componentId: z.string() }))
+    .query(async ({ input }) => {
+      return await db.query.subcomponent.findMany({
+        where: eq(schema.subcomponent.componentId, input.componentId),
+        with: {
+          subcomponentOverview: true,
+        },
+      });
+    }),
   update: publicProcedure
     .input(updateComponentSchema)
     .mutation(async ({ input }) => {

@@ -16,25 +16,25 @@ import { Field, Form } from "@repo/ui/components/form";
 import { Card } from "@repo/ui/components/layout";
 import { Flow } from "@repo/ui/components/navigation";
 
-export function ProductionTaskForm({ exit }: { exit: () => void }) {
+export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
   const [query, setQuery] = useState<string>("");
 
   const [values, setValues] = useImmer<{
-    componentId: string | undefined;
+    orderId: string | undefined;
     quantity: number;
     locationId: string | undefined;
   }>({
-    componentId: undefined,
+    orderId: undefined,
     quantity: 1,
     locationId: undefined,
   });
 
-  const { data: subcomponents } = api.component.subcomponents.useQuery(
-    {
-      componentId: values.componentId as string,
-    },
-    { enabled: !!values.componentId },
-  );
+  // const { data: subcomponents } = api.component.subcomponents.useQuery(
+  //   {
+  //     orderId: values.orderId as string,
+  //   },
+  //   { enabled: !!values.orderId },
+  // );
 
   const [items, setItems] = useImmer<
     {
@@ -66,36 +66,41 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           console.log(values);
         }}
         schema={z.object({
-          componentId: z.string(),
+          orderId: z.string(),
           locationId: z.string(),
           quantity: z.number(),
         })}
         defaultValues={values}
       >
         <>
-          <Field name="component">
-            <Field.Label>Component</Field.Label>
-            <Field.Description>Select the component to build</Field.Description>
+          <Field name="orderId">
+            <Field.Label>Order</Field.Label>
+            <Field.Description>Select the order to receive</Field.Description>
             <Field.Control>
-              <Combobox<RouterOutputs["component"]["list"]["rows"][number]>
+              <Combobox<
+                RouterOutputs["receiving"]["order"]["list"]["rows"][number]
+              >
                 options={(query) => {
-                  return api.component.list.useQuery({
+                  return api.receiving.order.list.useQuery({
+                    pagination: {
+                      page: 1,
+                      size: 10,
+                    },
                     filter: {
-                      hasSubcomponents: true,
                       search: query,
                     },
                   });
                 }}
-                onSelectionChange={(componentId) => {
+                onSelectionChange={(orderId) => {
                   setValues((draft) => {
-                    draft.componentId = componentId as string;
+                    draft.orderId = orderId as string;
                   });
                 }}
               >
-                {(component) => {
+                {(order) => {
                   return (
-                    <Combobox.Option key={component.id} value={component}>
-                      {component.id}
+                    <Combobox.Option key={order.id} value={order}>
+                      {order.id} - {order.supplier.name}
                     </Combobox.Option>
                   );
                 }}
@@ -146,7 +151,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           </Field>
         </>
       </Form>
-      {values.componentId && (
+      {/* {values.componentId && (
         <LocationPicker
           components={
             subcomponents?.map((subcomponent) => {
@@ -159,7 +164,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           value={items}
           onChange={setItems}
         />
-      )}
+      )} */}
       <Button
         variant="primary"
         onPress={() => {

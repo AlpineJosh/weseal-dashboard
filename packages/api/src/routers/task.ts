@@ -17,6 +17,14 @@ const taskInput = z.object({
   purchaseOrderId: z.number().optional(),
   salesOrderId: z.number().optional(),
   type: z.enum(["transfer", "production", "despatch", "receipt"]),
+  items: z.array(
+    z.object({
+      componentId: z.string(),
+      locationId: z.number(),
+      batchId: z.number(),
+      quantity: z.number(),
+    }),
+  ),
 });
 
 export const taskRouter = {
@@ -41,13 +49,26 @@ export const taskRouter = {
     });
   }),
   create: publicProcedure.input(taskInput).mutation(async ({ input }) => {
-    return await db
+    const result = await db
       .insert(schema.task)
       .values({
         ...input,
         createdById: "",
       })
       .returning();
+    const task = result[0]!;
+
+    const taskItems = await db
+      .insert(schema.taskItem)
+      .values(
+        input.items.map((item) => ({
+          ...item,
+          taskId: task.id,
+        })),
+      )
+      .returning();
+
+    return { ...task, items: taskItems };
   }),
   completeItem: publicProcedure
     .input(uniqueTaskInput)

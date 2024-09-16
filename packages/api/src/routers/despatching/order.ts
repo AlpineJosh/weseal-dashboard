@@ -5,26 +5,22 @@ import { eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
+import {
+  paginationSchema,
+  sortSchema,
+  stringFilterSchema,
+} from "../../lib/schemas";
 import { publicProcedure } from "../../trpc";
 
 const uniqueOrderInput = z.object({
   id: z.number(),
 });
 
-const listOrderInput = z
-  .object({
-    pagination: z.object({
-      page: z.number(),
-      size: z.number(),
-    }),
-  })
-  .optional()
-  .default({
-    pagination: {
-      page: 1,
-      size: 10,
-    },
-  });
+const listOrderInput = z.object({
+  pagination: paginationSchema(),
+  filter: z.object({}),
+  sort: sortSchema(["id", "accountId"]),
+});
 
 export const salesOrderRouter = {
   list: publicProcedure.input(listOrderInput).query(async ({ input }) => {

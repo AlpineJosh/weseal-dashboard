@@ -1,6 +1,7 @@
 "use client";
 
 import { ProductionTaskForm } from "@/components/flows/ProductionTaskFlow";
+import { PurchaseReceiptTaskForm } from "@/components/flows/PurchaseReceiptTask";
 import { api } from "@/utils/trpc/react";
 
 import { RouterInputs, RouterOutputs } from "@repo/api";
@@ -41,7 +42,7 @@ export default function HomePage() {
         <Modal>
           <Button variant="primary">Record Receipt</Button>
           <Modal.Content isDismissable className="w-screen-md">
-            <div>Hello</div>
+            <PurchaseReceiptTaskForm exit={close} />
           </Modal.Content>
         </Modal>
         <Button variant="primary">Prepare Despatch</Button>

@@ -66,70 +66,83 @@ export default function ComponentPage({
               </span>
             </Card>
           </div>
-          <Card className="mt-4">
-            <Table>
-              <Table.Header>
-                <Table.Row>
-                  <Table.Head>Subcomponent</Table.Head>
-                  <Table.Head>Description</Table.Head>
-                  <Table.Head>Quantity Required</Table.Head>
-                  <Table.Head>Quantity Available</Table.Head>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {data.subcomponents.map((subcomponent) => (
-                  <Table.Row key={subcomponent.id}>
-                    <Table.Cell>
-                      <Link
-                        href={`/inventory/components/${subcomponent.subcomponentId}`}
-                      >
-                        {subcomponent.subcomponentId}
-                      </Link>
-                    </Table.Cell>
-                    <Table.Cell>
-                      {subcomponent.subcomponentOverview.description}
-                    </Table.Cell>
-                    <Table.Cell>{subcomponent.quantity}</Table.Cell>
-                    <Table.Cell>
-                      {subcomponent.subcomponentOverview.totalQuantity}
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-          </Card>
-          <Card className="mt-4">
-            <Table>
-              <Table.Header>
-                <Table.Row>
-                  <Table.Head>Subcomponent</Table.Head>
-                  <Table.Head>Description</Table.Head>
-                  <Table.Head>Quantity Required</Table.Head>
-                  <Table.Head>Quantity Available</Table.Head>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {data.subcomponents.map((subcomponent) => (
-                  <Table.Row key={subcomponent.id}>
-                    <Table.Cell>
-                      <Link
-                        href={`/inventory/components/${subcomponent.subcomponentId}`}
-                      >
-                        {subcomponent.subcomponentId}
-                      </Link>
-                    </Table.Cell>
-                    <Table.Cell>
-                      {subcomponent.subcomponentOverview.description}
-                    </Table.Cell>
-                    <Table.Cell>{subcomponent.quantity}</Table.Cell>
-                    <Table.Cell>
-                      {subcomponent.subcomponentOverview.totalQuantity}
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-          </Card>
+          <div className="my-4 flex flex-col space-y-4">
+            {data.subcomponents.length > 0 && (
+              <>
+                <h3 className="text-muted-foreground">Subcomponents</h3>
+                <Card>
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head>Subcomponent</Table.Head>
+                        <Table.Head>Description</Table.Head>
+                        <Table.Head>Quantity Required</Table.Head>
+                        <Table.Head>Quantity Available</Table.Head>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      {data.subcomponents.map((subcomponent) => (
+                        <Table.Row key={subcomponent.id}>
+                          <Table.Cell>
+                            <Link
+                              href={`/inventory/components/${subcomponent.subcomponentId}`}
+                            >
+                              {subcomponent.subcomponentId}
+                            </Link>
+                          </Table.Cell>
+                          <Table.Cell>
+                            {subcomponent.subcomponentOverview.description}
+                          </Table.Cell>
+                          <Table.Cell>{subcomponent.quantity}</Table.Cell>
+                          <Table.Cell>
+                            {subcomponent.subcomponentOverview.totalQuantity}
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table>
+                </Card>
+              </>
+            )}
+            {data.locations.length > 0 && (
+              <>
+                <h3 className="text-muted-foreground">Locations</h3>
+                <Card>
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head>Location</Table.Head>
+                        <Table.Head>Batch</Table.Head>
+                        <Table.Head>Total</Table.Head>
+                        <Table.Head>Allocated</Table.Head>
+                        <Table.Head>Free</Table.Head>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      {data.locations.map((location, index) => (
+                        <Table.Row key={index}>
+                          <Table.Cell>
+                            <Link
+                              className="hover:underline"
+                              href={`/inventory/locations/${location.locationId}`}
+                            >
+                              {location.location?.name}
+                            </Link>
+                          </Table.Cell>
+                          <Table.Cell>
+                            {location.batch?.batchReference}
+                          </Table.Cell>
+                          <Table.Cell>{location.total}</Table.Cell>
+                          <Table.Cell>{location.allocated}</Table.Cell>
+                          <Table.Cell>{location.free}</Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table>
+                </Card>
+              </>
+            )}
+          </div>
         </>
       )}
     </div>

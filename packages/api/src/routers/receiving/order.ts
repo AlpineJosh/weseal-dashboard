@@ -1,40 +1,47 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
+import { eq, ilike, sql } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
+import { paginationSchema } from "../../lib/schemas";
 import { publicProcedure } from "../../trpc";
 
 const uniqueOrderInput = z.object({
   id: z.number(),
 });
 
-const listOrderInput = z
-  .object({
-    pagination: z.object({
-      page: z.number(),
-      size: z.number(),
-    }),
-  })
-  .optional()
-  .default({
-    pagination: {
-      page: 1,
-      size: 10,
-    },
-  });
+const listOrderInput = z.object({
+  pagination: paginationSchema(),
+  filter: z.object({
+    search: z.string().optional(),
+  }),
+});
 
 export const purchaseOrderRouter = {
   list: publicProcedure.input(listOrderInput).query(async ({ input }) => {
-    return db.query.purchaseOrder.findMany({
+    const where = input.filter.search
+      ? sql`${schema.purchaseOrder.id}::text ILIKE ${"%" + input.filter.search + "%"}`
+      : undefined;
+
+    const results = await db.query.purchaseOrder.findMany({
       limit: input.pagination.size,
       offset: (input.pagination.page - 1) * input.pagination.size,
+      where,
       with: {
         supplier: true,
       },
     });
+
+    return {
+      rows: results,
+      pagination: {
+        page: input.pagination.page,
+        size: input.pagination.size,
+        total: 0,
+      },
+    };
   }),
   get: publicProcedure.input(uniqueOrderInput).query(async ({ input }) => {
     return db.query.purchaseOrder.findFirst({

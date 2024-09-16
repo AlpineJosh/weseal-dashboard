@@ -44,22 +44,22 @@ const modalStyles = cva(
   },
 );
 
-const Content = forwardRef<HTMLDivElement, DialogProps>(
+const Content = forwardRef<HTMLDivElement, ModalOverlayProps>(
   ({ className, ...props }, ref) => {
     return (
       <ModalOverlay
+        {...props}
         className={({ isEntering, isExiting }) =>
           overlayStyles({ isEntering, isExiting })
         }
       >
         <ModalPrimitive
+          {...props}
           className={({ isEntering, isExiting }) =>
             cn(modalStyles({ isEntering, isExiting }), className)
           }
           ref={ref}
-        >
-          <Dialog {...props} />
-        </ModalPrimitive>
+        ></ModalPrimitive>
       </ModalOverlay>
     );
   },
