@@ -1,9 +1,10 @@
 "use client";
 
-import type { ModalOverlayProps } from "react-aria-components";
+import type { DialogProps, ModalOverlayProps } from "react-aria-components";
 import { forwardRef } from "react";
 import { cva } from "class-variance-authority";
 import {
+  Dialog,
   DialogTrigger,
   ModalOverlay,
   Modal as ModalPrimitive,
@@ -30,7 +31,7 @@ const overlayStyles = cva(
 );
 
 const modalStyles = cva(
-  "text-popover-foreground max-screen-w-md max-h-full rounded-lg bg-card bg-clip-padding text-left align-middle shadow-2xl",
+  "text-popover-foreground max-screen-w-md flex max-h-full flex-col rounded-lg bg-card bg-clip-padding text-left align-middle shadow-2xl",
   {
     variants: {
       isEntering: {
@@ -43,22 +44,22 @@ const modalStyles = cva(
   },
 );
 
-const Content = forwardRef<HTMLDivElement, ModalOverlayProps>(
+const Content = forwardRef<HTMLDivElement, DialogProps>(
   ({ className, ...props }, ref) => {
     return (
       <ModalOverlay
-        {...props}
         className={({ isEntering, isExiting }) =>
           overlayStyles({ isEntering, isExiting })
         }
       >
         <ModalPrimitive
-          {...props}
           className={({ isEntering, isExiting }) =>
             cn(modalStyles({ isEntering, isExiting }), className)
           }
           ref={ref}
-        />
+        >
+          <Dialog {...props} />
+        </ModalPrimitive>
       </ModalOverlay>
     );
   },

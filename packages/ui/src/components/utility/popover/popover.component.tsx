@@ -16,7 +16,7 @@ export interface PopoverProps extends Omit<AriaPopoverProps, "children"> {
 
 const styles = cva(
   cn(
-    "rounded-lg border border-border bg-popover/30 text-popover-foreground shadow-lg",
+    "bg-popover/30 text-popover-foreground rounded-lg border border-border bg-card shadow-lg",
     "backdrop-blur-2xl backdrop-saturate-200",
   ),
   {

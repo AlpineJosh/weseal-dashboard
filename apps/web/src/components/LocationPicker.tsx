@@ -85,7 +85,7 @@ const LocationPickerItem = ({
             {component.locations.map((location, index) => (
               <Table.Row key={index}>
                 <Table.Cell>
-                  <input type="checkbox" onChange={() => {}} />
+                  <input type="checkbox" checked={true} onChange={() => {}} />
                 </Table.Cell>
                 <Table.Cell>{location.location.name}</Table.Cell>
                 <Table.Cell>{location.batch.batchReference}</Table.Cell>

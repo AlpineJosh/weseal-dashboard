@@ -48,7 +48,7 @@ export default function HomePage() {
         <Modal>
           <Button variant="primary">BOM Build</Button>
           <Modal.Content isDismissable>
-            <ProductionTaskForm />
+            {({ close }) => <ProductionTaskForm close={close} />}
           </Modal.Content>
         </Modal>
         <Button variant="primary">Transfer</Button>

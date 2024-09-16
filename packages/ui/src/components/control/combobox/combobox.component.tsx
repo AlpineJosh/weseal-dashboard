@@ -54,7 +54,10 @@ function Root<T extends object, E extends AsyncData<Iterable<T>>>({
       {...props}
       className={cn("group flex flex-row gap-1", props.className)}
       inputValue={filterText}
-      onInputChange={setFilterText}
+      onInputChange={(query) => {
+        setFilterText(query);
+        props.onInputChange?.(query);
+      }}
       items={items}
     >
       <Group className="flex flex-row gap-1">

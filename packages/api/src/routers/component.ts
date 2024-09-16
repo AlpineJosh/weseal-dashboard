@@ -36,6 +36,8 @@ export const listComponentSchema = z.object({
       description: stringFilterSchema().optional(),
       category: multiSelectFilterSchema(z.string()).optional(),
       sageDiscrepancy: numberFilterSchema().optional(),
+      hasSubcomponents: z.boolean().optional(),
+      search: z.string().optional(),
     })
     .optional()
     .default({}),
@@ -60,11 +62,11 @@ export const componentRouter = {
         },
         department: true,
         category: true,
-        batches: {
-          with: {
-            movements: true,
-          },
-        },
+        // batches: {
+        //   with: {
+        //     movements: true,
+        //   },
+        // },
         locations: {
           with: {
             batch: true,
@@ -96,6 +98,21 @@ export const componentRouter = {
         ? handleNumberFilter(
             schema.componentOverview.sageDiscrepancy,
             input.filter.sageDiscrepancy,
+          )
+        : undefined,
+      input.filter?.hasSubcomponents
+        ? eq(
+            schema.componentOverview.hasSubcomponents,
+            input.filter.hasSubcomponents,
+          )
+        : undefined,
+      input.filter?.search
+        ? or(
+            ilike(
+              schema.componentOverview.description,
+              `%${input.filter.search}%`,
+            ),
+            ilike(schema.componentOverview.id, `%${input.filter.search}%`),
           )
         : undefined,
     );
