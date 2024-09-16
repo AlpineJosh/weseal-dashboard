@@ -16,8 +16,6 @@ import {
   faInboxOut,
   faWrench,
 } from "@repo/pro-light-svg-icons";
-import { cn } from "@repo/ui";
-import { Input } from "@repo/ui/components/control";
 import { Button, Menu } from "@repo/ui/components/element";
 
 // import { ResizablePanels } from "@repo/ui/components/layout";
@@ -90,18 +88,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 title="Overview"
                 isActive={pathname === "/despatching"}
               />
-              <VerticalNavigation.Item
+              {/* <VerticalNavigation.Item
                 href="/despatching/customers"
                 title="Customers"
                 isActive={pathname.startsWith("/despatching/customers")}
-              />
+              /> */}
               <VerticalNavigation.Item
                 href="/despatching/orders"
                 title="Sales Orders"
                 isActive={pathname.startsWith("/despatching/orders")}
               />
             </VerticalNavigation.ItemGroup>
-            <VerticalNavigation.ItemGroup
+            {/* <VerticalNavigation.ItemGroup
               title="Production"
               icon={faFluxCapacitor}
             >
@@ -115,8 +113,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 title="Jobs"
                 isActive={pathname.startsWith("/production/jobs")}
               />
-            </VerticalNavigation.ItemGroup>
-            <VerticalNavigation.ItemGroup title="Admin" icon={faWrench}>
+            </VerticalNavigation.ItemGroup> */}
+            {/* <VerticalNavigation.ItemGroup title="Admin" icon={faWrench}>
               <VerticalNavigation.Item
                 href="/admin/users"
                 title="Users"
@@ -137,7 +135,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 title="Transactions"
                 isActive={pathname.startsWith("/admin/transactions")}
               />
-            </VerticalNavigation.ItemGroup>
+            </VerticalNavigation.ItemGroup> */}
           </VerticalNavigation.Nav>
           <div className="flex flex-col items-center border-t p-2 text-sm">
             <span className="font-medium text-muted-foreground">
