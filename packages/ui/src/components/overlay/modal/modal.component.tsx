@@ -30,7 +30,7 @@ const overlayStyles = cva(
 );
 
 const modalStyles = cva(
-  "text-popover-foreground max-h-full w-full max-w-md rounded-lg bg-card bg-clip-padding text-left align-middle shadow-2xl",
+  "text-popover-foreground max-screen-w-md max-h-full rounded-lg bg-card bg-clip-padding text-left align-middle shadow-2xl",
   {
     variants: {
       isEntering: {
@@ -64,9 +64,6 @@ const Content = forwardRef<HTMLDivElement, ModalOverlayProps>(
   },
 );
 
-const Trigger = DialogTrigger;
-
-export const Modal = {
+export const Modal = Object.assign(DialogTrigger, {
   Content,
-  Trigger,
-};
+});

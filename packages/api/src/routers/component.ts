@@ -1,10 +1,20 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, desc, eq, ilike, not, or } from "@repo/db";
+import { and, asc, count, desc, eq, ilike, not, or } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
+import {
+  handleMultiSelectFilter,
+  handleNumberFilter,
+  handleStringFilter,
+  multiSelectFilterSchema,
+  numberFilterSchema,
+  paginationSchema,
+  sortSchema,
+  stringFilterSchema,
+} from "../lib/schemas";
 import { publicProcedure } from "../trpc";
 
 export const uniqueComponentSchema = z.object({
@@ -12,37 +22,23 @@ export const uniqueComponentSchema = z.object({
 });
 
 export const listComponentSchema = z.object({
-  pagination: z
-    .object({
-      page: z.number(),
-      size: z.number(),
-    })
-    .optional()
-    .default({
-      page: 1,
-      size: 10,
-    }),
-  sort: z
-    .array(
-      z.object({
-        field: z.enum([
-          "id",
-          "description",
-          "unit",
-          "hasSubcomponents",
-          "isTraceable",
-        ]),
-        order: z.enum(["asc", "desc"]),
-      }),
-    )
-    .optional(),
+  pagination: paginationSchema(),
+  sort: sortSchema([
+    "id",
+    "description",
+    "unit",
+    "hasSubcomponents",
+    "isTraceable",
+  ]),
   filter: z
     .object({
-      search: z.string().optional(),
-      hasSubcomponents: z.boolean().optional(),
-      discrepancy: z.boolean().optional(),
+      id: stringFilterSchema().optional(),
+      description: stringFilterSchema().optional(),
+      category: multiSelectFilterSchema(z.string()).optional(),
+      sageDiscrepancy: numberFilterSchema().optional(),
     })
-    .optional(),
+    .optional()
+    .default({}),
 });
 
 export const updateComponentSchema = z.object({
@@ -64,6 +60,11 @@ export const componentRouter = {
         },
         department: true,
         category: true,
+        batches: {
+          with: {
+            movements: true,
+          },
+        },
         locations: {
           with: {
             batch: true,
@@ -75,7 +76,40 @@ export const componentRouter = {
     });
   }),
   list: publicProcedure.input(listComponentSchema).query(async ({ input }) => {
-    return await db.query.componentOverview.findMany({
+    const where = and(
+      input.filter?.id
+        ? handleStringFilter(schema.componentOverview.id, input.filter.id)
+        : undefined,
+      input.filter?.description
+        ? handleStringFilter(
+            schema.componentOverview.description,
+            input.filter.description,
+          )
+        : undefined,
+      input.filter?.category
+        ? handleMultiSelectFilter(
+            schema.componentOverview.categoryId,
+            input.filter.category,
+          )
+        : undefined,
+      input.filter?.sageDiscrepancy
+        ? handleNumberFilter(
+            schema.componentOverview.sageDiscrepancy,
+            input.filter.sageDiscrepancy,
+          )
+        : undefined,
+    );
+
+    console.log(input.filter);
+
+    console.log(where);
+
+    const total = await db
+      .select({ count: count() })
+      .from(schema.componentOverview)
+      .where(where);
+
+    const results = await db.query.componentOverview.findMany({
       limit: input.pagination.size,
       offset: (input.pagination.page - 1) * input.pagination.size,
       with: {
@@ -83,29 +117,31 @@ export const componentRouter = {
         department: true,
         category: true,
       },
-      where: and(
-        input.filter?.hasSubcomponents
-          ? eq(schema.componentOverview.hasSubcomponents, true)
-          : undefined,
-        input.filter?.search
-          ? or(
-              ilike(
-                schema.componentOverview.description,
-                `%${input.filter.search}%`,
-              ),
-              ilike(schema.componentOverview.id, input.filter.search),
-            )
-          : undefined,
-        input.filter?.discrepancy
-          ? not(eq(schema.componentOverview.sageDiscrepancy, 0))
-          : undefined,
-      ),
+      where,
       orderBy: input.sort?.map((sort) =>
         sort.order === "asc"
-          ? asc(schema.componentOverview[sort.field])
-          : desc(schema.componentOverview[sort.field]),
+          ? asc(
+              schema.componentOverview[
+                sort.field as keyof typeof schema.componentOverview
+              ] as any,
+            )
+          : desc(
+              schema.componentOverview[
+                sort.field as keyof typeof schema.componentOverview
+              ] as any,
+            ),
       ),
     });
+
+    return {
+      rows: results,
+      pagination: {
+        page: input.pagination.page,
+        size: input.pagination.size,
+        total: total[0]?.count ?? 0,
+      },
+      sort: input.sort ?? [],
+    };
   }),
   update: publicProcedure
     .input(updateComponentSchema)

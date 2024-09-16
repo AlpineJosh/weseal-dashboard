@@ -23,6 +23,10 @@
     "./sage": {
       "types": "./dist/sage.d.ts",
       "default": "./src/sage.ts"
+    },
+    "./bit-systems": {
+      "types": "./dist/bit-systems.d.ts",
+      "default": "./src/bit-systems.ts"
     }
   },
   "license": "MIT",

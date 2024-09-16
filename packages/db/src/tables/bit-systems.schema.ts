@@ -10,7 +10,7 @@ import {
 export const bitSystemsSchema = pgSchema("bit_systems");
 
 export const binItem = bitSystemsSchema.table("bin_item", {
-  pk_BinItem_ID: integer("pk_BinItem_ID"),
+  pk_BinItem_ID: integer("pk_BinItem_ID").primaryKey(),
   fk_StockItem_ID: integer("fk_StockItem_ID"),
   fk_Bin_ID: integer("fk_Bin_ID"),
   QuantityInStock: doublePrecision("QuantityInStock"),
@@ -21,7 +21,7 @@ export const binItem = bitSystemsSchema.table("bin_item", {
 });
 
 export const bin = bitSystemsSchema.table("bin", {
-  pk_Bin_ID: integer("pk_Bin_ID"),
+  pk_Bin_ID: integer("pk_Bin_ID").primaryKey(),
   fk_Warehouse_ID: integer("fk_Warehouse_ID"),
   Name: varchar("Name", { length: 255 }),
   IsUnspecifiedBin: integer("IsUnspecifiedBin"),
@@ -31,7 +31,7 @@ export const bin = bitSystemsSchema.table("bin", {
 });
 
 export const stockItem = bitSystemsSchema.table("stock_item", {
-  pk_StockItem_ID: integer("pk_StockItem_ID"),
+  pk_StockItem_ID: integer("pk_StockItem_ID").primaryKey(),
   Code: varchar("Code", { length: 255 }),
   DateTimeCreated: timestamp("DateTimeCreated"),
   DeletedOn: timestamp("DeletedOn"),
@@ -53,7 +53,7 @@ export const stockItem = bitSystemsSchema.table("stock_item", {
 });
 
 export const traceableBinItem = bitSystemsSchema.table("traceable_bin_item", {
-  pk_TraceableBinItem_ID: integer("pk_TraceableBinItem_ID"),
+  pk_TraceableBinItem_ID: integer("pk_TraceableBinItem_ID").primaryKey(),
   fk_TraceableItem_ID: integer("fk_TraceableItem_ID"),
   fk_BinItem_ID: integer("fk_BinItem_ID"),
   QuantityInStock: doublePrecision("QuantityInStock"),
@@ -62,7 +62,7 @@ export const traceableBinItem = bitSystemsSchema.table("traceable_bin_item", {
 });
 
 export const traceableItem = bitSystemsSchema.table("traceable_item", {
-  pk_TraceableItem_ID: integer("pk_TraceableItem_ID"),
+  pk_TraceableItem_ID: integer("pk_TraceableItem_ID").primaryKey(),
   fk_StockItem_ID: integer("fk_StockItem_ID"),
   fk_TraceableType_ID: integer("fk_TraceableType_ID"),
   IdentificationNo: varchar("IdentificationNo", { length: 255 }),
@@ -75,7 +75,7 @@ export const traceableItem = bitSystemsSchema.table("traceable_item", {
 });
 
 export const warehouse = bitSystemsSchema.table("warehouse", {
-  pk_Warehouse_ID: integer("pk_Warehouse_ID"),
+  pk_Warehouse_ID: integer("pk_Warehouse_ID").primaryKey(),
   Name: varchar("Name", { length: 255 }),
   Description: varchar("Description", { length: 255 }),
 });

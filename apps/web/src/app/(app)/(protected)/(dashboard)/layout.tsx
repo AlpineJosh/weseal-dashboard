@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { api } from "@/utils/trpc/react";
 import { VerticalNavigation } from "node_modules/@repo/ui/src/components/navigation/vertical-navigation";
 
 import {
@@ -14,7 +15,7 @@ import {
 } from "@repo/pro-light-svg-icons";
 import { cn } from "@repo/ui";
 import { Input } from "@repo/ui/components/control";
-import { Menu } from "@repo/ui/components/element";
+import { Button, Menu } from "@repo/ui/components/element";
 
 // import { ResizablePanels } from "@repo/ui/components/layout";
 
@@ -24,6 +25,8 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
+
+  const resetInventory = api.resetInventory.useMutation();
 
   return (
     <div className="flex h-full flex-row items-stretch">
@@ -140,7 +143,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
       <div className="flex h-screen grow flex-col items-stretch">
         <div className="flex h-16 flex-none flex-row items-center space-x-10 border-b bg-card px-4">
-          <Input placeholder="Search..." />
+          <Button
+            variant="accent"
+            onPress={() => {
+              resetInventory.mutate();
+            }}
+          >
+            Reset Inventory
+          </Button>
           <div className="flex flex-row items-center space-x-2">
             <div className="flex flex-col space-y-0.5 text-sm">
               <span className="font-semibold text-muted-foreground">

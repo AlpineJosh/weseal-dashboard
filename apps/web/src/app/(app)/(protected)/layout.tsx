@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function ProtectedLayout(props: {
   children: React.ReactNode;
@@ -7,7 +8,9 @@ export default async function ProtectedLayout(props: {
   const {
     data: { session },
   } = await createClient().auth.getSession();
-  console.log("session", session);
 
+  if (!session) {
+    redirect("/sign-in");
+  }
   return <>{props.children}</>;
 }

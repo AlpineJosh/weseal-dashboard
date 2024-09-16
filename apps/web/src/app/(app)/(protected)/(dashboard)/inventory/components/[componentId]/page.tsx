@@ -98,6 +98,38 @@ export default function ComponentPage({
               </Table.Body>
             </Table>
           </Card>
+          <Card className="mt-4">
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>Subcomponent</Table.Head>
+                  <Table.Head>Description</Table.Head>
+                  <Table.Head>Quantity Required</Table.Head>
+                  <Table.Head>Quantity Available</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {data.subcomponents.map((subcomponent) => (
+                  <Table.Row key={subcomponent.id}>
+                    <Table.Cell>
+                      <Link
+                        href={`/inventory/components/${subcomponent.subcomponentId}`}
+                      >
+                        {subcomponent.subcomponentId}
+                      </Link>
+                    </Table.Cell>
+                    <Table.Cell>
+                      {subcomponent.subcomponentOverview.description}
+                    </Table.Cell>
+                    <Table.Cell>{subcomponent.quantity}</Table.Cell>
+                    <Table.Cell>
+                      {subcomponent.subcomponentOverview.totalQuantity}
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </Card>
         </>
       )}
     </div>

@@ -22,12 +22,12 @@ import { cn } from "@repo/ui/lib/class-merge";
 import type { ListboxProps } from "../listbox/listbox.component";
 
 const styles = cva(
-  "dark:border-white/10 dark:bg-zinc-700 flex w-full min-w-[150px] cursor-default items-center gap-4 rounded-lg border py-2 pl-3 pr-2 text-start shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition dark:shadow-none",
+  "dark:border-white/10 flex w-full min-w-[150px] cursor-default items-center gap-4 rounded-lg border py-2 pl-3 pr-2 text-start shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition dark:bg-muted dark:shadow-none",
   {
     variants: {
       isDisabled: {
         false:
-          "pressed:bg-gray-200 dark:pressed:bg-zinc-500 text-gray-800 hover:bg-gray-100 group-invalid:border-red-600 dark:text-zinc-300 dark:hover:bg-zinc-600 forced-colors:group-invalid:border-[Mark]",
+          "pressed:bg-muted dark:pressed:bg-zinc-500 group-invalid:border-red-600 dark:text-zinc-300 dark:hover:bg-zinc-600 text-muted-foreground hover:bg-muted forced-colors:group-invalid:border-[Mark]",
         true: "text-gray-200 dark:border-white/5 dark:bg-zinc-800 dark:text-zinc-600 forced-colors:border-[GrayText] forced-colors:text-[GrayText]",
       },
     },

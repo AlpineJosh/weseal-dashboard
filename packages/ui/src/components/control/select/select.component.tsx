@@ -41,7 +41,7 @@ export interface SelectProps<T extends object>
   children: React.ReactNode | ((item: T) => React.ReactNode);
 }
 
-export function Select<T extends object>({
+function Root<T extends object>({
   children,
   items,
   className,
@@ -72,10 +72,15 @@ export function Select<T extends object>({
   );
 }
 
-export function SelectItem(props: ListBoxItemProps) {
+function Option(props: ListBoxItemProps) {
   return <ListboxItem variant="dropdown" {...props} />;
 }
 
-export function SelectSection<T extends object>(props: ListboxSectionProps<T>) {
+function Section<T extends object>(props: ListboxSectionProps<T>) {
   return <ListboxSection {...props} />;
 }
+
+export const Select = Object.assign(Root, {
+  Option,
+  Section,
+});

@@ -1,10 +1,14 @@
 "use client";
 
+import { ProductionTaskForm } from "@/components/flows/ProductionTaskFlow";
 import { api } from "@/utils/trpc/react";
 
-import { Table } from "@repo/ui/components/display";
-import { Button } from "@repo/ui/components/element";
+import { RouterInputs, RouterOutputs } from "@repo/api";
+import { faBarsFilter, faFilterList, faSort } from "@repo/pro-solid-svg-icons";
+import { Datatable, Table } from "@repo/ui/components/display";
+import { Button, Icon, Menu } from "@repo/ui/components/element";
 import { Card } from "@repo/ui/components/layout";
+import { Modal } from "@repo/ui/components/overlay";
 
 // import { DataTable } from "@repo/ui/components/datatable/datatable";
 
@@ -28,32 +32,42 @@ export default function HomePage() {
 
   // console.log(data);
 
-  const { data } = api.component.list.useQuery({
-    filter: {
-      discrepancy: true,
-    },
-  });
-
   return (
     <div className="flex flex-col space-y-2">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
       <div className="w-full border-b"></div>
       <h3 className="font-medium text-muted-foreground">Quick Actions</h3>
       <div className="flex flex-row items-stretch space-x-4">
-        <Button variant="primary">Record Receipt</Button>
+        <Modal>
+          <Button variant="primary">Record Receipt</Button>
+          <Modal.Content isDismissable className="w-screen-md">
+            <div>Hello</div>
+          </Modal.Content>
+        </Modal>
         <Button variant="primary">Prepare Despatch</Button>
-        <Button variant="primary">BOM Build</Button>
+        <Modal>
+          <Button variant="primary">BOM Build</Button>
+          <Modal.Content isDismissable>
+            <ProductionTaskForm />
+          </Modal.Content>
+        </Modal>
         <Button variant="primary">Transfer</Button>
       </div>
 
       <div className="w-full border-b"></div>
       <h3 className="font-medium text-muted-foreground">Sage Discrepancies</h3>
-      {data && (
-        <Card>
-          <Table>
+
+      <Card>
+        {/* <Table>
             <Table.Header>
               <Table.Row>
-                <Table.Head>Component</Table.Head>
+                <Table.Head>
+                  Component
+                  <Menu variant="ghost" icon={faFilterList}>
+                    <Menu.Item>Sort Ascending</Menu.Item>
+                    <Menu.Item>Sort Descending</Menu.Item>
+                  </Menu>
+                </Table.Head>
                 <Table.Head>Description</Table.Head>
                 <Table.Head>Total Quantity</Table.Head>
                 <Table.Head>Sage Quantity</Table.Head>
@@ -71,42 +85,38 @@ export default function HomePage() {
                 </Table.Row>
               ))}
             </Table.Body>
-          </Table>
-        </Card>
-      )}
+          </Table> */}
+        <Datatable<RouterOutputs["component"]["list"]["rows"][number]>
+          columns={[
+            {
+              accessor: "id",
+              label: "ID",
+            },
+            {
+              accessor: "description",
+              label: "Description",
+            },
+            {
+              accessor: (row) => row.category?.name,
+              label: "Category",
+            },
+            {
+              accessor: "totalQuantity",
+              label: "Quantity",
+            },
+            {
+              accessor: "sageQuantity",
+              label: "Quantity In Sage",
+            },
+            {
+              accessor: "sageDiscrepancy",
+              label: "Discrepancy",
+            },
+          ]}
+          data={api.component.list.useQuery}
+          filter={{ sageDiscrepancy: { neq: 0 } }}
+        />
+      </Card>
     </div>
-    // <main className="container h-screen p-16">
-    //   <div className="flex flex-col items-stretch justify-center gap-4">
-    //     <DataTable
-    //       columns={[
-    //         {
-    //           accessorKey: "id",
-    //           header: "ID",
-    //         },
-    //         {
-    //           accessorKey: "description",
-    //           header: "Description",
-    //         },
-    //         {
-    //           accessorKey: "category",
-    //           header: "Category",
-    //         },
-    //         {
-    //           accessorKey: "quantity",
-    //           header: "Quantity",
-    //         },
-    //         {
-    //           accessorKey: "allocated",
-    //           header: "Quantity Allocated",
-    //         },
-    //         {
-    //           accessorKey: "sageQuantity",
-    //           header: "Quantity In Sage",
-    //         },
-    //       ]}
-    //       data={data?.data ?? []}
-    //     />
-    //   </div>
-    // </main>
   );
 }

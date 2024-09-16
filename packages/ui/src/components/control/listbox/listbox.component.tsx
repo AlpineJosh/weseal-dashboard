@@ -64,12 +64,12 @@ export const itemStyles = cva(
       {
         variant: "dropdown",
         isSelected: false,
-        className: "hover:bg-accent",
+        className: "hover:bg-primary",
       },
       {
         variant: "dropdown",
         isSelected: true,
-        className: "bg-accent",
+        className: "bg-primary text-background",
       },
       {
         variant: "listbox",

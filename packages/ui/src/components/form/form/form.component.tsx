@@ -21,6 +21,7 @@ type FormProps<T extends FieldValues> = Omit<
 > &
   UseFormProps<T> & {
     onSubmit: SubmitHandler<T>;
+    onChange?: (data: T) => void;
     children: Children<UseFormReturn<T>>;
     schema: ZodSchema<T>;
   };

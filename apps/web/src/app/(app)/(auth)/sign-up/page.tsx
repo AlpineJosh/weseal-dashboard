@@ -12,7 +12,7 @@ export default function Signup() {
   return (
     <Form
       className="flex min-w-64 flex-1 flex-col space-y-4"
-      onSubmit={signUpAction}
+      onSubmit={({ email, password }) => signUpAction({ email, password })}
       schema={signUpSchema}
     >
       <h1 className="text-2xl font-medium">Sign up</h1>

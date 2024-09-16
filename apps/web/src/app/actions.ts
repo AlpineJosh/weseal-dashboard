@@ -48,7 +48,7 @@ export const signInAction = async (data: z.infer<typeof signInSchema>) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/protected");
+  return redirect("/");
 };
 
 export const forgotPasswordAction = async (

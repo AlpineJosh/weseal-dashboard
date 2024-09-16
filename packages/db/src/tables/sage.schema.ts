@@ -2,6 +2,7 @@ import {
   doublePrecision,
   integer,
   pgSchema,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -1567,7 +1568,7 @@ export const CURRENCY = sageSchema.table("CURRENCY", {
 export const INSERT_CURRENCY_SCHEMA = createInsertSchema(CURRENCY);
 
 export const DEPARTMENT = sageSchema.table("DEPARTMENT", {
-  NUMBER: smallint("NUMBER"),
+  NUMBER: smallint("NUMBER").primaryKey(),
   NAME: varchar("NAME"),
   REFERENCE: varchar("REFERENCE"),
   RECORD_CREATE_DATE: timestamp("RECORD_CREATE_DATE"),
@@ -2082,22 +2083,30 @@ export const PROJECT_TRAN = sageSchema.table("PROJECT_TRAN", {
 
 export const INSERT_PROJECT_TRAN_SCHEMA = createInsertSchema(PROJECT_TRAN);
 
-export const GRN_ITEM = sageSchema.table("GRN_ITEM", {
-  GRN_NUMBER: integer("GRN_NUMBER"),
-  ITEM_NUMBER: integer("ITEM_NUMBER"),
-  ORDER_NUMBER: integer("ORDER_NUMBER"),
-  ORDER_ITEM: smallint("ORDER_ITEM"),
-  ACCOUNT_REF: varchar("ACCOUNT_REF"),
-  SUPPLIER_GRN_NUMBER: varchar("SUPPLIER_GRN_NUMBER"),
-  STOCK_CODE: varchar("STOCK_CODE"),
-  DESCRIPTION: varchar("DESCRIPTION"),
-  DATE: timestamp("DATE"),
-  QTY_RECEIVED: doublePrecision("QTY_RECEIVED"),
-  QTY_ON_ORDER: doublePrecision("QTY_ON_ORDER"),
-  RECORD_CREATE_DATE: timestamp("RECORD_CREATE_DATE"),
-  RECORD_MODIFY_DATE: timestamp("RECORD_MODIFY_DATE"),
-  RECORD_DELETED: smallint("RECORD_DELETED"),
-});
+export const GRN_ITEM = sageSchema.table(
+  "GRN_ITEM",
+  {
+    GRN_NUMBER: integer("GRN_NUMBER"),
+    ITEM_NUMBER: integer("ITEM_NUMBER"),
+    ORDER_NUMBER: integer("ORDER_NUMBER"),
+    ORDER_ITEM: smallint("ORDER_ITEM"),
+    ACCOUNT_REF: varchar("ACCOUNT_REF"),
+    SUPPLIER_GRN_NUMBER: varchar("SUPPLIER_GRN_NUMBER"),
+    STOCK_CODE: varchar("STOCK_CODE"),
+    DESCRIPTION: varchar("DESCRIPTION"),
+    DATE: timestamp("DATE"),
+    QTY_RECEIVED: doublePrecision("QTY_RECEIVED"),
+    QTY_ON_ORDER: doublePrecision("QTY_ON_ORDER"),
+    RECORD_CREATE_DATE: timestamp("RECORD_CREATE_DATE"),
+    RECORD_MODIFY_DATE: timestamp("RECORD_MODIFY_DATE"),
+    RECORD_DELETED: smallint("RECORD_DELETED"),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.GRN_NUMBER, table.ITEM_NUMBER] }),
+    };
+  },
+);
 
 export const INSERT_GRN_ITEM_SCHEMA = createInsertSchema(GRN_ITEM);
 
@@ -2133,7 +2142,7 @@ export const INSERT_PURCHASE_DEL_ADDR_SCHEMA =
   createInsertSchema(PURCHASE_DEL_ADDR);
 
 export const PURCHASE_LEDGER = sageSchema.table("PURCHASE_LEDGER", {
-  ACCOUNT_REF: varchar("ACCOUNT_REF"),
+  ACCOUNT_REF: varchar("ACCOUNT_REF").primaryKey(),
   NAME: varchar("NAME"),
   ADDRESS_1: varchar("ADDRESS_1"),
   ADDRESS_2: varchar("ADDRESS_2"),
@@ -2291,7 +2300,7 @@ export const INSERT_PURCHASE_LEDGER_SCHEMA =
   createInsertSchema(PURCHASE_LEDGER);
 
 export const PURCHASE_ORDER = sageSchema.table("PURCHASE_ORDER", {
-  ORDER_NUMBER: integer("ORDER_NUMBER"),
+  ORDER_NUMBER: integer("ORDER_NUMBER").primaryKey(),
   ORDER_OR_QUOTE: varchar("ORDER_OR_QUOTE"),
   ORDER_DATE: timestamp("ORDER_DATE"),
   DELIVERY_DATE: timestamp("DELIVERY_DATE"),
@@ -2448,7 +2457,7 @@ export const POP_ITEM = sageSchema.table("POP_ITEM", {
   PROJECT_REF: varchar("PROJECT_REF"),
   PROJECT_NAME: varchar("PROJECT_NAME"),
   COST_CODE_REF: varchar("COST_CODE_REF"),
-  ITEMID: integer("ITEMID"),
+  ITEMID: integer("ITEMID").primaryKey(),
   GENERATED_MESSAGE: smallint("GENERATED_MESSAGE"),
   QTY_INVOICED: doublePrecision("QTY_INVOICED"),
   RECORD_CREATE_DATE: timestamp("RECORD_CREATE_DATE"),
@@ -2507,24 +2516,32 @@ export const INSERT_DIRECT_DEBIT_PAYMENT_REQUESTS_SCHEMA = createInsertSchema(
   DIRECT_DEBIT_PAYMENT_REQUESTS,
 );
 
-export const GDN_ITEM = sageSchema.table("GDN_ITEM", {
-  UNIQUE_ID: integer("UNIQUE_ID"),
-  GDN_NUMBER: integer("GDN_NUMBER"),
-  ITEM_NUMBER: integer("ITEM_NUMBER"),
-  ORDER_NUMBER: integer("ORDER_NUMBER"),
-  ORDER_ITEM: smallint("ORDER_ITEM"),
-  ACCOUNT_REF: varchar("ACCOUNT_REF"),
-  CUSTOMER_GDN_NUMBER: varchar("CUSTOMER_GDN_NUMBER"),
-  STOCK_CODE: varchar("STOCK_CODE"),
-  DESCRIPTION: varchar("DESCRIPTION"),
-  DATE: timestamp("DATE"),
-  QTY_DESPATCHED: doublePrecision("QTY_DESPATCHED"),
-  QTY_ON_ORDER: doublePrecision("QTY_ON_ORDER"),
-  PRINTED_FLAG: smallint("PRINTED_FLAG"),
-  RECORD_CREATE_DATE: timestamp("RECORD_CREATE_DATE"),
-  RECORD_MODIFY_DATE: timestamp("RECORD_MODIFY_DATE"),
-  RECORD_DELETED: smallint("RECORD_DELETED"),
-});
+export const GDN_ITEM = sageSchema.table(
+  "GDN_ITEM",
+  {
+    UNIQUE_ID: integer("UNIQUE_ID"),
+    GDN_NUMBER: integer("GDN_NUMBER"),
+    ITEM_NUMBER: integer("ITEM_NUMBER"),
+    ORDER_NUMBER: integer("ORDER_NUMBER"),
+    ORDER_ITEM: smallint("ORDER_ITEM"),
+    ACCOUNT_REF: varchar("ACCOUNT_REF"),
+    CUSTOMER_GDN_NUMBER: varchar("CUSTOMER_GDN_NUMBER"),
+    STOCK_CODE: varchar("STOCK_CODE"),
+    DESCRIPTION: varchar("DESCRIPTION"),
+    DATE: timestamp("DATE"),
+    QTY_DESPATCHED: doublePrecision("QTY_DESPATCHED"),
+    QTY_ON_ORDER: doublePrecision("QTY_ON_ORDER"),
+    PRINTED_FLAG: smallint("PRINTED_FLAG"),
+    RECORD_CREATE_DATE: timestamp("RECORD_CREATE_DATE"),
+    RECORD_MODIFY_DATE: timestamp("RECORD_MODIFY_DATE"),
+    RECORD_DELETED: smallint("RECORD_DELETED"),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.GDN_NUMBER, table.ITEM_NUMBER] }),
+    };
+  },
+);
 
 export const INSERT_GDN_ITEM_SCHEMA = createInsertSchema(GDN_ITEM);
 
@@ -2581,7 +2598,7 @@ export const SALES_DEL_ADDR = sageSchema.table("SALES_DEL_ADDR", {
 export const INSERT_SALES_DEL_ADDR_SCHEMA = createInsertSchema(SALES_DEL_ADDR);
 
 export const SALES_LEDGER = sageSchema.table("SALES_LEDGER", {
-  ACCOUNT_REF: varchar("ACCOUNT_REF"),
+  ACCOUNT_REF: varchar("ACCOUNT_REF").primaryKey(),
   NAME: varchar("NAME"),
   ADDRESS_1: varchar("ADDRESS_1"),
   ADDRESS_2: varchar("ADDRESS_2"),
@@ -2742,7 +2759,7 @@ export const SALES_LEDGER = sageSchema.table("SALES_LEDGER", {
 export const INSERT_SALES_LEDGER_SCHEMA = createInsertSchema(SALES_LEDGER);
 
 export const SALES_ORDER = sageSchema.table("SALES_ORDER", {
-  ORDER_NUMBER: integer("ORDER_NUMBER"),
+  ORDER_NUMBER: integer("ORDER_NUMBER").primaryKey(),
   ORDER_TYPE_CODE: smallint("ORDER_TYPE_CODE"),
   ORDER_OR_QUOTE: varchar("ORDER_OR_QUOTE"),
   ORDER_DATE: timestamp("ORDER_DATE"),
@@ -2911,7 +2928,7 @@ export const SOP_ITEM = sageSchema.table("SOP_ITEM", {
   THIS_RECORD: integer("THIS_RECORD"),
   POP_ITEM_ID: integer("POP_ITEM_ID"),
   DUE_DATE: timestamp("DUE_DATE"),
-  ITEMID: integer("ITEMID"),
+  ITEMID: integer("ITEMID").primaryKey(),
   NEGOTIATION_DISC_NET: doublePrecision("NEGOTIATION_DISC_NET"),
   NEGOTIATION_DISC_NET_BASE: doublePrecision("NEGOTIATION_DISC_NET_BASE"),
   GENERATED_MESSAGE: smallint("GENERATED_MESSAGE"),
@@ -2923,7 +2940,7 @@ export const SOP_ITEM = sageSchema.table("SOP_ITEM", {
 export const INSERT_SOP_ITEM_SCHEMA = createInsertSchema(SOP_ITEM);
 
 export const STOCK = sageSchema.table("STOCK", {
-  STOCK_CODE: varchar("STOCK_CODE"),
+  STOCK_CODE: varchar("STOCK_CODE").primaryKey(),
   DESCRIPTION: varchar("DESCRIPTION"),
   UNIT_OF_SALE: varchar("UNIT_OF_SALE"),
   NOMINAL_CODE: varchar("NOMINAL_CODE"),
@@ -3311,7 +3328,7 @@ export const INSERT_STOCK_ALLOCATION_SCHEMA =
   createInsertSchema(STOCK_ALLOCATION);
 
 export const STOCK_CAT = sageSchema.table("STOCK_CAT", {
-  NUMBER: smallint("NUMBER"),
+  NUMBER: smallint("NUMBER").primaryKey(),
   NAME: varchar("NAME"),
 });
 
@@ -3331,7 +3348,7 @@ export const STOCK_COMP = sageSchema.table("STOCK_COMP", {
 export const INSERT_STOCK_COMP_SCHEMA = createInsertSchema(STOCK_COMP);
 
 export const STOCK_TRAN = sageSchema.table("STOCK_TRAN", {
-  TRAN_NUMBER: integer("TRAN_NUMBER"),
+  TRAN_NUMBER: integer("TRAN_NUMBER").primaryKey(),
   STOCK_CODE: varchar("STOCK_CODE"),
   TYPE: varchar("TYPE"),
   DATE: timestamp("DATE"),
