@@ -33,6 +33,13 @@ export const LocationPicker = ({
   value,
   onChange,
 }: LocationPickerProps) => {
+  const handleItemChange = (items: TaskItem[], componentId: string) => {
+    const updated = value.filter((item) => item.componentId !== componentId);
+    updated.push(...items);
+
+    onChange(updated);
+  };
+
   return (
     <div>
       {components.map((component) => (
@@ -41,15 +48,7 @@ export const LocationPicker = ({
           id={component.id}
           quantity={component.quantity}
           value={value.filter((item) => item.componentId === component.id)}
-          onChange={(items) => {
-            const updated = value.filter(
-              (item) => item.componentId !== component.id,
-            );
-            updated.push(
-              ...items.map((item) => ({ ...item, componentId: component.id })),
-            );
-            onChange(updated);
-          }}
+          onChange={(items) => handleItemChange(items, component.id)}
         />
       ))}
     </div>
@@ -71,7 +70,7 @@ const LocationPickerItem = ({
 }: LocationPickerItemProps) => {
   const [locations, setLocations] = useImmer<LocationsType[]>([]);
 
-  const [component] = api.component.get.useSuspenseQuery({
+  const { data: component } = api.component.get.useQuery({
     id,
   });
 
@@ -86,13 +85,13 @@ const LocationPickerItem = ({
         });
       }
       setLocations(locs);
-      calculateQuantities();
     }
-  }, [component, setLocations]);
+  }, [component]);
 
   const calculateQuantities = () => {
     const batches = [];
     let remaining = quantity;
+
     for (let ii = 0; ii < locations.length; ii++) {
       const location = locations[ii]!;
 
@@ -103,66 +102,80 @@ const LocationPickerItem = ({
           locationId: location.location.id,
           batchId: location.batch.id,
           quantity: use,
+          componentId: id,
         });
       }
     }
-    onChange(batches.map((batch) => ({ ...batch, componentId: id })));
-    return remaining;
+    return batches.map((batch) => ({ ...batch, componentId: id }));
   };
 
   useEffect(() => {
-    calculateQuantities();
-  }, [locations, quantity]);
+    const newBatches = calculateQuantities();
+    const hasChanges = newBatches.some((newBatch) => {
+      const existingBatch = value.find(
+        (batch) =>
+          batch.locationId === newBatch.locationId &&
+          batch.batchId === newBatch.batchId,
+      );
+      return !existingBatch || existingBatch.quantity !== newBatch.quantity;
+    });
+
+    if (hasChanges) {
+      onChange(newBatches);
+    }
+  }, [locations, quantity, onChange]);
 
   if (!component) return null;
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <div className="flex flex-row border-b">
-        <div className="flex w-1/3 shrink-0 flex-col border-r p-2">
-          <span className="font-semibold">{component.id}</span>
-          <span className="text-sm text-muted-foreground">
-            {component.description}
-          </span>
-          <span className="text-lg">{quantity}</span>
-        </div>
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              <Table.Head />
-              <Table.Head>Location</Table.Head>
-              <Table.Head>Batch</Table.Head>
-              <Table.Head>Quantity</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {locations.map((location, index) => (
-              <Table.Row key={index}>
-                <Table.Cell>
-                  <input
-                    type="checkbox"
-                    checked={!location.blocked}
-                    onChange={() => {
-                      setLocations((draft) => {
-                        draft![index]!.blocked = !draft![index]!.blocked;
-                      });
-                    }}
-                  />
-                </Table.Cell>
-                <Table.Cell>{location.location.name}</Table.Cell>
-                <Table.Cell>{location.batch.batchReference}</Table.Cell>
-                <Table.Cell>
-                  {value.find(
-                    (batch) =>
-                      batch.locationId === location.location.id &&
-                      batch.batchId === location.batch.id,
-                  )?.quantity ?? 0}
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+    <div className="relative flex flex-row border-b">
+      <div className="flex w-1/3 shrink-0 flex-col border-r p-2">
+        <span className="font-semibold">{component.id}</span>
+        <span className="text-sm text-muted-foreground">
+          {component.description}
+        </span>
+        <span className="text-lg">{quantity}</span>
       </div>
-    </Suspense>
+      <Table>
+        <Table.Header>
+          <Table.Row className="sticky top-0 bg-card">
+            <Table.Head />
+            <Table.Head>Location</Table.Head>
+            <Table.Head>Batch</Table.Head>
+            <Table.Head>Quantity</Table.Head>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {locations.map((location, index) => (
+            <Table.Row key={index}>
+              <Table.Cell>
+                <input
+                  type="checkbox"
+                  checked={!location.blocked}
+                  onChange={() => {
+                    setLocations((draft) => {
+                      draft![index]!.blocked = !draft![index]!.blocked;
+                    });
+                  }}
+                />
+              </Table.Cell>
+              <Table.Cell>{location.location.name}</Table.Cell>
+              <Table.Cell>
+                {location.batch.batchReference ||
+                  location.batch.entryDate.toLocaleDateString()}
+              </Table.Cell>
+              <Table.Cell>
+                {value.find(
+                  (batch) =>
+                    batch.locationId === location.location.id &&
+                    batch.batchId === location.batch.id,
+                )?.quantity ?? 0}{" "}
+                / {location.total}
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </div>
   );
 };

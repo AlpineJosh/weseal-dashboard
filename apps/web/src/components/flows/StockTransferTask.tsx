@@ -57,6 +57,8 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
     });
   };
 
+  console.log(items);
+
   return (
     <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
       <h1 className="text-2xl font-semibold">Create Production Task</h1>
@@ -157,7 +159,10 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
             }) ?? []
           }
           value={items}
-          onChange={setItems}
+          onChange={(items) => {
+            console.log("HERE");
+            setItems(items);
+          }}
         />
       )}
       <Button

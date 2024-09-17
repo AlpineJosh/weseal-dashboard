@@ -16,7 +16,7 @@ import { Field, Form } from "@repo/ui/components/form";
 import { Card } from "@repo/ui/components/layout";
 import { Flow } from "@repo/ui/components/navigation";
 
-export function ProductionTaskForm({ exit }: { exit: () => void }) {
+export function ProductionTaskForm() {
   const [query, setQuery] = useState<string>("");
 
   const [values, setValues] = useImmer<{
@@ -64,9 +64,6 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
         className="flex flex-row space-x-4"
         onSubmit={() => {
           console.log(values);
-        }}
-        onChange={(data) => {
-          console.log(data);
         }}
         schema={z.object({
           componentId: z.string(),
@@ -122,7 +119,9 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           </Field>
           <Field name="location">
             <Field.Label>Production Location</Field.Label>
-            <Field.Description>Select the component to build</Field.Description>
+            <Field.Description>
+              Where the components need to go
+            </Field.Description>
             <Field.Control>
               <Field.Control>
                 <Combobox<
@@ -154,7 +153,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           </Field>
         </>
       </Form>
-      <div className="width-full flex flex-col overflow-y-auto">
+      <div className="width-full flex max-h-[400px] flex-col overflow-y-auto">
         {values.componentId ? (
           <LocationPicker
             components={
@@ -169,14 +168,18 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
             onChange={setItems}
           />
         ) : (
-          <></>
+          <div className="flex min-h-[200px] flex-col items-center justify-center">
+            <span className="text-muted-foreground">
+              Please select a component
+            </span>
+          </div>
         )}
       </div>
       <Button
         variant="primary"
+        isDisabled={!values.componentId}
         onPress={() => {
           save();
-          close();
         }}
       >
         Save
