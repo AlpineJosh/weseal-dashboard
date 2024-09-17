@@ -141,20 +141,22 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <span className="font-medium text-muted-foreground">
               Last Sage Sync
             </span>
-            <span className="font-medium text-accent">1/9/2024 10:27</span>
+            <span className="font-medium text-muted-foreground">
+              17/09/2024 11:27
+            </span>
           </div>
         </div>
       </div>
       <div className="flex h-screen grow flex-col items-stretch">
         <div className="flex h-16 flex-none flex-row items-center space-x-10 border-b bg-card px-4">
-          <Button
+          {/* <Button
             variant="accent"
             onPress={() => {
               resetInventory.mutate();
             }}
           >
             Reset Inventory
-          </Button>
+          </Button> */}
           <div className="flex flex-row items-center space-x-2">
             <div className="flex flex-col space-y-0.5 text-sm">
               <span className="font-semibold text-muted-foreground">
