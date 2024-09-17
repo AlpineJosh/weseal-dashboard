@@ -1,17 +1,28 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
+import { count, eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
+import { paginationSchema, sortSchema } from "../lib/schemas";
 import { publicProcedure } from "../trpc";
 
 const uniqueTaskInput = z.object({
   id: z.number(),
 });
 
-const taskInput = z.object({
+const listTaskInput = z.object({
+  pagination: paginationSchema(),
+  filter: z
+    .object({
+      type: z.enum(["transfer", "production", "despatch", "receipt"]),
+    })
+    .optional(),
+  sort: sortSchema(["createdAt"]),
+});
+
+const createTaskInput = z.object({
   assignedToId: z.string(),
   productionJobId: z.number().optional(),
   purchaseOrderId: z.number().optional(),
@@ -34,21 +45,44 @@ export const taskRouter = {
       with: {
         productionJob: true,
         salesDespatch: true,
-        items: true,
+        items: {
+          with: {
+            pickLocation: true,
+            putLocation: true,
+            batch: {
+              with: {
+                component: true,
+              },
+            },
+          },
+        },
       },
     });
   }),
-  list: publicProcedure.input(taskInput).query(async ({ input }) => {
-    return await db.query.task.findMany({
-      where: eq(schema.task.type, input.type),
+  list: publicProcedure.input(listTaskInput).query(async ({ input }) => {
+    const total = await db.select({ count: count() }).from(schema.task);
+
+    const results = await db.query.task.findMany({
+      limit: input.pagination.size,
+      offset: (input.pagination.page - 1) * input.pagination.size,
       with: {
         productionJob: true,
         salesDespatch: true,
         items: true,
       },
     });
+
+    return {
+      rows: results,
+      pagination: {
+        page: input.pagination.page,
+        size: input.pagination.size,
+        total: total[0]?.count ?? 0,
+      },
+      sort: input.sort ?? [],
+    };
   }),
-  create: publicProcedure.input(taskInput).mutation(async ({ input }) => {
+  create: publicProcedure.input(createTaskInput).mutation(async ({ input }) => {
     const result = await db
       .insert(schema.task)
       .values({

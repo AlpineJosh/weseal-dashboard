@@ -9,6 +9,7 @@ import { faBarsFilter, faFilterList, faSort } from "@repo/pro-solid-svg-icons";
 import { Datatable, Table } from "@repo/ui/components/display";
 import { Button, Icon, Menu } from "@repo/ui/components/element";
 import { Card } from "@repo/ui/components/layout";
+import { Link } from "@repo/ui/components/navigation";
 import { Modal } from "@repo/ui/components/overlay";
 
 // import { DataTable } from "@repo/ui/components/datatable/datatable";
@@ -54,7 +55,39 @@ export default function HomePage() {
         </Modal>
         <Button variant="primary">Transfer</Button>
       </div>
+      <div className="w-full border-b"></div>
+      <h3 className="font-medium text-muted-foreground">Tasks</h3>
 
+      <Card>
+        <Datatable<RouterOutputs["task"]["list"]["rows"][number]>
+          columns={[
+            {
+              accessor: "id",
+              label: "ID",
+              cell: (row) => {
+                return (
+                  <Table.Cell>
+                    <Link href={`/tasks/${row.id}`}>{row.id}</Link>
+                  </Table.Cell>
+                );
+              },
+            },
+            {
+              accessor: "type",
+              label: "Type",
+            },
+            {
+              accessor: (row) => row.items.length,
+              label: "Items",
+            },
+            {
+              accessor: (row) => row.createdAt.toLocaleDateString(),
+              label: "Created At",
+            },
+          ]}
+          data={api.task.list.useQuery}
+        />
+      </Card>
       <div className="w-full border-b"></div>
       <h3 className="font-medium text-muted-foreground">Sage Discrepancies</h3>
 

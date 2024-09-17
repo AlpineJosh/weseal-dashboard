@@ -80,6 +80,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
             <Field.Description>Select the component to build</Field.Description>
             <Field.Control>
               <Combobox<RouterOutputs["component"]["list"]["rows"][number]>
+                keyAccessor="id"
                 options={(query) => {
                   return api.component.list.useQuery({
                     filter: {
@@ -134,6 +135,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
                       },
                     });
                   }}
+                  keyAccessor="id"
                 >
                   {(location) => {
                     return (
