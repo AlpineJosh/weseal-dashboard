@@ -3,16 +3,11 @@
 import type { DialogProps, ModalOverlayProps } from "react-aria-components";
 import { forwardRef } from "react";
 import { cva } from "class-variance-authority";
-import {
-  Dialog,
-  DialogTrigger,
-  ModalOverlay,
-  Modal as ModalPrimitive,
-} from "react-aria-components";
+import { ModalOverlay, Modal as ModalPrimitive } from "react-aria-components";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
-export type ModalProps = ModalOverlayProps;
+import { Dialog } from "../../utility";
 
 const overlayStyles = cva(
   cn(
@@ -44,8 +39,11 @@ const modalStyles = cva(
   },
 );
 
-const Content = forwardRef<HTMLDivElement, ModalOverlayProps>(
-  ({ className, ...props }, ref) => {
+export type ModalProps = Omit<ModalOverlayProps, "children"> &
+  Pick<DialogProps, "children">;
+
+const Content = forwardRef<HTMLDivElement, ModalProps>(
+  ({ className, children, ...props }, ref) => {
     return (
       <ModalOverlay
         {...props}
@@ -59,12 +57,14 @@ const Content = forwardRef<HTMLDivElement, ModalOverlayProps>(
             cn(modalStyles({ isEntering, isExiting }), className)
           }
           ref={ref}
-        ></ModalPrimitive>
+        >
+          <Dialog.Content children={children} />
+        </ModalPrimitive>
       </ModalOverlay>
     );
   },
 );
 
-export const Modal = Object.assign(DialogTrigger, {
+export const Modal = Object.assign(Dialog.Trigger, {
   Content,
 });

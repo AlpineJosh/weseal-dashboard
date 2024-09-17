@@ -1,32 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
-import { SearchableListbox } from "@/components/SearchableListbox";
 import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 import { z } from "zod";
 
 import type { RouterInputs, RouterOutputs } from "@repo/api";
-import type { FlowStepRendererProps } from "@repo/ui/components/navigation";
-import { Combobox, Input, Select } from "@repo/ui/components/control";
-import { Table } from "@repo/ui/components/display";
-import { Badge, Button } from "@repo/ui/components/element";
+import { Combobox, Input } from "@repo/ui/components/control";
+import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
-import { Card } from "@repo/ui/components/layout";
-import { Flow } from "@repo/ui/components/navigation";
 
-export function ProductionTaskForm() {
+type ProductionTaskFormProps = {
+  onExit: () => void;
+};
+
+export const ProductionTaskForm = ({ onExit }: ProductionTaskFormProps) => {
   const [query, setQuery] = useState<string>("");
+  const utils = api.useUtils();
+
+  const [task, setTask] = useImmer<RouterInputs["task"]["create"]>({
+    type: "production",
+    assignedToId: "",
+    items: [],
+  });
+
+  const [items, setItems] = useImmer<
+    (RouterInputs["task"]["create"]["items"][number] & {
+      componentId: string;
+    })[]
+  >([]);
+
+  useEffect(() => {
+    setTask((draft) => {
+      draft.items = items.map((item) => {
+        const { componentId, ...rest } = item;
+        return { ...rest, putLocationId: values.putLocationId };
+      });
+    });
+  }, [items]);
 
   const [values, setValues] = useImmer<{
     componentId: string | undefined;
     quantity: number;
-    locationId: string | undefined;
+    putLocationId: number | undefined;
   }>({
     componentId: undefined,
     quantity: 1,
-    locationId: undefined,
+    putLocationId: undefined,
   });
 
   const { data: subcomponents } = api.component.subcomponents.useQuery(
@@ -36,25 +57,15 @@ export function ProductionTaskForm() {
     { enabled: !!values.componentId },
   );
 
-  const [items, setItems] = useImmer<
-    {
-      componentId: string;
-      locationId: number;
-      batchId: number;
-      quantity: number;
-    }[]
-  >([]);
+  const { mutate: createTask } = api.task.create.useMutation({
+    onSuccess: () => {
+      utils.task.list.invalidate();
+    },
+  });
 
-  const { mutate: createTask } = api.task.create.useMutation();
   const save = () => {
-    createTask({
-      type: "production",
-      assignedToId: "1",
-      items: items.map((item) => ({
-        ...item,
-        locationId: item.locationId as number,
-      })),
-    });
+    createTask(task);
+    onExit();
   };
 
   return (
@@ -134,6 +145,11 @@ export function ProductionTaskForm() {
                       },
                     });
                   }}
+                  onSelectionChange={(locationId) => {
+                    setValues((draft) => {
+                      draft.putLocationId = locationId as number;
+                    });
+                  }}
                   keyAccessor="id"
                 >
                   {(location) => {
@@ -165,7 +181,9 @@ export function ProductionTaskForm() {
               }) ?? []
             }
             value={items}
-            onChange={setItems}
+            onChange={(items) => {
+              setItems(items);
+            }}
           />
         ) : (
           <div className="flex min-h-[200px] flex-col items-center justify-center">
@@ -180,10 +198,11 @@ export function ProductionTaskForm() {
         isDisabled={!values.componentId}
         onPress={() => {
           save();
+          onExit();
         }}
       >
         Save
       </Button>
     </div>
   );
-}
+};

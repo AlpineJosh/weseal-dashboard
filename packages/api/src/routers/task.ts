@@ -30,8 +30,8 @@ const createTaskInput = z.object({
   type: z.enum(["transfer", "production", "despatch", "receipt"]),
   items: z.array(
     z.object({
-      componentId: z.string(),
-      locationId: z.number(),
+      pickLocationId: z.number().optional(),
+      putLocationId: z.number().optional(),
       batchId: z.number(),
       quantity: z.number(),
     }),

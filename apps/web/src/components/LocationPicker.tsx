@@ -2,14 +2,11 @@ import { Suspense, useEffect } from "react";
 import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 
-import type { RouterOutputs } from "@repo/api";
+import type { RouterInputs, RouterOutputs } from "@repo/api";
 import { Table } from "@repo/ui/components/display";
 
-type TaskItem = {
+type TaskItem = RouterInputs["task"]["create"]["items"][number] & {
   componentId: string;
-  locationId: number;
-  batchId: number;
-  quantity: number;
 };
 
 export interface LocationPickerItemProps {
@@ -99,7 +96,7 @@ const LocationPickerItem = ({
         const use = Math.min(location.total, remaining);
         remaining -= use;
         batches.push({
-          locationId: location.location.id,
+          pickLocationId: location.location.id,
           batchId: location.batch.id,
           quantity: use,
           componentId: id,
@@ -114,7 +111,7 @@ const LocationPickerItem = ({
     const hasChanges = newBatches.some((newBatch) => {
       const existingBatch = value.find(
         (batch) =>
-          batch.locationId === newBatch.locationId &&
+          batch.pickLocationId === newBatch.pickLocationId &&
           batch.batchId === newBatch.batchId,
       );
       return !existingBatch || existingBatch.quantity !== newBatch.quantity;
@@ -167,7 +164,7 @@ const LocationPickerItem = ({
               <Table.Cell>
                 {value.find(
                   (batch) =>
-                    batch.locationId === location.location.id &&
+                    batch.pickLocationId === location.location.id &&
                     batch.batchId === location.batch.id,
                 )?.quantity ?? 0}{" "}
                 / {location.total}
