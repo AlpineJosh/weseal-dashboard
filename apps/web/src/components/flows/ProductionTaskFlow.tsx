@@ -65,12 +65,14 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
         onSubmit={() => {
           console.log(values);
         }}
+        onChange={(data) => {
+          console.log(data);
+        }}
         schema={z.object({
           componentId: z.string(),
           locationId: z.string(),
           quantity: z.number(),
         })}
-        defaultValues={values}
       >
         <>
           <Field name="component">
@@ -91,6 +93,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
                     draft.componentId = componentId as string;
                   });
                 }}
+                keyAccessor="id"
               >
                 {(component) => {
                   return (
@@ -108,12 +111,12 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
             <Field.Control>
               <Input
                 onChange={(e) => {
-                  setValues({
-                    ...values,
-                    quantity: Math.max(+e.target.value, 1),
+                  setValues((draft) => {
+                    draft.quantity = Math.max(+e.target.value, 1);
                   });
                 }}
                 type="number"
+                value={values.quantity}
               />
             </Field.Control>
           </Field>
@@ -132,10 +135,15 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
                       },
                     });
                   }}
+                  keyAccessor="id"
                 >
                   {(location) => {
                     return (
-                      <Combobox.Option value={location}>
+                      <Combobox.Option
+                        key={location.id}
+                        textValue={location.name}
+                        value={location}
+                      >
                         {location.name} - {location.group.name}
                       </Combobox.Option>
                     );
@@ -146,20 +154,24 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           </Field>
         </>
       </Form>
-      {values.componentId && (
-        <LocationPicker
-          components={
-            subcomponents?.map((subcomponent) => {
-              return {
-                id: subcomponent.subcomponentId,
-                quantity: subcomponent.quantity * values.quantity,
-              };
-            }) ?? []
-          }
-          value={items}
-          onChange={setItems}
-        />
-      )}
+      <div className="width-full flex flex-col overflow-y-auto">
+        {values.componentId ? (
+          <LocationPicker
+            components={
+              subcomponents?.map((subcomponent) => {
+                return {
+                  id: subcomponent.subcomponentId,
+                  quantity: subcomponent.quantity * values.quantity,
+                };
+              }) ?? []
+            }
+            value={items}
+            onChange={setItems}
+          />
+        ) : (
+          <></>
+        )}
+      </div>
       <Button
         variant="primary"
         onPress={() => {

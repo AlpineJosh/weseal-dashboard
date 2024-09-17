@@ -31,7 +31,7 @@ export type DataQueryInput<TData extends object> = {
 };
 
 export type DataQueryResponse<TData extends object> = {
-  rows: Iterable<TData>;
+  rows: TData[];
   pagination: DataPagination & { total: number };
   sort: DataSort<TData>[];
 };

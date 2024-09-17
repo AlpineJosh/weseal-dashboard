@@ -2,8 +2,10 @@
 
 import type {
   ComboBoxProps as AriaComboBoxProps,
-  ListBoxItemProps,
+  Key,
 } from "react-aria-components";
+import { useEffect } from "react";
+import { Draft } from "immer";
 import {
   ComboBox as AriaComboBox,
   Group,
@@ -16,7 +18,6 @@ import {
   Input,
   ListboxItem,
   ListboxSection,
-  ListboxSectionProps,
 } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/display";
 import { Button } from "@repo/ui/components/element";
@@ -28,18 +29,50 @@ export interface ComboboxProps<T extends object>
   extends Omit<AriaComboBoxProps<T>, "children" | "items"> {
   children: React.ReactNode | ((item: T) => React.ReactNode);
   options: (query: string) => AsyncData<DataQueryResponse<T>>;
+  keyAccessor: keyof T;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-function Root<T extends object>({
+const Root = <T extends object>({
   children,
   options,
+  ref,
+  keyAccessor,
   ...props
-}: ComboboxProps<T>) {
+}: ComboboxProps<T>) => {
   const [filterText, setFilterText] = useImmer<string>("");
+  const [items, setItems] = useImmer<T[]>([]);
+  const [selectedKey, setSelectedKey] = useImmer<Key | null>(null);
   const { data, isLoading } = options(filterText);
+
+  useEffect(() => {
+    setItems((draft) => {
+      const newItems: T[] = data?.rows ?? [];
+
+      for (let i = draft.length - 1; i >= 0; i--) {
+        const item = draft[i];
+        if (
+          item[keyAccessor as keyof Draft<T>] !== selectedKey &&
+          !newItems.some(
+            (newItem) =>
+              newItem[keyAccessor] === item[keyAccessor as keyof Draft<T>],
+          )
+        ) {
+          draft.splice(i, 1);
+        }
+      }
+
+      for (const newItem of newItems) {
+        if (!draft.some((item) => item[keyAccessor] === newItem[keyAccessor])) {
+          draft.push(newItem);
+        }
+      }
+    });
+  }, [data, isLoading]);
 
   return (
     <AriaComboBox
+      // ref={ref}
       {...props}
       className={cn("group flex flex-row gap-1", props.className)}
       inputValue={filterText}
@@ -47,9 +80,15 @@ function Root<T extends object>({
         setFilterText(query);
         props.onInputChange?.(query);
       }}
-      items={data?.rows ?? []}
+      // selectedKey={selectedKey}
+      // onSelectionChange={(key) => {
+      //   setFilterText(key as string);
+      //   setSelectedKey(key);
+      //   props.onSelectionChange?.(key);
+      // }}
+      items={items}
       menuTrigger="focus"
-      allowsEmptyCollection
+      allowsEmptyCollection={true}
     >
       <Group className="flex flex-row gap-1">
         <Input />
@@ -63,7 +102,13 @@ function Root<T extends object>({
       </Group>
       <Popover className="min-w-[--trigger-width]">
         {isLoading ? (
-          <div>Loading...</div>
+          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-muted-foreground">
+            Loading...
+          </div>
+        ) : items.length === 0 ? (
+          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-muted-foreground">
+            No results
+          </div>
         ) : (
           <ListBox className="max-h-[inherit] overflow-auto p-1 outline-0">
             {children}
@@ -72,17 +117,9 @@ function Root<T extends object>({
       </Popover>
     </AriaComboBox>
   );
-}
-
-function Option(props: ListBoxItemProps) {
-  return <ListboxItem {...props} />;
-}
-
-function Section<T extends object>(props: ListboxSectionProps<T>) {
-  return <ListboxSection {...props} />;
-}
+};
 
 export const Combobox = Object.assign(Root, {
-  Option,
-  Section,
+  Option: ListboxItem,
+  Section: ListboxSection,
 });
