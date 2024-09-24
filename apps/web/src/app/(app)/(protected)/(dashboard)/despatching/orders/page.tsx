@@ -25,7 +25,7 @@ export default function ReceivingPage() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {data?.map((order) => (
+            {data?.rows.map((order) => (
               <Table.Row key={order.id}>
                 <Table.Cell>{order.id}</Table.Cell>
                 <Table.Cell className="truncate">
