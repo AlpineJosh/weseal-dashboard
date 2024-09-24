@@ -149,14 +149,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
       <div className="flex h-screen grow flex-col items-stretch">
         <div className="flex h-16 flex-none flex-row items-center space-x-10 border-b bg-card px-4">
-          <Button
-            variant="accent"
-            onPress={() => {
-              resetInventory.mutate();
-            }}
-          >
-            Reset Inventory
-          </Button>
+          {user?.email === "josh@hobson.io" && (
+            <Button
+              variant="accent"
+              onPress={() => {
+                resetInventory.mutate();
+              }}
+            >
+              Reset Inventory
+            </Button>
+          )}
           <div className="flex flex-row items-center space-x-2">
             <div className="flex flex-col space-y-0.5 text-sm">
               <span className="font-semibold text-muted-foreground">
