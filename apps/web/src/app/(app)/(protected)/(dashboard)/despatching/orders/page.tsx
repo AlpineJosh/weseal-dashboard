@@ -9,7 +9,7 @@ import { Link } from "@repo/ui/components/navigation";
 import { Modal } from "@repo/ui/components/overlay";
 
 export default function ReceivingPage() {
-  const { data } = api.despatching.order.list.useQuery();
+  const { data } = api.despatching.order.list.useQuery({ filter: {} });
   return (
     <div className="flex flex-col space-y-4">
       <h1 className="text-2xl font-semibold">Sales Orders</h1>
