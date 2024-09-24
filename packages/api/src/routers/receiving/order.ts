@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq, ilike, sql } from "@repo/db";
+import { count, eq, ilike, sql } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
@@ -25,6 +25,11 @@ export const purchaseOrderRouter = {
       ? sql`${schema.purchaseOrder.id}::text ILIKE ${"%" + input.filter.search + "%"}`
       : undefined;
 
+    const total = await db
+      .select({ count: count() })
+      .from(schema.purchaseOrder)
+      .where(where);
+
     const results = await db.query.purchaseOrder.findMany({
       limit: input.pagination.size,
       offset: (input.pagination.page - 1) * input.pagination.size,
@@ -39,7 +44,7 @@ export const purchaseOrderRouter = {
       pagination: {
         page: input.pagination.page,
         size: input.pagination.size,
-        total: 0,
+        total: total[0]?.count ?? 0,
       },
     };
   }),

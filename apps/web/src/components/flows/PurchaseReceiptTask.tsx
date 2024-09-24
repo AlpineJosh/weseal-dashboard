@@ -1,40 +1,39 @@
-"use client";
-
 import { useState } from "react";
-import { LocationPicker } from "@/components/LocationPicker";
-import { SearchableListbox } from "@/components/SearchableListbox";
 import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 import { z } from "zod";
 
-import type { RouterInputs, RouterOutputs } from "@repo/api";
-import type { FlowStepRendererProps } from "@repo/ui/components/navigation";
-import { Combobox, Input, Select } from "@repo/ui/components/control";
+import type { RouterOutputs } from "@repo/api";
+import { Combobox, Input } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
-import { Badge, Button } from "@repo/ui/components/element";
+import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
-import { Card } from "@repo/ui/components/layout";
-import { Flow } from "@repo/ui/components/navigation";
 
-export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
+export function PurchaseReceiptTaskForm({
+  onSave,
+  onExit,
+}: {
+  onSave: () => void;
+  onExit: () => void;
+}) {
   const [query, setQuery] = useState<string>("");
 
   const [values, setValues] = useImmer<{
-    orderId: string | undefined;
+    orderId: number | undefined;
     quantity: number;
-    locationId: string | undefined;
+    locationId: number | undefined;
   }>({
     orderId: undefined,
     quantity: 1,
     locationId: undefined,
   });
 
-  // const { data: subcomponents } = api.component.subcomponents.useQuery(
-  //   {
-  //     orderId: values.orderId as string,
-  //   },
-  //   { enabled: !!values.orderId },
-  // );
+  const { data: order } = api.receiving.order.get.useQuery(
+    {
+      id: values.orderId as number,
+    },
+    { enabled: !!values.orderId },
+  );
 
   const [items, setItems] = useImmer<
     {
@@ -47,19 +46,21 @@ export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
 
   const { mutate: createTask } = api.task.create.useMutation();
   const save = () => {
-    createTask({
-      type: "production",
-      assignedToId: "1",
-      items: items.map((item) => ({
-        ...item,
-        locationId: item.locationId as number,
-      })),
-    });
+    // createTask({
+    //   type: "production",
+    //   assignedToId: "1",
+    //   items: items.map((item) => ({
+    //     ...item,
+    //     locationId: item.locationId as number,
+    //   })),
+    // });
+    console.log(items);
+    onSave();
   };
 
   return (
     <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
-      <h1 className="text-2xl font-semibold">Create Production Task</h1>
+      <h1 className="text-2xl font-semibold">Receive Purchase Order</h1>
       <Form
         className="flex flex-row space-x-4"
         onSubmit={() => {
@@ -73,7 +74,7 @@ export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
         defaultValues={values}
       >
         <>
-          <Field name="orderId">
+          <Field name="order">
             <Field.Label>Order</Field.Label>
             <Field.Description>Select the order to receive</Field.Description>
             <Field.Control>
@@ -93,13 +94,18 @@ export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
                 }}
                 onSelectionChange={(orderId) => {
                   setValues((draft) => {
-                    draft.orderId = orderId as string;
+                    draft.orderId = orderId;
                   });
                 }}
+                keyAccessor="id"
               >
                 {(order) => {
                   return (
-                    <Combobox.Option key={order.id} value={order}>
+                    <Combobox.Option
+                      key={order.id}
+                      value={order}
+                      textValue={order.id.toString()}
+                    >
                       {order.id} - {order.supplier.name}
                     </Combobox.Option>
                   );
@@ -107,24 +113,11 @@ export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
               </Combobox>
             </Field.Control>
           </Field>
-          <Field name="quantity">
-            <Field.Label>Quantity</Field.Label>
-            <Field.Description>Amount to build</Field.Description>
-            <Field.Control>
-              <Input
-                onChange={(e) => {
-                  setValues({
-                    ...values,
-                    quantity: Math.max(+e.target.value, 1),
-                  });
-                }}
-                type="number"
-              />
-            </Field.Control>
-          </Field>
           <Field name="location">
-            <Field.Label>Production Location</Field.Label>
-            <Field.Description>Select the component to build</Field.Description>
+            <Field.Label>Receiving Location</Field.Label>
+            <Field.Description>
+              Select the location to receive the order
+            </Field.Description>
             <Field.Control>
               <Field.Control>
                 <Combobox<
@@ -137,10 +130,14 @@ export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
                       },
                     });
                   }}
+                  keyAccessor="id"
                 >
                   {(location) => {
                     return (
-                      <Combobox.Option value={location}>
+                      <Combobox.Option
+                        value={location}
+                        textValue={location.name}
+                      >
                         {location.name} - {location.group.name}
                       </Combobox.Option>
                     );
@@ -151,28 +148,42 @@ export function PurchaseReceiptTaskForm({ exit }: { exit: () => void }) {
           </Field>
         </>
       </Form>
-      {/* {values.componentId && (
-        <LocationPicker
-          components={
-            subcomponents?.map((subcomponent) => {
-              return {
-                id: subcomponent.subcomponentId,
-                quantity: subcomponent.quantity * values.quantity,
-              };
-            }) ?? []
-          }
-          value={items}
-          onChange={setItems}
-        />
-      )} */}
+      {order && (
+        <Table>
+          <Table.Header>
+            <Table.Row>
+              <Table.Head>Component</Table.Head>
+              <Table.Head>Description</Table.Head>
+              <Table.Head>Quantity Expected</Table.Head>
+              <Table.Head>Quantity Received</Table.Head>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {order.items.map((item) => (
+              <Table.Row key={item.id}>
+                <Table.Cell>{item.component.id}</Table.Cell>
+                <Table.Cell>{item.component.description}</Table.Cell>
+                <Table.Cell>{item.quantityOrdered}</Table.Cell>
+                <Table.Cell>
+                  <Input
+                    type="number"
+                    defaultValue={item.quantityOrdered || 0}
+                  />
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      )}
       <Button
+        isDisabled={!order}
         variant="primary"
         onPress={() => {
           save();
           close();
         }}
       >
-        Save
+        Receive Goods
       </Button>
     </div>
   );

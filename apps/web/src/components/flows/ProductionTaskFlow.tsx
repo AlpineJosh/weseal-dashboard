@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
 import { api } from "@/utils/trpc/react";
@@ -13,9 +11,13 @@ import { Field, Form } from "@repo/ui/components/form";
 
 type ProductionTaskFormProps = {
   onExit: () => void;
+  onSave: () => void;
 };
 
-export const ProductionTaskForm = ({ onExit }: ProductionTaskFormProps) => {
+export const ProductionTaskForm = ({
+  onExit,
+  onSave,
+}: ProductionTaskFormProps) => {
   const [query, setQuery] = useState<string>("");
   const utils = api.useUtils();
 

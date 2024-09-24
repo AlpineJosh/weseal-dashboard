@@ -65,7 +65,7 @@ function Root<T extends object>({
           items={items}
           className="max-h-[inherit] overflow-auto p-1 outline-none [clip-path:inset(0_0_0_0_round_.75rem)]"
         >
-          {children}
+          {/* {children} */}
         </ListBox>
       </Popover>
     </AriaSelect>

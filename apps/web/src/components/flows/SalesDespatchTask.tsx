@@ -1,49 +1,50 @@
-"use client";
-
 import { useState } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
-import { SearchableListbox } from "@/components/SearchableListbox";
 import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 import { z } from "zod";
 
 import type { RouterInputs, RouterOutputs } from "@repo/api";
-import type { FlowStepRendererProps } from "@repo/ui/components/navigation";
-import { Combobox, Input, Select } from "@repo/ui/components/control";
-import { Table } from "@repo/ui/components/display";
-import { Badge, Button } from "@repo/ui/components/element";
+import { Combobox } from "@repo/ui/components/control";
+import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
-import { Card } from "@repo/ui/components/layout";
-import { Flow } from "@repo/ui/components/navigation";
 
-export function ProductionTaskForm({ exit }: { exit: () => void }) {
+export function SalesDespatchTaskForm({
+  onSave,
+  onExit,
+}: {
+  onSave: () => void;
+  onExit: () => void;
+}) {
   const [query, setQuery] = useState<string>("");
 
   const [values, setValues] = useImmer<{
-    componentId: string | undefined;
+    orderId: number | undefined;
     quantity: number;
-    locationId: string | undefined;
+    locationId: number | undefined;
   }>({
-    componentId: undefined,
+    orderId: undefined,
     quantity: 1,
     locationId: undefined,
   });
-
-  const { data: subcomponents } = api.component.subcomponents.useQuery(
-    {
-      componentId: values.componentId as string,
-    },
-    { enabled: !!values.componentId },
-  );
+  const [task, setTask] = useImmer<RouterInputs["task"]["create"]>({
+    type: "production",
+    assignedToId: "",
+    items: [],
+  });
 
   const [items, setItems] = useImmer<
-    {
+    (RouterInputs["task"]["create"]["items"][number] & {
       componentId: string;
-      locationId: number;
-      batchId: number;
-      quantity: number;
-    }[]
+    })[]
   >([]);
+
+  const { data: order } = api.despatching.order.get.useQuery(
+    {
+      id: values.orderId as number,
+    },
+    { enabled: !!values.orderId },
+  );
 
   const { mutate: createTask } = api.task.create.useMutation();
   const save = () => {
@@ -59,7 +60,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
 
   return (
     <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
-      <h1 className="text-2xl font-semibold">Create Production Task</h1>
+      <h1 className="text-2xl font-semibold">Prepare Despatch</h1>
       <Form
         className="flex flex-row space-x-4"
         onSubmit={() => {
@@ -74,90 +75,60 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
       >
         <>
           <Field name="component">
-            <Field.Label>Component</Field.Label>
-            <Field.Description>Select the component to build</Field.Description>
+            <Field.Label>Sales Order</Field.Label>
+            <Field.Description>Select the order to despatch</Field.Description>
             <Field.Control>
-              <Combobox<RouterOutputs["component"]["list"]["rows"][number]>
+              <Combobox<
+                RouterOutputs["despatching"]["order"]["list"]["rows"][number]
+              >
                 options={(query) => {
-                  return api.component.list.useQuery({
+                  return api.despatching.order.list.useQuery({
+                    pagination: {
+                      page: 1,
+                      size: 10,
+                    },
                     filter: {
-                      hasSubcomponents: true,
                       search: query,
                     },
                   });
                 }}
-                onSelectionChange={(componentId) => {
+                onSelectionChange={(orderId) => {
                   setValues((draft) => {
-                    draft.componentId = componentId as string;
+                    draft.orderId = orderId as number;
                   });
                 }}
+                keyAccessor="id"
               >
-                {(component) => {
+                {(order) => {
                   return (
-                    <Combobox.Option key={component.id} value={component}>
-                      {component.id}
+                    <Combobox.Option
+                      key={order.id}
+                      value={order}
+                      textValue={order.id.toString()}
+                    >
+                      {order.id}
                     </Combobox.Option>
                   );
                 }}
               </Combobox>
             </Field.Control>
           </Field>
-          <Field name="quantity">
-            <Field.Label>Quantity</Field.Label>
-            <Field.Description>Amount to build</Field.Description>
-            <Field.Control>
-              <Input
-                onChange={(e) => {
-                  setValues({
-                    ...values,
-                    quantity: Math.max(+e.target.value, 1),
-                  });
-                }}
-                type="number"
-              />
-            </Field.Control>
-          </Field>
-          <Field name="location">
-            <Field.Label>Production Location</Field.Label>
-            <Field.Description>Select the component to build</Field.Description>
-            <Field.Control>
-              <Field.Control>
-                <Combobox<
-                  RouterOutputs["inventory"]["locations"]["rows"][number]
-                >
-                  options={(query) => {
-                    return api.inventory.locations.useQuery({
-                      filter: {
-                        search: query,
-                      },
-                    });
-                  }}
-                >
-                  {(location) => {
-                    return (
-                      <Combobox.Option value={location}>
-                        {location.name} - {location.group.name}
-                      </Combobox.Option>
-                    );
-                  }}
-                </Combobox>
-              </Field.Control>
-            </Field.Control>
-          </Field>
         </>
       </Form>
-      {values.componentId && (
+      {values.orderId && (
         <LocationPicker
           components={
-            subcomponents?.map((subcomponent) => {
+            order?.items?.map((item) => {
               return {
-                id: subcomponent.subcomponentId,
-                quantity: subcomponent.quantity * values.quantity,
+                id: item.componentId,
+                quantity: item.quantityOrdered,
               };
             }) ?? []
           }
           value={items}
-          onChange={setItems}
+          onChange={(items) => {
+            setItems(items);
+          }}
         />
       )}
       <Button
@@ -167,7 +138,7 @@ export function ProductionTaskForm({ exit }: { exit: () => void }) {
           close();
         }}
       >
-        Save
+        Create Despatch Task
       </Button>
     </div>
   );

@@ -9,7 +9,7 @@ import { Link } from "@repo/ui/components/navigation";
 import { Modal } from "@repo/ui/components/overlay";
 
 export default function ReceivingPage() {
-  const { data } = api.receiving.order.list.useQuery();
+  const { data } = api.receiving.order.list.useQuery({ filter: {} });
   return (
     <div className="flex flex-col space-y-4">
       <h1 className="text-2xl font-semibold">Purchase Orders</h1>
@@ -25,7 +25,7 @@ export default function ReceivingPage() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {data?.map((order) => (
+            {data?.rows.map((order) => (
               <Table.Row key={order.id}>
                 <Table.Cell>{order.id}</Table.Cell>
                 <Table.Cell>{order.supplier.name}</Table.Cell>
@@ -34,12 +34,12 @@ export default function ReceivingPage() {
                 </Table.Cell>
                 <Table.Cell>{order.orderDate?.toLocaleDateString()}</Table.Cell>
                 <Table.Cell className="flex gap-2 p-0">
-                  <Modal.Trigger>
+                  <Modal>
                     <Link>Receive</Link>
                     <Modal.Content>
                       <p>Hello</p>
                     </Modal.Content>
-                  </Modal.Trigger>
+                  </Modal>
                   <Button variant="ghost">View Details</Button>
                 </Table.Cell>
               </Table.Row>

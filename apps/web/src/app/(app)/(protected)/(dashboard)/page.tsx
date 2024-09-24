@@ -2,6 +2,8 @@
 
 import { ProductionTaskForm } from "@/components/flows/ProductionTaskFlow";
 import { PurchaseReceiptTaskForm } from "@/components/flows/PurchaseReceiptTask";
+import { SalesDespatchTaskForm } from "@/components/flows/SalesDespatchTask";
+import { StockTransferTaskForm } from "@/components/flows/StockTransferTask";
 import { api } from "@/utils/trpc/react";
 
 import { RouterInputs, RouterOutputs } from "@repo/api";
@@ -43,17 +45,35 @@ export default function HomePage() {
         <Modal>
           <Button variant="primary">Record Receipt</Button>
           <Modal.Content isDismissable className="w-screen-md">
-            <PurchaseReceiptTaskForm exit={close} />
+            {({ close }) => (
+              <PurchaseReceiptTaskForm onSave={close} onExit={close} />
+            )}
           </Modal.Content>
         </Modal>
-        <Button variant="primary">Prepare Despatch</Button>
+        <Modal>
+          <Button variant="primary">Prepare Despatch</Button>
+          <Modal.Content isDismissable>
+            {({ close }) => (
+              <SalesDespatchTaskForm onSave={close} onExit={close} />
+            )}
+          </Modal.Content>
+        </Modal>
         <Modal>
           <Button variant="primary">BOM Build</Button>
           <Modal.Content isDismissable>
-            {({ close }) => <ProductionTaskForm onExit={close} />}
+            {({ close }) => (
+              <ProductionTaskForm onSave={close} onExit={close} />
+            )}
           </Modal.Content>
         </Modal>
-        <Button variant="primary">Transfer</Button>
+        <Modal>
+          <Button variant="primary">Transfer</Button>
+          <Modal.Content isDismissable>
+            {({ close }) => (
+              <StockTransferTaskForm onSave={close} onExit={close} />
+            )}
+          </Modal.Content>
+        </Modal>
       </div>
       <div className="w-full border-b"></div>
       <h3 className="font-medium text-muted-foreground">Tasks</h3>
