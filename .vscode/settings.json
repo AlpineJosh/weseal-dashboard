@@ -32,5 +32,8 @@
 
   "[handlebars]": {
     "editor.formatOnSave": false
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "adpyke.vscode-sql-formatter"
   }
 }

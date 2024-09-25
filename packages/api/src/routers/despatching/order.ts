@@ -12,6 +12,14 @@ import {
 } from "../../lib/schemas";
 import { publicProcedure } from "../../trpc";
 
+const despatchCTE = db
+  .select({
+    total: count(),
+  })
+  .from(schema.salesDespatch)
+  .groupBy(schema.salesDespatch.orderId)
+  .as("despatch_cte");
+
 const uniqueOrderInput = z.object({
   id: z.number(),
 });

@@ -17,6 +17,7 @@ const listTaskInput = z.object({
   filter: z
     .object({
       type: z.enum(["transfer", "production", "despatch", "receipt"]),
+      isComplete: z.boolean().optional(),
     })
     .optional(),
   sort: sortSchema(["createdAt"]),
@@ -70,6 +71,9 @@ export const taskRouter = {
         salesDespatch: true,
         items: true,
       },
+      where: input.filter?.type
+        ? eq(schema.task.type, input.filter.type)
+        : undefined,
     });
 
     return {
