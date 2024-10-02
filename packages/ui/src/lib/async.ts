@@ -1,19 +1,8 @@
-export type AsyncData<T> =
-  | {
-      data: T;
-      isLoading: false;
-      error: undefined;
-    }
-  | {
-      data: undefined;
-      isLoading: true;
-      error: undefined;
-    }
-  | {
-      data: undefined;
-      isLoading: false;
-      error: Error;
-    };
+export type AsyncData<T> = {
+  data: T | undefined;
+  isLoading: boolean;
+  error: Error | undefined;
+};
 
 export type DataPagination = {
   page: number;

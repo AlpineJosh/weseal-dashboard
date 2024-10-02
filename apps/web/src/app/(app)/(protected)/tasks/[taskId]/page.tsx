@@ -4,7 +4,7 @@ import { api } from "@/utils/trpc/react";
 
 import { Table } from "@repo/ui/components/display";
 import { Badge, Button } from "@repo/ui/components/element";
-import { Card } from "@repo/ui/components/layout";
+import { Heading, Subheading } from "@repo/ui/components/typography";
 
 export default function TaskPage({ params }: { params: { taskId: string } }) {
   const utils = api.useUtils();
@@ -16,20 +16,23 @@ export default function TaskPage({ params }: { params: { taskId: string } }) {
   });
 
   return (
-    <Card className="overflow-hidden">
+    <div>
+      <Heading level={1}>Task #{task?.id}</Heading>
+      <Subheading level={2}>Items</Subheading>
       <Table>
         <Table.Header>
           <Table.Row>
-            <Table.Head>Stock Code</Table.Head>
-            <Table.Head>Quantity</Table.Head>
-            <Table.Head>Batch</Table.Head>
-            <Table.Head>From Location</Table.Head>
-            <Table.Head>To Location</Table.Head>
-            <Table.Head>Status</Table.Head>
+            <Table.Column isRowHeader>Stock Code</Table.Column>
+            <Table.Column>Quantity</Table.Column>
+            <Table.Column>Batch</Table.Column>
+            <Table.Column>From Location</Table.Column>
+            <Table.Column>To Location</Table.Column>
+            <Table.Column>Status</Table.Column>
+            <Table.Column>Actions</Table.Column>
           </Table.Row>
         </Table.Header>
-        <Table.Body>
-          {task?.items.map((item) => (
+        <Table.Body items={task?.items}>
+          {(item) => (
             <Table.Row key={item.id}>
               <Table.Cell>{item.batch.component.id}</Table.Cell>
               <Table.Cell>{item.quantity}</Table.Cell>
@@ -37,15 +40,15 @@ export default function TaskPage({ params }: { params: { taskId: string } }) {
               <Table.Cell>{item.pickLocation?.name}</Table.Cell>
               <Table.Cell>{item.putLocation?.name}</Table.Cell>
               <Table.Cell>
-                <Badge variant={item.isComplete ? "secondary" : "default"}>
+                <Badge color={item.isComplete ? "green" : "red"}>
                   {item.isComplete ? "Complete" : "Incomplete"}
                 </Badge>
               </Table.Cell>
               <Table.Cell>
                 {!item.isComplete && (
                   <Button
-                    variant="accent"
-                    size="sm"
+                    variant="plain"
+                    color="primary"
                     onPress={() => completeItem({ id: item.id })}
                   >
                     Mark Complete
@@ -53,9 +56,9 @@ export default function TaskPage({ params }: { params: { taskId: string } }) {
                 )}
               </Table.Cell>
             </Table.Row>
-          ))}
+          )}
         </Table.Body>
       </Table>
-    </Card>
+    </div>
   );
 }

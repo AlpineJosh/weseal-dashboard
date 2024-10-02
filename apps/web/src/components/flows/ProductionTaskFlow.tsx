@@ -132,9 +132,7 @@ export const ProductionTaskForm = ({
           </Field>
           <Field name="location">
             <Field.Label>Production Location</Field.Label>
-            <Field.Description>
-              Where the components need to go
-            </Field.Description>
+            <Field.Description>Component destination</Field.Description>
             <Field.Control>
               <Field.Control>
                 <Combobox<
@@ -167,6 +165,13 @@ export const ProductionTaskForm = ({
                   }}
                 </Combobox>
               </Field.Control>
+            </Field.Control>
+          </Field>
+          <Field name="batchReference">
+            <Field.Label>Batch Reference</Field.Label>
+            <Field.Description>Input the batch reference</Field.Description>
+            <Field.Control>
+              <Input type="text" />
             </Field.Control>
           </Field>
         </>

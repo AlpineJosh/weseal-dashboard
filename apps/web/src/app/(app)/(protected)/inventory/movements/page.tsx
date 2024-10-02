@@ -41,11 +41,21 @@ export default function InventoryOverview() {
         data={api.inventory.movements.list.useQuery}
         columns={[
           {
-            accessor: "id",
+            id: "id",
+            key: "id",
+            isRowHeader: true,
             label: "ID",
+            cell: (row) => {
+              return (
+                <Datatable.Cell>
+                  <Link href={`/inventory/movements/${row.id}`}>{row.id}</Link>
+                </Datatable.Cell>
+              );
+            },
           },
           {
-            accessor: "type",
+            id: "type",
+            key: "type",
             label: "Type",
             cell: ({ type }) => {
               return (
@@ -58,23 +68,46 @@ export default function InventoryOverview() {
             },
           },
           {
-            accessor: "componentId",
+            id: "componentId",
+            key: "componentId",
             label: "Stock Code",
+            cell: ({ componentId }) => {
+              return (
+                <Table.Cell>
+                  <Link href={`/inventory/components/${componentId}`}>
+                    {componentId}
+                  </Link>
+                </Table.Cell>
+              );
+            },
           },
           {
-            accessor: "batchReference",
+            id: "batchReference",
+            key: "batchReference",
             label: "Batch Reference",
+            cell: ({ batchReference }) => {
+              return <Table.Cell>{batchReference}</Table.Cell>;
+            },
           },
           {
-            accessor: "locationName",
+            id: "locationName",
+            key: "locationName",
             label: "Location",
+            cell: ({ locationName }) => {
+              return <Table.Cell>{locationName}</Table.Cell>;
+            },
           },
           {
-            accessor: "quantity",
+            id: "quantity",
+            key: "quantity",
             label: "Quantity",
+            cell: ({ quantity }) => {
+              return <Table.Cell>{quantity}</Table.Cell>;
+            },
           },
           {
-            accessor: "date",
+            id: "date",
+            key: "date",
             label: "Date",
             cell: ({ date }) => {
               return (

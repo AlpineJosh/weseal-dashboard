@@ -2,43 +2,58 @@
 
 import { api } from "@/utils/trpc/react";
 
-import { RouterOutputs } from "@repo/api";
-import { Datatable, Table } from "@repo/ui/components/display";
+import { Datatable } from "@repo/ui/components/display";
 
 export default function InventoryPage() {
   return (
     <div className="flex flex-col space-y-4">
       <h1 className="text-2xl font-semibold">Sage Discrepancies</h1>
 
-      <Datatable<RouterOutputs["component"]["list"]["rows"][number]>
+      <Datatable
         columns={[
           {
-            accessor: "id",
+            id: "id",
+            isRowHeader: true,
+            key: "id",
             label: "ID",
+            cell: (row) => <Datatable.Cell>{row.id}</Datatable.Cell>,
           },
           {
-            accessor: "description",
+            id: "description",
+            key: "description",
             label: "Description",
+            cell: (row) => <Datatable.Cell>{row.description}</Datatable.Cell>,
           },
           {
-            accessor: (row) => row.category?.name,
+            id: "category",
+            key: "category",
             label: "Category",
+            cell: (row) => (
+              <Datatable.Cell>{row.category?.name}</Datatable.Cell>
+            ),
           },
           {
-            accessor: "totalQuantity",
+            id: "totalQuantity",
+            key: "totalQuantity",
             label: "Quantity",
+            cell: (row) => <Datatable.Cell>{row.totalQuantity}</Datatable.Cell>,
           },
           {
-            accessor: "sageQuantity",
+            id: "sageQuantity",
+            key: "sageQuantity",
             label: "Quantity In Sage",
+            cell: (row) => <Datatable.Cell>{row.sageQuantity}</Datatable.Cell>,
           },
           {
-            accessor: "sageDiscrepancy",
+            id: "sageDiscrepancy",
+            key: "sageDiscrepancy",
             label: "Discrepancy",
+            cell: (row) => (
+              <Datatable.Cell>{row.sageDiscrepancy.toFixed(2)}</Datatable.Cell>
+            ),
           },
         ]}
-        data={api.component.list.useQuery}
-        filter={{ sageDiscrepancy: { neq: 0 } }}
+        data={(query) => api.component.list.useQuery(query)}
       />
     </div>
   );
