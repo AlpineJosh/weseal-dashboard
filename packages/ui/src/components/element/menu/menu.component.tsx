@@ -1,53 +1,71 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MenuTriggerProps } from "react-aria-components";
+import React from "react";
+import { cva } from "class-variance-authority";
+import * as Aria from "react-aria-components";
 
-import { IconDefinition } from "@repo/pro-light-svg-icons";
 import { Popover } from "@repo/ui/components/utility";
 
-import { Button, ButtonProps } from "../button";
-import * as MenuPrimitive from "./menu.primitive";
+import { cn } from "../../../lib/class-merge";
 
-interface MenuPropsBase<T extends object>
-  extends MenuPrimitive.MenuProps<T>,
-    Omit<MenuTriggerProps, "children"> {
-  variant?: ButtonProps["variant"];
-}
+const variants = {
+  root: cva(),
+  items: cva([
+    // Handle scrolling when menu won't fit in viewport
+    "overflow-y-auto p-1",
+  ]),
+  item: cva([
+    // Base styles
+    "group cursor-default rounded-lg px-3.5 py-2.5 focus:outline-none sm:px-3 sm:py-1.5",
+    // Text styles
+    "text-left text-base/6 text-content sm:text-sm/6",
+    // Focus
+    "data-[focused]:bg-primary data-[focused]:text-background",
+    // Disabled state
+    "data-[disabled]:opacity-50",
+    // Icons
+    "[&>[data-slot=icon]]:col-start-1 [&>[data-slot=icon]]:row-start-1 [&>[data-slot=icon]]:-ml-0.5 [&>[data-slot=icon]]:mr-2.5 [&>[data-slot=icon]]:size-5 sm:[&>[data-slot=icon]]:mr-2 [&>[data-slot=icon]]:sm:size-4",
+    "[&>[data-slot=icon]]:text-content-muted [&>[data-slot=icon]]:data-[focused]:text-background",
+    // Avatar
+    "[&>[data-slot=avatar]]:-ml-1 [&>[data-slot=avatar]]:mr-2.5 [&>[data-slot=avatar]]:size-6 sm:[&>[data-slot=avatar]]:mr-2 sm:[&>[data-slot=avatar]]:size-5",
+  ]),
+};
 
-interface MenuPropsWithLabel<T extends object> extends MenuPropsBase<T> {
-  label: string;
-  icon?: IconDefinition;
-}
+type MenuProps = Aria.MenuTriggerProps;
 
-interface MenuPropsWithIcon<T extends object> extends MenuPropsBase<T> {
-  label?: string;
-  icon: IconDefinition;
-}
+const Root = ({ children, ...props }: MenuProps) => {
+  return <Aria.MenuTrigger {...props}>{children}</Aria.MenuTrigger>;
+};
 
-type MenuProps<T extends object> = MenuPropsWithLabel<T> | MenuPropsWithIcon<T>;
+type MenuItemsProps<T extends object> = Aria.MenuProps<T>;
 
-const Root = <T extends object>({
+const Items = <T extends object>({
   children,
-  label,
-  icon,
-  variant,
+  className,
   ...props
-}: MenuProps<T>) => {
+}: MenuItemsProps<T>) => {
   return (
-    <MenuPrimitive.Menu {...props}>
-      <Button variant={variant}>
-        {label}
-        {icon && <FontAwesomeIcon icon={icon} />}
-      </Button>
-      <Popover>
-        <MenuPrimitive.Items>{children}</MenuPrimitive.Items>
-      </Popover>
-    </MenuPrimitive.Menu>
+    <Popover>
+      <Aria.Menu {...props} className={cn(variants.items(), className)}>
+        {children}
+      </Aria.Menu>
+    </Popover>
   );
 };
 
-type MenuItemProps<T extends object> = MenuPrimitive.MenuItemProps<T>;
+type MenuItemProps<T extends object> = Aria.MenuItemProps<T>;
 
-export const Menu = Object.assign(Root, { Item: MenuPrimitive.Item });
-export type { MenuProps, MenuItemProps };
+const Item = <T extends object>({
+  children,
+  className,
+  ...props
+}: MenuItemProps<T>) => {
+  return (
+    <Aria.MenuItem {...props} className={cn(variants.item(), className)}>
+      {children}
+    </Aria.MenuItem>
+  );
+};
+
+export const Menu = Object.assign(Root, { Items, Item });
+export type { MenuProps, MenuItemsProps, MenuItemProps };

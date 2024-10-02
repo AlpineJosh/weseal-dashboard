@@ -3,6 +3,11 @@
 import type { FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export const Icon = FontAwesomeIcon;
+const Icon = (props: FontAwesomeIconProps) => (
+  <FontAwesomeIcon data-slot="icon" {...props} />
+);
 
-export type IconProps = FontAwesomeIconProps;
+type IconProps = FontAwesomeIconProps;
+
+export { Icon };
+export type { IconProps };

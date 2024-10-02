@@ -1,23 +1,26 @@
-import type { PopoverProps as AriaPopoverProps } from "react-aria-components";
-import { forwardRef } from "react";
+import React from "react";
 import { cva } from "class-variance-authority";
-import {
-  Popover as AriaPopover,
-  PopoverContext,
-  useSlottedContext,
-} from "react-aria-components";
+import * as Aria from "react-aria-components";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
-export interface PopoverProps extends Omit<AriaPopoverProps, "children"> {
-  showArrow?: boolean;
-  children: React.ReactNode;
-}
+type PopoverProps = Aria.PopoverProps;
 
-const styles = cva(
+const variants = cva(
   cn(
-    "bg-popover/30 text-popover-foreground rounded-lg border border-border bg-card shadow-lg",
-    "backdrop-blur-2xl backdrop-saturate-200",
+    // Base styles
+    "isolate w-max rounded-lg",
+    // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+    "outline outline-1 outline-transparent focus:outline-none",
+    // Handle scrolling when menu won't fit in viewport
+    "overflow-y-auto",
+    // Popover background
+    "bg-background-popover/75 backdrop-blur-xl",
+    // Shadows
+    "shadow-lg ring-1 ring-content/10 dark:ring-inset",
+    // Define grid at the menu level if subgrid is supported
+    // Transitions
+    "transition data-[closed]:data-[leave]:opacity-0 data-[leave]:duration-100 data-[leave]:ease-in",
   ),
   {
     variants: {
@@ -31,25 +34,18 @@ const styles = cva(
   },
 );
 
-export const Popover = forwardRef<HTMLDivElement, PopoverProps>(
-  ({ children, showArrow, className, ...props }, ref) => {
-    const popoverContext = useSlottedContext(PopoverContext);
-    const isSubmenu = popoverContext?.trigger === "SubmenuTrigger";
-    let offset = showArrow ? 12 : 8;
-    offset = isSubmenu ? offset - 6 : offset;
-    return (
-      <AriaPopover
-        ref={ref}
-        onOpenChange={console.log}
-        offset={offset}
-        {...props}
-        className={cn(
-          styles({ isEntering: props.isEntering, isExiting: props.isExiting }),
-          className,
-        )}
-      >
-        {children}
-      </AriaPopover>
-    );
-  },
-);
+const Popover = ({ children, className, ...props }: PopoverProps) => {
+  return (
+    <Aria.Popover
+      {...props}
+      className={({ isEntering, isExiting }) =>
+        cn(variants({ isEntering, isExiting }), className)
+      }
+    >
+      {children}
+    </Aria.Popover>
+  );
+};
+
+export { Popover };
+export type { PopoverProps };

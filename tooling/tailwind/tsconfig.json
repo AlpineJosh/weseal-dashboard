@@ -2,8 +2,11 @@
   "extends": "@repo/tsconfig/base.json",
   "compilerOptions": {
     "incremental": true,
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "paths": {
+      "@domchristie/tailwind-utopia": ["../tailwind/types/tailwind-utopia.d.ts"]
+    }
   },
-  "include": ["."],
+  "include": [".", "types"],
   "exclude": ["node_modules"]
 }

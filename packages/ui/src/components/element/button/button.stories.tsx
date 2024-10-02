@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { faPlus } from "@repo/pro-light-svg-icons";
 
 import type { ButtonProps } from "./button.component";
+import { Icon } from "..";
+import { colorVariants } from "../../../lib/colors";
 import { Button } from "./button.component";
 
 const meta: Meta<ButtonProps> = {
@@ -16,73 +19,54 @@ export default meta;
 type Story = StoryObj<ButtonProps>;
 
 export const Default: Story = {
+  render: (args) => <Button {...args}>Button</Button>,
   args: {
     children: "Button",
-    variant: "default",
-    size: "default",
   },
 };
 
-export const Primary: Story = {
+export const Solid: Story = {
+  render: (args) => (
+    <div className="grid grid-cols-5 gap-2">
+      {Object.keys(colorVariants).map((color) => (
+        <Button key={color} {...args} color={color as any}>
+          {color}
+        </Button>
+      ))}
+    </div>
+  ),
   args: {
-    ...Default.args,
-    variant: "primary",
-  },
-};
-
-export const Secondary: Story = {
-  args: {
-    ...Default.args,
-    variant: "secondary",
-  },
-};
-
-export const Accent: Story = {
-  args: {
-    ...Default.args,
-    variant: "accent",
+    children: "Button",
+    variant: "solid",
   },
 };
 
 export const Outline: Story = {
+  ...Solid,
   args: {
-    ...Default.args,
     variant: "outline",
   },
 };
 
-export const Ghost: Story = {
+export const Plain: Story = {
+  ...Solid,
   args: {
-    ...Default.args,
-    variant: "ghost",
+    variant: "plain",
   },
 };
 
-export const Link: Story = {
+export const Input: Story = {
+  ...Default,
   args: {
-    ...Default.args,
-    variant: "link",
+    variant: "input",
   },
 };
 
-export const Small: Story = {
-  args: {
-    ...Default.args,
-    size: "sm",
-  },
-};
-
-export const Large: Story = {
-  args: {
-    ...Default.args,
-    size: "lg",
-  },
-};
-
-export const Icon: Story = {
-  args: {
-    ...Default.args,
-    children: <FontAwesomeIcon size="lg" icon={faPlus} />,
-    size: "icon",
-  },
+export const WithIcon: Story = {
+  render: (args) => (
+    <Button {...args}>
+      <Icon icon={faPlus} />
+      Button
+    </Button>
+  ),
 };

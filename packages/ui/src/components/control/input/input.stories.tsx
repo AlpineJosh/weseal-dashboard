@@ -13,5 +13,5 @@ export default meta;
 type Story = StoryObj<InputProps>;
 
 export const Default: Story = {
-  args: { className: "w-[200px] bg-white" },
+  args: { className: "w-[200px]" },
 };

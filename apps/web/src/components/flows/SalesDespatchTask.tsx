@@ -53,13 +53,13 @@ export function SalesDespatchTaskForm({
       assignedToId: "1",
       items: items.map((item) => ({
         ...item,
-        locationId: item.locationId as number,
+        locationId: item.pickLocationId as number,
       })),
     });
   };
 
   return (
-    <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
+    <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Prepare Despatch</h1>
       <Form
         className="flex flex-row space-x-4"
@@ -68,7 +68,7 @@ export function SalesDespatchTaskForm({
         }}
         schema={z.object({
           componentId: z.string(),
-          locationId: z.string(),
+          locationId: z.number(),
           quantity: z.number(),
         })}
         defaultValues={values}
@@ -131,15 +131,22 @@ export function SalesDespatchTaskForm({
           }}
         />
       )}
-      <Button
-        variant="primary"
-        onPress={() => {
-          save();
-          close();
-        }}
-      >
-        Create Despatch Task
-      </Button>
+      <div className="flex justify-end gap-2">
+        <Button variant="plain" color="default" onPress={onExit}>
+          Cancel
+        </Button>
+        <Button
+          isDisabled={!order}
+          variant="solid"
+          color="primary"
+          onPress={() => {
+            save();
+            close();
+          }}
+        >
+          Create Despatch Task
+        </Button>
+      </div>
     </div>
   );
 }

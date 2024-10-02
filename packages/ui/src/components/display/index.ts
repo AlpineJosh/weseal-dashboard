@@ -1,3 +1,3 @@
-export * from "../element/icon";
+export * from "./modal";
 export * from "./table";
 export * from "./datatable";

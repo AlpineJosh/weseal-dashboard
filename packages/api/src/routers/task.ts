@@ -16,7 +16,9 @@ const listTaskInput = z.object({
   pagination: paginationSchema(),
   filter: z
     .object({
-      type: z.enum(["transfer", "production", "despatch", "receipt"]),
+      type: z
+        .enum(["transfer", "production", "despatch", "receipt"])
+        .optional(),
     })
     .optional(),
   sort: sortSchema(["createdAt"]),

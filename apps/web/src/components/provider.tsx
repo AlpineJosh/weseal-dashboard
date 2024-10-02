@@ -11,7 +11,7 @@ declare module "react-aria-components" {
   }
 }
 
-export function ClientProviders({ children }) {
+export function ClientProviders({ children }: { children: React.ReactNode }) {
   let router = useRouter();
 
   return <RouterProvider navigate={router.push}>{children}</RouterProvider>;

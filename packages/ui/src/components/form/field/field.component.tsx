@@ -6,7 +6,6 @@ import { createContext, forwardRef, useContext, useId } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { Label as AriaLabel } from "react-aria-components";
 import { useFormContext } from "react-hook-form";
-import { mergeRefs } from "react-merge-refs";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
@@ -89,7 +88,7 @@ const Control = forwardRef<
 
   return (
     <Slot
-      ref={mergeRefs([ref, fieldRef])}
+      ref={fieldRef}
       id={formItemId}
       aria-describedby={
         !error
@@ -114,7 +113,7 @@ const Description = forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-[0.8rem] text-muted-foreground", className)}
+      className={cn("text-muted-foreground text-[0.8rem]", className)}
       {...props}
     />
   );

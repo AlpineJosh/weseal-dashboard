@@ -71,7 +71,7 @@ export const ProductionTaskForm = ({
   };
 
   return (
-    <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
+    <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Create Production Task</h1>
       <Form
         className="flex flex-row space-x-4"
@@ -195,16 +195,22 @@ export const ProductionTaskForm = ({
           </div>
         )}
       </div>
-      <Button
-        variant="primary"
-        isDisabled={!values.componentId}
-        onPress={() => {
-          save();
-          onExit();
-        }}
-      >
-        Save
-      </Button>
+      <div className="flex justify-end gap-2">
+        <Button variant="plain" color="default" onPress={onExit}>
+          Cancel
+        </Button>
+        <Button
+          isDisabled={!values.componentId}
+          variant="solid"
+          color="primary"
+          onPress={() => {
+            save();
+            close();
+          }}
+        >
+          Create Task
+        </Button>
+      </div>
     </div>
   );
 };

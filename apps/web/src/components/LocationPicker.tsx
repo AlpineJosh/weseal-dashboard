@@ -128,19 +128,17 @@ const LocationPickerItem = ({
     <div className="relative flex flex-row border-b">
       <div className="flex w-1/3 shrink-0 flex-col border-r p-2">
         <span className="font-semibold">{component.id}</span>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {component.description}
         </span>
         <span className="text-lg">{quantity}</span>
       </div>
       <Table>
         <Table.Header>
-          <Table.Row className="sticky top-0 bg-card">
-            <Table.Head />
-            <Table.Head>Location</Table.Head>
-            <Table.Head>Batch</Table.Head>
-            <Table.Head>Quantity</Table.Head>
-          </Table.Row>
+          <Table.Column />
+          <Table.Column isRowHeader>Location</Table.Column>
+          <Table.Column>Batch</Table.Column>
+          <Table.Column>Quantity</Table.Column>
         </Table.Header>
         <Table.Body>
           {locations.map((location, index) => (

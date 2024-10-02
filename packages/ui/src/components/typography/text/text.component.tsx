@@ -1,35 +1,45 @@
 "use client";
 
 import type { ComponentPropsWithoutRef } from "react";
-import { forwardRef } from "react";
-import { cva } from "class-variance-authority";
+import React from "react";
 import { Text as AriaText } from "react-aria-components";
 
+import { Link } from "@repo/ui/components/element";
 import { cn } from "@repo/ui/lib/class-merge";
 
-const textStyles = cva("leading-7 [&:not(:first-child)]:mt-6", {
-  variants: {
-    muted: {
-      true: "text-muted-foreground",
-    },
-  },
-});
+type TextProps = ComponentPropsWithoutRef<"p">;
 
-interface TextProps extends ComponentPropsWithoutRef<"p"> {
-  muted?: boolean;
-}
+const Text = ({ className, ...props }: TextProps) => {
+  return (
+    <AriaText
+      data-slot="text"
+      {...props}
+      className={cn(className, "text-base/6 text-content-muted sm:text-sm/6")}
+    />
+  );
+};
 
-const Text = forwardRef<HTMLParagraphElement, TextProps>(
-  ({ muted = false, className, ...props }, ref) => {
-    return (
-      <AriaText
-        className={cn(textStyles({ muted }), className)}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
+type TextLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
-export { Text };
-export type { TextProps };
+const TextLink = ({ className, ...props }: TextLinkProps) => {
+  return (
+    <Link
+      {...props}
+      className={cn(
+        className,
+        "text-content underline decoration-content/50 data-[hovered]:decoration-content",
+      )}
+    />
+  );
+};
+
+type StrongProps = ComponentPropsWithoutRef<"strong">;
+
+const Strong = ({ className, ...props }: StrongProps) => {
+  return (
+    <strong {...props} className={cn(className, "font-medium text-content")} />
+  );
+};
+
+export { Text, TextLink, Strong };
+export type { TextProps, TextLinkProps, StrongProps };

@@ -27,7 +27,7 @@ export function StockTransferTaskForm({
   });
 
   return (
-    <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
+    <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Create Transfer Task</h1>
       <Form
         className="flex flex-col space-y-4"
@@ -151,7 +151,7 @@ export function StockTransferTaskForm({
             </Field.Control>
           </Field.Control>
         </Field>
-        <Button variant="primary" type="submit">
+        <Button color="primary" type="submit">
           Create Task
         </Button>
       </Form>

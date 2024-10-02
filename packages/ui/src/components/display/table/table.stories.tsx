@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 
 import type { TableProps } from "./table.component";
 import { Table } from "./table.component";
@@ -16,13 +17,11 @@ export const Default: Story = {
   render: () => (
     <Table>
       <Table.Header>
-        <Table.Row>
-          <Table.Head>ID</Table.Head>
-          <Table.Head>Name</Table.Head>
-          <Table.Head>Email</Table.Head>
-          <Table.Head>Role</Table.Head>
-          <Table.Head>Status</Table.Head>
-        </Table.Row>
+        <Table.Column>ID</Table.Column>
+        <Table.Column isRowHeader>Name</Table.Column>
+        <Table.Column>Email</Table.Column>
+        <Table.Column>Role</Table.Column>
+        <Table.Column>Status</Table.Column>
       </Table.Header>
       <Table.Body>
         {[
@@ -71,11 +70,11 @@ export const Default: Story = {
           </Table.Row>
         ))}
       </Table.Body>
-      <Table.Footer>
+      {/* <Table.Footer>
         <Table.Row>
           <Table.Cell colSpan={5}>Total Users: 5</Table.Cell>
         </Table.Row>
-      </Table.Footer>
+      </Table.Footer> */}
     </Table>
   ),
 };

@@ -59,16 +59,16 @@ export function PurchaseReceiptTaskForm({
   };
 
   return (
-    <div className="flex w-[800px] max-w-screen-md flex-col gap-4 self-stretch p-8">
+    <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Receive Purchase Order</h1>
       <Form
-        className="flex flex-row space-x-4"
+        className="flex flex-col space-y-4"
         onSubmit={() => {
           console.log(values);
         }}
         schema={z.object({
-          orderId: z.string(),
-          locationId: z.string(),
+          orderId: z.number(),
+          locationId: z.number(),
           quantity: z.number(),
         })}
         defaultValues={values}
@@ -94,7 +94,7 @@ export function PurchaseReceiptTaskForm({
                 }}
                 onSelectionChange={(orderId) => {
                   setValues((draft) => {
-                    draft.orderId = orderId;
+                    draft.orderId = orderId as number;
                   });
                 }}
                 keyAccessor="id"
@@ -131,6 +131,11 @@ export function PurchaseReceiptTaskForm({
                     });
                   }}
                   keyAccessor="id"
+                  onSelectionChange={(locationId) => {
+                    setValues((draft) => {
+                      draft.locationId = locationId as number;
+                    });
+                  }}
                 >
                   {(location) => {
                     return (
@@ -149,14 +154,12 @@ export function PurchaseReceiptTaskForm({
         </>
       </Form>
       {order && (
-        <Table>
+        <Table className="-mx-4">
           <Table.Header>
-            <Table.Row>
-              <Table.Head>Component</Table.Head>
-              <Table.Head>Description</Table.Head>
-              <Table.Head>Quantity Expected</Table.Head>
-              <Table.Head>Quantity Received</Table.Head>
-            </Table.Row>
+            <Table.Column isRowHeader>Component</Table.Column>
+            <Table.Column>Description</Table.Column>
+            <Table.Column>Quantity Expected</Table.Column>
+            <Table.Column>Quantity Received</Table.Column>
           </Table.Header>
           <Table.Body>
             {order.items.map((item) => (
@@ -175,16 +178,22 @@ export function PurchaseReceiptTaskForm({
           </Table.Body>
         </Table>
       )}
-      <Button
-        isDisabled={!order}
-        variant="primary"
-        onPress={() => {
-          save();
-          close();
-        }}
-      >
-        Receive Goods
-      </Button>
+      <div className="flex justify-end gap-2">
+        <Button variant="plain" color="default" onPress={onExit}>
+          Cancel
+        </Button>
+        <Button
+          isDisabled={!order}
+          variant="solid"
+          color="primary"
+          onPress={() => {
+            save();
+            close();
+          }}
+        >
+          Receive Goods
+        </Button>
+      </div>
     </div>
   );
 }

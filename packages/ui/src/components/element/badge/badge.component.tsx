@@ -1,44 +1,32 @@
 "use client";
 
-import type { ComponentPropsWithoutRef } from "react";
-import { forwardRef } from "react";
-import { cva, VariantProps } from "class-variance-authority";
+import type { ComponentPropsWithRef } from "react";
+import { cva } from "class-variance-authority";
 
-import { cn } from "@repo/ui/lib/class-merge";
+import type { ColorVariants } from "../../../lib/colors";
+import { cn } from "../../../lib/class-merge";
+import { colorVariants } from "../../../lib/colors";
 
-const badgeVariants = cva(
-  "rounded-full inline-flex items-center px-2 py-1 text-xs font-medium",
+const variants = cva(
+  [
+    "inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm font-medium",
+    "bg-color/15 text-color-text group-data-[hover]:bg-color/25 dark:bg-color/25 forced-colors:outline",
+  ],
   {
     variants: {
-      variant: {
-        default: "bg-muted text-muted-foreground",
-        primary: "bg-primary-muted text-primary",
-        secondary: "bg-secondary-muted text-secondary",
-        accent: "bg-accent-muted text-accent",
-        outline: "border bg-background text-muted-foreground",
-      },
+      color: colorVariants,
     },
     defaultVariants: {
-      variant: "default",
+      color: "default",
     },
   },
 );
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+type BadgeProps = ComponentPropsWithRef<"span"> & { color?: ColorVariants };
 
-const Badge = forwardRef<
-  HTMLDivElement,
-  ComponentPropsWithoutRef<"div"> & BadgeProps
->(({ variant, className, ...props }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
-  );
-});
+const Badge = ({ color, className, ...props }: BadgeProps) => {
+  return <span {...props} className={cn(className, variants({ color }))} />;
+};
 
 export { Badge };
+export type { BadgeProps };

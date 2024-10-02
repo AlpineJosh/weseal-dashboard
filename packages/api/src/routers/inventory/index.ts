@@ -6,6 +6,7 @@ import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
 import { publicProcedure } from "../../trpc";
+import { movementsRouter } from "./movements";
 import { resetInventory } from "./reset";
 
 export const inventoryRouter = {
@@ -45,6 +46,7 @@ export const inventoryRouter = {
         sort: [],
       };
     }),
+  movements: movementsRouter,
 } satisfies TRPCRouterRecord;
 
 export type InventoryRouter = typeof inventoryRouter;

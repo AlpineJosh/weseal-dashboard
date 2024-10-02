@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 
 import type { BadgeProps } from "./badge.component";
+import { ColorVariants, colorVariants } from "../../../lib/colors";
 import { Badge } from "./badge.component";
 
 const meta: Meta<BadgeProps> = {
@@ -16,30 +18,16 @@ export const Default: Story = {
   render: (args) => <Badge {...args}>Default</Badge>,
 };
 
-export const Primary: Story = {
-  ...Default,
-  args: {
-    variant: "primary",
-  },
-};
-
-export const Secondary: Story = {
-  ...Default,
-  args: {
-    variant: "secondary",
-  },
-};
-
-export const Accent: Story = {
-  ...Default,
-  args: {
-    variant: "accent",
-  },
-};
-
-export const Outline: Story = {
-  ...Default,
-  args: {
-    variant: "outline",
-  },
+export const Colors: Story = {
+  render: () => (
+    <div className="grid grid-cols-4 gap-2">
+      {Object.keys(colorVariants).map((color) => (
+        <span>
+          <Badge key={color} color={color as ColorVariants}>
+            {color}
+          </Badge>
+        </span>
+      ))}
+    </div>
+  ),
 };

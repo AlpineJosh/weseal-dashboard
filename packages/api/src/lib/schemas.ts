@@ -19,6 +19,9 @@ import {
   notInArray,
   or,
   SQL,
+  Subquery,
+  Table,
+  View,
 } from "@repo/db";
 
 export const paginationSchema = () =>
@@ -168,7 +171,7 @@ export const handleSearchFilter = <T extends DrizzleTable<T>>(
   return where;
 };
 
-export const handleSort = <T extends DrizzleTable<T>>(
+export const handleSort = <T extends Table | View>(
   table: T,
   sort: z.infer<ReturnType<typeof sortSchema>>,
 ) => {

@@ -1,14 +1,13 @@
-import type { StorybookConfig } from "@storybook/react-webpack5";
+import { dirname, join } from "path";
+import type { StorybookConfig } from "@storybook/nextjs";
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: ["../src/components/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
-    "@storybook/addon-webpack5-compiler-swc",
-    "@storybook/addon-onboarding",
     "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@chromatic-com/storybook",
+    "@storybook/addon-actions",
+    "@storybook/addon-viewport",
     "@storybook/addon-interactions",
     "@storybook/addon-themes",
     {
@@ -38,27 +37,27 @@ const config: StorybookConfig = {
       },
     },
   ],
-  framework: {
-    name: "@storybook/react-webpack5",
-    options: {
-      builder: {
-        useSWC: true,
-      },
-    },
-  },
-  swc: () => ({
-    jsc: {
-      transform: {
-        react: {
-          runtime: "automatic",
-        },
-      },
-    },
-  }),
+
+  framework: "@storybook/nextjs",
+
   webpackFinal: async (config, { configType }) => {
     config.resolve = config.resolve || {};
     config.resolve.plugins = [new TsconfigPathsPlugin()];
+
+    // config.module = config.module || {};
+    // config.module.rules = config.module.rules || [];
+    // config.module.rules.push({
+    //   test: /\.css$/,
+    //   use: ["style-loader", "css-loader", "postcss-loader"],
+    //   include: join(__dirname, "../src"),
+    // });
     return config;
+  },
+
+  docs: {},
+
+  typescript: {
+    reactDocgen: "react-docgen-typescript",
   },
 };
 export default config;

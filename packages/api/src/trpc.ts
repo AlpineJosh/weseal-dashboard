@@ -5,7 +5,6 @@ import { ZodError } from "zod";
 import { db } from "@repo/db/client";
 
 export const createTRPCContext = () => {
-  console.log("Test");
   return {
     db,
   };

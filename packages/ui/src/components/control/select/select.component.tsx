@@ -1,26 +1,89 @@
-import type {
-  SelectProps as AriaSelectProps,
-  ListBoxItemProps,
-} from "react-aria-components";
 import React from "react";
 import { cva } from "class-variance-authority";
-import {
-  Select as AriaSelect,
-  Button,
-  ListBox,
-  SelectValue,
-} from "react-aria-components";
+import * as Aria from "react-aria-components";
 
-import type { ListboxSectionProps } from "@repo/ui/components/control";
-import { faChevronDown } from "@repo/pro-light-svg-icons";
-import { ListboxItem, ListboxSection } from "@repo/ui/components/control";
+import type {
+  ListboxOptionProps,
+  ListboxSectionProps,
+} from "@repo/ui/components/control";
+import { faAnglesUpDown } from "@repo/pro-light-svg-icons";
+import { Listbox } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Popover } from "@repo/ui/components/utility";
 import { cn } from "@repo/ui/lib/class-merge";
 
+const variants = {
+  root: cva(),
+  button: cva([
+    // Basic layout
+    "group relative block w-full",
+    // Background color + shadow applied to inset pseudo element, so shadow blends with border in light mode
+    "before:bg-white before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:shadow",
+    // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
+    "dark:before:hidden",
+    // Hide default focus styles
+    "focus:outline-none",
+    // Focus ring
+    "after:ring-transparent after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:data-[focus]:ring-2 after:data-[focus]:ring-ring",
+    // Disabled state
+    "data-[disabled]:opacity-50 before:data-[disabled]:bg-content/5 before:data-[disabled]:shadow-none",
+  ]),
+  value: cva([
+    // Basic layout
+    "relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
+    // Set minimum height for when no value is selected
+    "min-h-11 sm:min-h-9",
+    // Horizontal padding
+    "pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.7)-1px)] sm:pl-[calc(theme(spacing.3)-1px)]",
+    // Typography
+    "text-left text-base/6 text-content data-[placeholder]:text-content-muted sm:text-sm/6 forced-colors:text-[CanvasText]",
+    // Border
+    "border border-content/10 group-data-[active]:border-content/20 group-data-[hovered]:border-content/20",
+    // Background color
+    "bg-transparent dark:bg-white/5",
+    // Invalid state
+    "group-data-[invalid]:border-red-500 group-data-[invalid]:group-data-[hovered]:border-red-500 group-data-[invalid]:dark:border-red-600 group-data-[invalid]:data-[hovered]:dark:border-red-600",
+    // Disabled state
+    "group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hovered]:group-data-[disabled]:border-white/15 group-data-[disabled]:border-content/20 group-data-[disabled]:opacity-100",
+  ]),
+  icon: cva([
+    "pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2",
+  ]),
+  popover: cva([
+    // "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
+    // // Base styles
+    // "rounded-xl isolate w-max min-w-[calc(var(--button-width)+1.75rem)] select-none scroll-py-1 p-1",
+    // // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+    // "outline-transparent outline outline-1 focus:outline-none",
+    // // Handle scrolling when menu won't fit in viewport
+    // "overflow-y-scroll overscroll-contain",
+    // // Popover background
+    // "bg-popover/75 backdrop-blur-xl",
+    // // Shadows
+    // "shadow-lg ring-1 ring-content/10 dark:ring-inset",
+    // // Transitions
+    // "transition-opacity duration-100 ease-in data-[transition]:pointer-events-none data-[closed]:data-[leave]:opacity-0",
+  ]),
+  listbox: cva([
+    // "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
+    // // Base styles
+    // "rounded-xl isolate w-max min-w-[calc(var(--button-width)+1.75rem)] select-none scroll-py-1 p-1",
+    // // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+    // "outline-transparent outline outline-1 focus:outline-none",
+    // // Handle scrolling when menu won't fit in viewport
+    // "overflow-y-scroll overscroll-contain",
+    // // Popover background
+    // "bg-popover/75 backdrop-blur-xl",
+    // // Shadows
+    // "shadow-lg ring-1 ring-content/10 dark:ring-inset",
+    // // Transitions
+    // "transition-opacity duration-100 ease-in data-[transition]:pointer-events-none data-[closed]:data-[leave]:opacity-0",
+  ]),
+};
+
 const styles = cva(
   cn(
-    "flex w-full min-w-[150px] cursor-default items-center gap-4 rounded-lg border border-input py-2 pl-3 pr-2 text-start transition",
+    "border-input flex w-full min-w-[150px] cursor-default items-center gap-4 rounded-lg border py-2 pl-3 pr-2 text-start transition",
     "focus:outline-none rac-focus-visible:outline-2 rac-focus-visible:outline-ring",
   ),
 
@@ -35,52 +98,52 @@ const styles = cva(
   },
 );
 
-export interface SelectProps<T extends object>
-  extends Omit<AriaSelectProps<T>, "children"> {
+type SelectProps<T extends object> = Omit<Aria.SelectProps<T>, "children"> & {
   items?: Iterable<T>;
   children: React.ReactNode | ((item: T) => React.ReactNode);
-}
+};
 
-function Root<T extends object>({
+const Root = <T extends object>({
   children,
   items,
   className,
   ...props
-}: SelectProps<T>) {
+}: SelectProps<T>) => {
   return (
-    <AriaSelect
-      {...props}
-      className={cn("group flex flex-col gap-1", className)}
-    >
-      <Button className={styles}>
-        <SelectValue className="flex-1 text-sm placeholder-shown:italic" />
-        <Icon
-          icon={faChevronDown}
-          aria-hidden
-          className="text-gray-600 group-disabled:text-gray-200 dark:text-zinc-400 dark:group-disabled:text-zinc-600 h-4 w-4 forced-colors:text-[ButtonText] forced-colors:group-disabled:text-[GrayText]"
-        />
-      </Button>
-      <Popover className="min-w-[--trigger-width]">
-        <ListBox
+    <Aria.Select {...props} className={cn(variants.root(), className)}>
+      <Aria.Button data-slot="control" className={variants.button()}>
+        <Aria.SelectValue className={variants.value()} />
+        <span className={variants.icon()}>
+          <Icon
+            icon={faAnglesUpDown}
+            aria-hidden
+            className="size-3 stroke-content-muted group-data-[disabled]:stroke-content/20 sm:size-3"
+          />
+        </span>
+      </Aria.Button>
+      <Popover className={variants.popover()}>
+        <Listbox
           items={items}
           className="max-h-[inherit] overflow-auto p-1 outline-none [clip-path:inset(0_0_0_0_round_.75rem)]"
         >
-          {/* {children} */}
-        </ListBox>
+          {children}
+        </Listbox>
       </Popover>
-    </AriaSelect>
+    </Aria.Select>
   );
-}
+};
 
-function Option(props: ListBoxItemProps) {
-  return <ListboxItem variant="dropdown" {...props} />;
-}
+const Option = <T extends object>(props: ListboxOptionProps<T>) => {
+  return <Listbox.Option {...props} />;
+};
 
-function Section<T extends object>(props: ListboxSectionProps<T>) {
-  return <ListboxSection {...props} />;
-}
+const Section = <T extends object>(props: ListboxSectionProps<T>) => {
+  return <Listbox.Section {...props} />;
+};
 
 export const Select = Object.assign(Root, {
   Option,
   Section,
 });
+
+export type { SelectProps };

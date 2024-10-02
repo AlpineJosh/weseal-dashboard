@@ -1,125 +1,190 @@
 "use client";
 
-import type {
-  ComboBoxProps as AriaComboBoxProps,
-  Key,
-} from "react-aria-components";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import { cva } from "class-variance-authority";
 import { Draft } from "immer";
-import {
-  ComboBox as AriaComboBox,
-  Group,
-  ListBox,
-} from "react-aria-components";
+import * as Aria from "react-aria-components";
 import { useImmer } from "use-immer";
 
-import { faChevronDown } from "@repo/pro-light-svg-icons";
-import {
-  Input,
-  ListboxItem,
-  ListboxSection,
-} from "@repo/ui/components/control";
-import { Icon } from "@repo/ui/components/display";
-import { Button } from "@repo/ui/components/element";
+import { faAngleDown } from "@repo/pro-light-svg-icons";
+import { Listbox } from "@repo/ui/components/control";
+import { Icon } from "@repo/ui/components/element";
 import { Popover } from "@repo/ui/components/utility";
 import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
 import { cn } from "@repo/ui/lib/class-merge";
 
-export interface ComboboxProps<T extends object>
-  extends Omit<AriaComboBoxProps<T>, "children" | "items"> {
+const variants = {
+  root: cva(),
+  group: cva([
+    // Basic layout
+    "group relative block w-full",
+    // Background color + shadow applied to inset pseudo element, so shadow blends with border in light mode
+    "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
+    // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
+    "dark:before:hidden",
+    // Hide default focus styles
+    "focus:outline-none",
+    // Focus ring
+    "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:data-[focus]:ring-2 after:data-[focus]:ring-ring",
+    // Disabled state
+    "data-[disabled]:opacity-50 before:data-[disabled]:bg-content/5 before:data-[disabled]:shadow-none",
+  ]),
+  input: cva([
+    // Basic layout
+    "relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
+    // Set minimum height for when no value is selected
+    "min-h-11 sm:min-h-9",
+    // Horizontal padding
+    "pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing[1.5])-1px)] sm:pl-[calc(theme(spacing.3)-1px)]",
+    // Typography
+    "text-left text-base/6 text-content data-[placeholder]:text-content-muted sm:text-sm/6 forced-colors:text-[CanvasText]",
+    // Border
+    "border border-content/10 group-data-[active]:border-content/20 group-data-[hovered]:border-content/20",
+    // Background color
+    "bg-transparent dark:bg-white/5",
+    // Invalid state
+    "group-data-[invalid]:border-red-500 group-data-[invalid]:group-data-[hovered]:border-red-500 group-data-[invalid]:dark:border-red-600 group-data-[invalid]:data-[hovered]:dark:border-red-600",
+    // Disabled state
+    "group-data-[disabled]:border-content/20 group-data-[disabled]:opacity-100 group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hovered]:group-data-[disabled]:border-white/15",
+    "focus:outline-none",
+  ]),
+  button: cva(["absolute inset-y-0 right-0 flex items-center pr-3"]),
+  icon: cva(["flex size-3 items-center text-content-muted"]),
+};
+
+type Options<T extends object> =
+  | T[]
+  | ((query: string) => AsyncData<DataQueryResponse<T>>);
+
+type UseOptionsProps<T extends object> = Aria.ComboBoxProps<T> & {
+  isLoading: boolean;
+  items: T[];
+};
+
+const useOptions = <T extends object, K extends keyof T & keyof Draft<T>>(
+  optionsFn: Options<T>,
+  keyAccessor: K,
+  setSelectedKey: (key: Aria.Key | null) => void | undefined,
+  selectedKey: Aria.Key | null,
+): UseOptionsProps<T> => {
+  if (typeof optionsFn === "function") {
+    const [options, setOptions] = useImmer<T[]>([]);
+    const [filterText, setFilterText] = useImmer<string>("");
+
+    if (!setSelectedKey) {
+      [selectedKey, setSelectedKey] = useImmer<Aria.Key | null>(null);
+    }
+
+    const { data, isLoading } = optionsFn(filterText);
+
+    useEffect(() => {
+      setOptions((draft) => {
+        const newOptions: T[] = data?.rows ?? [];
+
+        for (let i = draft.length - 1; i >= 0; i--) {
+          const option = draft[i];
+          if (
+            option?.[keyAccessor] !== selectedKey &&
+            !newOptions.some(
+              (newOption) => newOption[keyAccessor] === option?.[keyAccessor],
+            )
+          ) {
+            draft.splice(i, 1);
+          }
+        }
+
+        for (const newOption of newOptions) {
+          if (
+            !draft.some(
+              (option) => option[keyAccessor] === newOption[keyAccessor],
+            )
+          ) {
+            draft.push(newOption as Draft<T>);
+          }
+        }
+      });
+    }, [data, isLoading]);
+
+    return {
+      items: options,
+      inputValue: filterText,
+      onInputChange: (query) => {
+        setFilterText(query);
+      },
+      selectedKey,
+      onSelectionChange: (key) => {
+        setSelectedKey(key);
+      },
+      isLoading,
+    };
+  } else {
+    return { items: optionsFn, isLoading: false };
+  }
+};
+
+type ComboboxProps<T extends object> = Omit<
+  Aria.ComboBoxProps<T>,
+  "children" | "items"
+> & {
   children: React.ReactNode | ((item: T) => React.ReactNode);
-  options: (query: string) => AsyncData<DataQueryResponse<T>>;
-  keyAccessor: keyof T;
-  ref?: React.Ref<HTMLInputElement>;
-}
+  options: Options<T>;
+  keyAccessor: keyof T & keyof Draft<T>;
+};
 
 const Root = <T extends object>({
   children,
   options,
-  ref,
   keyAccessor,
+  className,
   ...props
 }: ComboboxProps<T>) => {
-  const [filterText, setFilterText] = useImmer<string>("");
-  const [items, setItems] = useImmer<T[]>([]);
-  const [selectedKey, setSelectedKey] = useImmer<Key | null>(null);
-  const { data, isLoading } = options(filterText);
-
-  useEffect(() => {
-    setItems((draft) => {
-      const newItems: T[] = data?.rows ?? [];
-
-      for (let i = draft.length - 1; i >= 0; i--) {
-        const item = draft[i];
-        if (
-          item[keyAccessor as keyof Draft<T>] !== selectedKey &&
-          !newItems.some(
-            (newItem) =>
-              newItem[keyAccessor] === item[keyAccessor as keyof Draft<T>],
-          )
-        ) {
-          draft.splice(i, 1);
-        }
-      }
-
-      for (const newItem of newItems) {
-        if (!draft.some((item) => item[keyAccessor] === newItem[keyAccessor])) {
-          draft.push(newItem);
-        }
-      }
-    });
-  }, [data, isLoading]);
+  const { isLoading, onSelectionChange, ...optionProps } = useOptions(
+    options,
+    keyAccessor,
+    props.onSelectionChange,
+    props.selectedKey,
+  );
 
   return (
-    <AriaComboBox
-      // ref={ref}
+    <Aria.ComboBox
       {...props}
-      className={cn("group flex flex-row gap-1", props.className)}
-      inputValue={filterText}
-      onInputChange={(query) => {
-        setFilterText(query);
-        props.onInputChange?.(query);
-      }}
-      // selectedKey={selectedKey}
-      // onSelectionChange={(key) => {
-      //   setFilterText(key as string);
-      //   setSelectedKey(key);
-      //   props.onSelectionChange?.(key);
-      // }}
-      items={items}
+      className={cn(variants.root(), className)}
       menuTrigger="focus"
       allowsEmptyCollection={true}
+      {...optionProps}
     >
-      <Group className="flex flex-row gap-1">
-        <Input />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded mr-1 w-6 outline-offset-0"
-        >
-          <Icon icon={faChevronDown} aria-hidden className="h-4 w-4" />
-        </Button>
-      </Group>
+      <Aria.Group data-slot="control" className={cn(variants.group())}>
+        <Aria.Input placeholder="Search" className={cn(variants.input())} />
+        <Aria.Button className={cn(variants.button())}>
+          <Icon
+            icon={faAngleDown}
+            aria-hidden
+            className={cn(variants.icon())}
+          />
+        </Aria.Button>
+      </Aria.Group>
       <Popover className="min-w-[--trigger-width]">
         {isLoading ? (
-          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-muted-foreground">
+          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-content-muted">
             Loading...
           </div>
-        ) : items.length === 0 ? (
-          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-muted-foreground">
+        ) : optionProps.items.length === 0 ? (
+          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-content-muted">
             No results
           </div>
         ) : (
-          <ListBox className="max-h-[inherit] overflow-auto p-1 outline-0">
+          <Listbox className="max-h-[inherit] overflow-auto p-1 outline-0">
             {children}
-          </ListBox>
+          </Listbox>
         )}
       </Popover>
-    </AriaComboBox>
+    </Aria.ComboBox>
   );
 };
 
 export const Combobox = Object.assign(Root, {
-  Option: ListboxItem,
-  Section: ListboxSection,
+  Option: Listbox.Option,
+  Section: Listbox.Section,
 });
+
+export type { ComboboxProps };

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 
 import type { ListboxProps } from "./listbox.component";
-import { Listbox, ListboxItem } from "./listbox.component";
+import { Listbox } from "./listbox.component";
 
 const meta: Meta<ListboxProps<object>> = {
   title: "Control/Listbox",
@@ -15,18 +16,10 @@ type Story = StoryObj<ListboxProps<{ id: string; name: string }>>;
 export const Default: Story = {
   render: (args) => (
     <Listbox aria-label="Ice cream flavor" {...args}>
-      <ListboxItem variant="dropdown" id="chocolate">
-        Chocolate
-      </ListboxItem>
-      <ListboxItem variant="dropdown" id="mint">
-        Mint
-      </ListboxItem>
-      <ListboxItem variant="dropdown" id="strawberry">
-        Strawberry
-      </ListboxItem>
-      <ListboxItem variant="dropdown" id="vanilla">
-        Vanilla
-      </ListboxItem>
+      <Listbox.Option id="chocolate">Chocolate</Listbox.Option>
+      <Listbox.Option id="mint">Mint</Listbox.Option>
+      <Listbox.Option id="strawberry">Strawberry</Listbox.Option>
+      <Listbox.Option id="vanilla">Vanilla</Listbox.Option>
     </Listbox>
   ),
   args: {

@@ -117,10 +117,6 @@ export const componentRouter = {
         : undefined,
     );
 
-    console.log(input.filter);
-
-    console.log(where);
-
     const total = await db
       .select({ count: count() })
       .from(schema.componentOverview)

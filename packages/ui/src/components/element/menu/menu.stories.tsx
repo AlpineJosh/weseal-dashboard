@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ComponentType } from "react";
+import React, { ComponentType } from "react";
 
-import type { MenuItemProps, MenuProps } from "./menu.component";
-import { Menu } from "./menu.component";
+import { Button } from "../button";
+import { Menu, MenuProps } from "./menu.component";
 
-const meta: Meta<MenuProps<object>> = {
+const meta: Meta<MenuProps> = {
   title: "Element/Menu",
   component: Menu,
   subcomponents: {
@@ -14,14 +14,17 @@ const meta: Meta<MenuProps<object>> = {
 
 export default meta;
 
-type Story = StoryObj<MenuProps<object>>;
+type Story = StoryObj<MenuProps>;
 
 export const Default: Story = {
   render: () => (
-    <Menu label="Menu">
-      <Menu.Item>Item 1</Menu.Item>
-      <Menu.Item>Item 2</Menu.Item>
-      <Menu.Item>Item 3</Menu.Item>
+    <Menu>
+      <Button>Menu</Button>
+      <Menu.Items>
+        <Menu.Item>Item 1</Menu.Item>
+        <Menu.Item>Item 2</Menu.Item>
+        <Menu.Item>Item 3</Menu.Item>
+      </Menu.Items>
     </Menu>
   ),
   args: {},
