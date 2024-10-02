@@ -1,0 +1,40 @@
+import {
+  date,
+  integer,
+  pgView,
+  real,
+  serial,
+  varchar,
+} from "drizzle-orm/pg-core";
+
+import { batchMovementType } from "./inventory.schema";
+
+export const batchMovementOverview = pgView("batch_movement_overview", {
+  id: serial("id"),
+  date: date("date", { mode: "date" }),
+  batchId: integer("batch_id"),
+  batchReference: varchar("batch_reference"),
+  batchEntryDate: date("batch_entry_date", { mode: "date" }),
+  componentId: varchar("component_id"),
+  componentDescription: varchar("component_description"),
+  componentUnit: varchar("component_unit"),
+  locationId: integer("location_id"),
+  locationName: varchar("location_name"),
+  locationGroupId: integer("location_group_id"),
+  locationGroupName: varchar("location_group_name"),
+  quantity: real("quantity"),
+  userId: varchar("user_id"),
+  type: batchMovementType("type"),
+  purchaseReceiptItemId: integer("purchase_receipt_item_id"),
+  purchaseOrderId: integer("purchase_order_id"),
+  supplierId: integer("supplier_id"),
+  supplierName: varchar("supplier_name"),
+  salesDespatchItemId: integer("sales_despatch_item_id"),
+  salesOrderId: integer("sales_order_id"),
+  customerId: integer("customer_id"),
+  customerName: varchar("customer_name"),
+  productionBatchInputId: integer("production_batch_input_id"),
+  productionBatchOutputId: integer("production_batch_output_id"),
+  productionJobId: integer("production_job_id"),
+  productionJobBatchReference: varchar("production_job_batch_reference"),
+}).existing();
