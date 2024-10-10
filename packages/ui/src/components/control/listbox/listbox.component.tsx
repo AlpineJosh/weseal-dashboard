@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import React, { forwardRef } from "react";
 import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
 
@@ -102,7 +102,7 @@ export function Option<T extends object>({
         <>
           <Icon
             icon={faCheck}
-            className="text-current relative hidden size-5 self-center group-data-[selected]/option:inline sm:size-4"
+            className="relative hidden size-5 self-center text-content group-data-[selected]/option:inline sm:size-4"
           />
           <span className={cn(className, "col-start-2")}>
             {renderChildren(children, props)}
@@ -120,7 +120,7 @@ type ListboxSectionProps<T> = Aria.SectionProps<T> & {
 const Section = <T extends object>(props: ListboxSectionProps<T>) => {
   return (
     <Aria.Section {...props}>
-      <Aria.Header className="bg-gray-100/60 text-gray-500 supports-[-moz-appearance:none]:bg-gray-100 dark:border-y-zinc-700 dark:bg-zinc-700/60 dark:text-zinc-300 sticky -top-[5px] z-10 -mx-1 -mt-px truncate border-y px-4 py-1 text-sm font-semibold backdrop-blur-md [&+*]:mt-1">
+      <Aria.Header className="sticky -top-[5px] z-10 -mx-1 -mt-px truncate border-y bg-background-muted px-4 py-1 text-sm font-semibold text-content-muted backdrop-blur-md supports-[-moz-appearance:none]:bg-background-muted [&+*]:mt-1">
         {props.title}
       </Aria.Header>
       <Aria.Collection items={props.items}>{props.children}</Aria.Collection>

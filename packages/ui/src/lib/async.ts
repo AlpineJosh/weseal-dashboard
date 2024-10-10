@@ -1,7 +1,7 @@
 export type AsyncData<T> = {
   data: T | undefined;
   isLoading: boolean;
-  error: Error | undefined;
+  error?: Error | undefined;
 };
 
 export type DataPagination = {

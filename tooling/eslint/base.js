@@ -35,6 +35,7 @@ export const restrictEnvAccess = tseslint.config({
   },
 });
 
+/** @type {import('typescript-eslint').Config} */
 export default tseslint.config(
   includeIgnoreFile(path.join(import.meta.dirname, "../../.gitignore")),
   {

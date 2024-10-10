@@ -1,3 +1,3 @@
-import * as quantities from "./overview";
+import * as views from "./overview";
 
-export default { ...quantities };
+export default { ...views };

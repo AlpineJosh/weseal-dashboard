@@ -8,6 +8,7 @@ import type {
   UseFormReturn,
 } from "react-hook-form";
 import type { ZodSchema } from "zod";
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form as AriaForm } from "react-aria-components";
 import { FormProvider, useForm } from "react-hook-form";

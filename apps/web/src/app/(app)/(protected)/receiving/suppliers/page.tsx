@@ -9,7 +9,7 @@ import { Button } from "@repo/ui/components/element";
 export default function OrdersPage() {
   return (
     <div>
-      <Datatable<RouterOutputs["receiving"]["supplier"]["list"]["rows"][number]>
+      {/* <Datatable<RouterOutputs["receiving"]["supplier"]["list"]["rows"][number]>
         columns={[
           {
             label: "Reference",
@@ -21,7 +21,7 @@ export default function OrdersPage() {
           },
         ]}
         data={api.receiving.supplier.list.useQuery}
-      />
+      /> */}
     </div>
   );
 }

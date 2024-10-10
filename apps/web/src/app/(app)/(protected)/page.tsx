@@ -52,6 +52,8 @@ export default function DashboardPage() {
 
   // console.log(data);
 
+  const completeTaskItem = api.inventory.tasks.items.complete.useMutation();
+  const utils = api.useUtils();
   return (
     <div className="flex flex-col space-y-2">
       <div className="flex flex-row items-center justify-between">
@@ -103,86 +105,103 @@ export default function DashboardPage() {
       <Subheading level={2}>Tasks</Subheading>
 
       <Datatable
+        idKey="id"
+        selectionMode="multiple"
+        selectionBehaviour="toggle"
         columns={[
           {
-            id: "id",
-            key: "id",
+            id: "componentId",
+            sortKey: "componentId",
             isRowHeader: true,
-            label: "ID",
+            label: "Stock Code",
             cell: (row) => {
-              return (
-                <Datatable.Cell>
-                  <Link href={`/tasks/${row.id}`}>{row.id}</Link>
-                </Datatable.Cell>
-              );
+              return <Datatable.Cell>{row.componentId}</Datatable.Cell>;
             },
           },
           {
-            id: "type",
-            key: "type",
-            label: "Type",
+            id: "batchReference",
+            sortKey: "batchReference",
+            label: "Batch Reference",
             cell: (row) => {
-              return (
-                <Datatable.Cell>
-                  <Badge color={taskTypes[row.type].color}>
-                    {taskTypes[row.type].label}
-                  </Badge>
-                </Datatable.Cell>
-              );
+              return <Datatable.Cell>{row.batchReference}</Datatable.Cell>;
             },
           },
           {
-            id: "status",
-            key: "items",
-            label: "Status",
+            id: "quantity",
+            sortKey: "quantity",
+            label: "Quantity",
             cell: (row) => {
-              return (
-                <Datatable.Cell>
-                  {row.items.length > 0 ? (
-                    <Badge color="rose">In Progress</Badge>
-                  ) : (
-                    <Badge color="green">Complete</Badge>
-                  )}
-                </Datatable.Cell>
-              );
+              return <Datatable.Cell>{row.quantity}</Datatable.Cell>;
             },
           },
           {
-            id: "items",
-            key: "items",
-            label: "Items",
+            id: "pickLocationName",
+            sortKey: "pickLocationName",
+            label: "From Location",
             cell: (row) => {
-              return <Datatable.Cell>{row.items.length}</Datatable.Cell>;
+              return <Datatable.Cell>{row.pickLocationName}</Datatable.Cell>;
             },
           },
           {
-            id: "createdAt",
-            key: "createdAt",
-            label: "Created At",
+            id: "putLocationName",
+            sortKey: "putLocationName",
+            label: "To Location",
+            cell: (row) => {
+              return <Datatable.Cell>{row.putLocationName}</Datatable.Cell>;
+            },
+          },
+          {
+            id: "actions",
+            label: "Actions",
             cell: (row) => {
               return (
                 <Datatable.Cell>
-                  {row.createdAt.toLocaleDateString()}
+                  <Button
+                    variant="plain"
+                    color="primary"
+                    onPress={() =>
+                      completeTaskItem.mutate(
+                        { id: row.id },
+                        {
+                          onSuccess: () => {
+                            utils.inventory.tasks.items.list.invalidate();
+                          },
+                        },
+                      )
+                    }
+                  >
+                    Mark Complete
+                  </Button>
                 </Datatable.Cell>
               );
             },
           },
         ]}
-        data={(query) =>
-          api.task.list.useQuery({
+        data={({ ...query }) => {
+          const { isLoading, data } = api.inventory.tasks.items.list.useQuery({
             ...query,
-          })
-        }
+            filter: {
+              isComplete: {
+                eq: false,
+              },
+            },
+          });
+          return {
+            data,
+            isLoading,
+          };
+        }}
       />
       <Divider />
       <Subheading level={2}>Sage Discrepancies</Subheading>
 
       <Datatable
+        idKey="id"
         columns={[
           {
             id: "id",
             isRowHeader: true,
-            key: "id",
+            sortKey: "id",
             label: "Stock Code",
             cell: (row) => {
               return <Datatable.Cell>{row.id}</Datatable.Cell>;
@@ -190,7 +209,7 @@ export default function DashboardPage() {
           },
           {
             id: "description",
-            key: "description",
+            sortKey: "description",
             label: "Description",
             cell: (row) => {
               return <Datatable.Cell>{row.description}</Datatable.Cell>;
@@ -206,7 +225,7 @@ export default function DashboardPage() {
           // },
           {
             id: "totalQuantity",
-            key: "totalQuantity",
+            sortKey: "totalQuantity",
             label: "Total Quantity",
             cell: (row) => {
               return <Datatable.Cell>{row.totalQuantity}</Datatable.Cell>;
@@ -214,7 +233,7 @@ export default function DashboardPage() {
           },
           {
             id: "sageQuantity",
-            key: "sageQuantity",
+            sortKey: "sageQuantity",
             label: "Quantity In Sage",
             cell: (row) => {
               return <Datatable.Cell>{row.sageQuantity}</Datatable.Cell>;
@@ -222,7 +241,7 @@ export default function DashboardPage() {
           },
           {
             id: "sageDiscrepancy",
-            key: "sageDiscrepancy",
+            sortKey: "sageDiscrepancy",
             label: "Discrepancy",
             cell: (row) => {
               return <Datatable.Cell>{row.sageDiscrepancy}</Datatable.Cell>;
@@ -230,8 +249,7 @@ export default function DashboardPage() {
           },
         ]}
         data={(query) => {
-          console.log(query.pagination?.page);
-          const { data, isLoading, error } = api.component.list.useQuery({
+          const { data, isLoading } = api.component.list.useQuery({
             ...query,
             filter: {
               sageDiscrepancy: {
@@ -239,11 +257,9 @@ export default function DashboardPage() {
               },
             },
           });
-          console.log(data);
           return {
             data,
             isLoading,
-            error,
           };
         }}
       />

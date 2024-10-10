@@ -18,13 +18,13 @@ const variants = {
     // Basic layout
     "group relative block w-full",
     // Background color + shadow applied to inset pseudo element, so shadow blends with border in light mode
-    "before:bg-white before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:shadow",
+    "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
     // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
     "dark:before:hidden",
     // Hide default focus styles
     "focus:outline-none",
     // Focus ring
-    "after:ring-transparent after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:data-[focus]:ring-2 after:data-[focus]:ring-ring",
+    "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:data-[focus]:ring-2 after:data-[focus]:ring-ring",
     // Disabled state
     "data-[disabled]:opacity-50 before:data-[disabled]:bg-content/5 before:data-[disabled]:shadow-none",
   ]),
@@ -44,7 +44,7 @@ const variants = {
     // Invalid state
     "group-data-[invalid]:border-red-500 group-data-[invalid]:group-data-[hovered]:border-red-500 group-data-[invalid]:dark:border-red-600 group-data-[invalid]:data-[hovered]:dark:border-red-600",
     // Disabled state
-    "group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hovered]:group-data-[disabled]:border-white/15 group-data-[disabled]:border-content/20 group-data-[disabled]:opacity-100",
+    "group-data-[disabled]:border-content/20 group-data-[disabled]:opacity-100 group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hovered]:group-data-[disabled]:border-white/15",
   ]),
   icon: cva([
     "pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2",
@@ -90,9 +90,8 @@ const styles = cva(
   {
     variants: {
       isDisabled: {
-        false:
-          "pressed:bg-gray-200 dark:pressed:bg-zinc-500 text-gray-800 hover:bg-gray-100 group-invalid:border-red-600 dark:text-zinc-300 dark:hover:bg-zinc-600 forced-colors:group-invalid:border-[Mark]",
-        true: "text-gray-200 dark:border-white/5 dark:bg-zinc-800 dark:text-zinc-600 forced-colors:border-[GrayText] forced-colors:text-[GrayText]",
+        false: "",
+        true: "",
       },
     },
   },

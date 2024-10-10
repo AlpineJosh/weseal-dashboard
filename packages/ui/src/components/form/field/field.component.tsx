@@ -2,7 +2,7 @@
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
-import { createContext, forwardRef, useContext, useId } from "react";
+import React, { createContext, forwardRef, useContext, useId } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { Label as AriaLabel } from "react-aria-components";
 import { useFormContext } from "react-hook-form";

@@ -1,11 +1,8 @@
 "use client";
 
 import { api } from "@/utils/trpc/react";
-import { UseTRPCQueryResult } from "@trpc/react-query/shared";
-import { useImmer } from "use-immer";
 
-import { RouterOutputs } from "@repo/api";
-import { Datatable, Table } from "@repo/ui/components/display";
+import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
 import { Link } from "@repo/ui/components/navigation";
 
@@ -15,12 +12,21 @@ export default function InventoryOverview() {
       <h1 className="text-muted-foreground text-2xl font-bold">Components</h1>
 
       <Datatable
-        data={api.component.list.useQuery}
+        idKey="id"
+        data={({ ...query }) => {
+          const { isLoading, data } = api.component.list.useQuery({
+            ...query,
+          });
+          return {
+            data,
+            isLoading,
+          };
+        }}
         columns={[
           {
             id: "id",
             isRowHeader: true,
-            key: "id",
+            sortKey: "id",
             label: "Stock Code",
             cell: (component) => (
               <Datatable.Cell>
@@ -32,7 +38,7 @@ export default function InventoryOverview() {
           },
           {
             id: "description",
-            key: "description",
+            sortKey: "description",
             label: "Description",
             cell: (component) => (
               <Datatable.Cell>
@@ -44,27 +50,27 @@ export default function InventoryOverview() {
           },
           {
             id: "department",
-            key: "department",
+            sortKey: "departmentName",
             label: "Department",
             cell: (component) => (
               <Datatable.Cell>
-                <Badge>{component.department?.name}</Badge>
+                <Badge>{component.departmentName}</Badge>
               </Datatable.Cell>
             ),
           },
           {
             id: "category",
-            key: "category",
+            sortKey: "categoryName",
             label: "Category",
             cell: (component) => (
               <Datatable.Cell>
-                <Badge>{component.category?.name}</Badge>
+                <Badge>{component.categoryName}</Badge>
               </Datatable.Cell>
             ),
           },
           {
             id: "totalQuantity",
-            key: "totalQuantity",
+            sortKey: "totalQuantity",
             label: "Quantity",
             cell: (component) => (
               <Datatable.Cell>{component.totalQuantity}</Datatable.Cell>
@@ -72,7 +78,7 @@ export default function InventoryOverview() {
           },
           {
             id: "sageQuantity",
-            key: "sageQuantity",
+            sortKey: "sageQuantity",
             label: "Sage Quantity",
             cell: (component) => (
               <Datatable.Cell>{component.sageQuantity}</Datatable.Cell>
@@ -80,7 +86,7 @@ export default function InventoryOverview() {
           },
           {
             id: "unit",
-            key: "unit",
+            sortKey: "unit",
             label: "Unit",
             cell: (component) => (
               <Datatable.Cell>{component.unit}</Datatable.Cell>

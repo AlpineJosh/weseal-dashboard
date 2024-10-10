@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import * as Aria from "react-aria-components";
 
 import { cn } from "@repo/ui/lib/class-merge";

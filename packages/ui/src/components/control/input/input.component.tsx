@@ -2,7 +2,7 @@
 
 import type { ComponentPropsWithRef } from "react";
 import React, { forwardRef } from "react";
-import { Input as AriaInput } from "react-aria-components";
+import * as Aria from "react-aria-components";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
@@ -62,10 +62,7 @@ export type InputProps = {
   type: InputType;
 } & Omit<ComponentPropsWithRef<"input">, "type">;
 
-export const Input = forwardRef(function Input({
-  className,
-  ...props
-}: InputProps) {
+export const Input = ({ className, ...props }: InputProps) => {
   return (
     <span
       data-slot="control"
@@ -85,7 +82,7 @@ export const Input = forwardRef(function Input({
         "before:has-[[data-invalid]]:shadow-red-500/10",
       ])}
     >
-      <AriaInput
+      <Aria.Input
         {...props}
         className={cn([
           // Date classes
@@ -117,11 +114,11 @@ export const Input = forwardRef(function Input({
           // Invalid state
           "data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[invalid]:dark:border-red-500 data-[invalid]:data-[hover]:dark:border-red-500",
           // Disabled state
-          "data-[disabled]:border-zinc-950/20 dark:data-[hover]:data-[disabled]:border-white/15 data-[disabled]:dark:border-white/15 data-[disabled]:dark:bg-white/[2.5%]",
+          "data-[disabled]:border-content/20 dark:data-[hover]:data-[disabled]:border-white/15 data-[disabled]:dark:border-white/15 data-[disabled]:dark:bg-white/[2.5%]",
           // System icons
           "dark:[color-scheme:dark]",
         ])}
       />
     </span>
   );
-});
+};

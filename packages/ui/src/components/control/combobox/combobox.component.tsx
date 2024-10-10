@@ -64,7 +64,7 @@ type UseOptionsProps<T extends object> = Aria.ComboBoxProps<T> & {
 const useOptions = <T extends object, K extends keyof T & keyof Draft<T>>(
   optionsFn: Options<T>,
   keyAccessor: K,
-  setSelectedKey: (key: Aria.Key | null) => void | undefined,
+  setSelectedKey: ((key: Aria.Key | null) => void) | undefined,
   selectedKey: Aria.Key | null,
 ): UseOptionsProps<T> => {
   if (typeof optionsFn === "function") {
@@ -113,7 +113,7 @@ const useOptions = <T extends object, K extends keyof T & keyof Draft<T>>(
       },
       selectedKey,
       onSelectionChange: (key) => {
-        setSelectedKey(key);
+        setSelectedKey?.(key);
       },
       isLoading,
     };
@@ -142,7 +142,7 @@ const Root = <T extends object>({
     options,
     keyAccessor,
     props.onSelectionChange,
-    props.selectedKey,
+    props.selectedKey ?? null,
   );
 
   return (

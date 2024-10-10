@@ -15,6 +15,10 @@ export default function ComponentPage({
     id: params.componentId,
   });
 
+  const { data: subcomponents } = api.component.subcomponents.useQuery({
+    componentId: params.componentId,
+  });
+
   return (
     <div className="w-full max-w-screen-xl">
       {data && (
@@ -22,8 +26,8 @@ export default function ComponentPage({
           <h1 className="text-2xl font-bold">{data.id}</h1>
           <span className="text-muted-foreground">{data.description}</span>
           <div className="mt-1 flex flex-row space-x-2">
-            <Badge variant="primary">Department: {data.department?.name}</Badge>
-            <Badge variant="primary">Category: {data.category?.name}</Badge>
+            <Badge color="primary">Department: {data.departmentName}</Badge>
+            <Badge color="secondary">Category: {data.categoryName}</Badge>
           </div>
           <div className="bg-border my-4 h-px w-full" />
 
@@ -66,7 +70,7 @@ export default function ComponentPage({
             </div>
           </div>
           <div className="my-4 flex flex-col space-y-4">
-            {data.subcomponents.length > 0 && (
+            {subcomponents && subcomponents.length > 0 && (
               <>
                 <h3 className="text-muted-foreground">Subcomponents</h3>
                 <div>
@@ -103,10 +107,10 @@ export default function ComponentPage({
                 </div>
               </>
             )}
-            {data.locations.length > 0 && (
+            {/* {data.locations.length > 0 && (
               <>
-                <h3 className="text-muted-foreground">Locations</h3>
-                {/* <Card>
+                <h3 className="text-muted-foreground">Locations</h3> */}
+            {/* <Card>
                   <Table>
                     <Table.Header>
                       <Table.Row>
@@ -139,8 +143,9 @@ export default function ComponentPage({
                     </Table.Body>
                   </Table>
                 </Card> */}
-              </>
+            {/* </>
             )}
+          </div> */}
           </div>
         </>
       )}

@@ -39,7 +39,7 @@ function CloseMenuIcon() {
 //         transition
 //         className="fixed inset-y-0 w-full max-w-80 p-2 transition duration-300 ease-in-out data-[closed]:-translate-x-full"
 //       >
-//         <div className="bg-white ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 flex h-full flex-col rounded-lg shadow-sm ring-1">
+//         <div className="bg-white ring-content/5 dark:bg-content dark:ring-white/10 flex h-full flex-col rounded-lg shadow-sm ring-1">
 //           <div className="-mb-3 px-4 pt-3">
 //             <Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
 //               <CloseMenuIcon />

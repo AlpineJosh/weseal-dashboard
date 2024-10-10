@@ -106,12 +106,16 @@ export const salesDespatch = pgTable("sales_despatch", {
     .$onUpdate(() => new Date()),
 });
 
-export const salesDespatchRelations = relations(salesDespatch, ({ one }) => ({
-  order: one(salesOrder, {
-    fields: [salesDespatch.orderId],
-    references: [salesOrder.id],
+export const salesDespatchRelations = relations(
+  salesDespatch,
+  ({ one, many }) => ({
+    order: one(salesOrder, {
+      fields: [salesDespatch.orderId],
+      references: [salesOrder.id],
+    }),
+    items: many(salesDespatchItem),
   }),
-}));
+);
 
 export const salesDespatchItem = pgTable("sales_despatch_item", {
   id: serial("id").primaryKey(),

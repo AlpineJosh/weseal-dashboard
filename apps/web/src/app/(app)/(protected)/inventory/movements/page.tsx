@@ -35,14 +35,21 @@ export default function InventoryOverview() {
         Transaction Log
       </h1>
 
-      <Datatable<
-        RouterOutputs["inventory"]["movements"]["list"]["rows"][number]
-      >
-        data={api.inventory.movements.list.useQuery}
+      <Datatable
+        idKey="id"
+        data={({ ...query }) => {
+          const { isLoading, data } = api.inventory.movements.list.useQuery({
+            ...query,
+          });
+          return {
+            data,
+            isLoading,
+          };
+        }}
         columns={[
           {
             id: "id",
-            key: "id",
+            sortKey: "id",
             isRowHeader: true,
             label: "ID",
             cell: (row) => {
@@ -55,7 +62,7 @@ export default function InventoryOverview() {
           },
           {
             id: "type",
-            key: "type",
+            sortKey: "type",
             label: "Type",
             cell: ({ type }) => {
               return (
@@ -69,7 +76,7 @@ export default function InventoryOverview() {
           },
           {
             id: "componentId",
-            key: "componentId",
+            sortKey: "componentId",
             label: "Stock Code",
             cell: ({ componentId }) => {
               return (
@@ -83,7 +90,7 @@ export default function InventoryOverview() {
           },
           {
             id: "batchReference",
-            key: "batchReference",
+            sortKey: "batchReference",
             label: "Batch Reference",
             cell: ({ batchReference }) => {
               return <Table.Cell>{batchReference}</Table.Cell>;
@@ -91,7 +98,7 @@ export default function InventoryOverview() {
           },
           {
             id: "locationName",
-            key: "locationName",
+            sortKey: "locationName",
             label: "Location",
             cell: ({ locationName }) => {
               return <Table.Cell>{locationName}</Table.Cell>;
@@ -99,7 +106,7 @@ export default function InventoryOverview() {
           },
           {
             id: "quantity",
-            key: "quantity",
+            sortKey: "quantity",
             label: "Quantity",
             cell: ({ quantity }) => {
               return <Table.Cell>{quantity}</Table.Cell>;
@@ -107,7 +114,7 @@ export default function InventoryOverview() {
           },
           {
             id: "date",
-            key: "date",
+            sortKey: "date",
             label: "Date",
             cell: ({ date }) => {
               return (

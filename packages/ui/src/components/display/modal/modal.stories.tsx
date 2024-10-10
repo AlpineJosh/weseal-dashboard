@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import type { ComponentType } from "react";
 import React from "react";
 
 import { Button } from "@repo/ui/components/element";
-import { Dialog } from "@repo/ui/components/utility";
 
 import type { ModalProps } from "./modal.component";
 import { Modal } from "./modal.component";

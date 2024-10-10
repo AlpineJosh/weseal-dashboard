@@ -1,5 +1,2 @@
-export type {
-  DialogTriggerProps,
-  DialogContentProps,
-} from "./dialog.component";
+export type { DialogTriggerProps, DialogProps } from "./dialog.component";
 export { Dialog } from "./dialog.component";

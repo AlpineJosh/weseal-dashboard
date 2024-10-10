@@ -23,8 +23,6 @@ const variants = {
       // Hover
       "data-[hovered]:data-[selected]:ring-color-border/90 data-[hovered]:ring-content/15",
       // Disabled
-      // "data-[disabled]:bg-zinc-200 data-[disabled]:data-[selected]:bg-zinc-200 data-[disabled]:data-[selected]:ring-black/5 data-[disabled]:opacity-50",
-      // "dark:data-[disabled]:bg-white/15 dark:data-[disabled]:data-[selected]:bg-white/15 dark:data-[disabled]:data-[selected]:ring-white/15",
     ],
     {
       variants: {
@@ -41,11 +39,11 @@ const variants = {
     // Transition
     "translate-x-0 transition duration-200 ease-in-out",
     // Invisible border so the switch is still visible in forced-colors mode
-    "border-transparent border",
+    "border border-transparent",
     // Unchecked
     "bg-background shadow ring-1 ring-content/5",
     // Checked
-    "group-data-[selected]:ring-transparent group-data-[selected]:bg-background group-data-[selected]:shadow-color-text/30",
+    "group-data-[selected]:bg-background group-data-[selected]:shadow-color-text/30 group-data-[selected]:ring-transparent",
     "group-data-[selected]:translate-x-4 sm:group-data-[selected]:translate-x-3",
     // Disabled
     // "group-data-[disabled]:group-data-[selected]:bg-white group-data-[disabled]:group-data-[selected]:ring-black/5 group-data-[disabled]:group-data-[selected]:shadow",

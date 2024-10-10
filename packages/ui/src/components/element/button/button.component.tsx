@@ -12,7 +12,7 @@ import { Link, LinkProps } from "../link";
 const variants = cva(
   [
     // Base
-    "relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base font-semibold",
+    "text-red relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base font-semibold",
     // Sizing
     "px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6",
     // Focus
@@ -56,7 +56,6 @@ const variants = cva(
           // Dark mode
           "dark:border-white/15 dark:text-white dark:[--btn-bg:transparent] dark:data-[active]:bg-white/5 dark:data-[hover]:bg-white/5",
           // Icon
-          // "[--btn-icon:theme(colors.zinc.500)] data-[active]:[--btn-icon:theme(colors.zinc.700)] data-[hover]:[--btn-icon:theme(colors.zinc.700)] dark:data-[active]:[--btn-icon:theme(colors.zinc.400)] dark:data-[hover]:[--btn-icon:theme(colors.zinc.400)]",
         ],
         plain: [
           // Base
@@ -64,7 +63,7 @@ const variants = cva(
           // Dark mode
           "dark:text-white dark:data-[active]:bg-white/10 dark:data-[hovered]:bg-white/10",
           // Icon
-          "[--btn-icon:--text-muted] data-[active]:[--btn-icon:theme(colors.zinc.700)] data-[hover]:[--btn-icon:theme(colors.zinc.700)] dark:[--btn-icon:theme(colors.zinc.500)] dark:data-[active]:[--btn-icon:theme(colors.zinc.400)] dark:data-[hover]:[--btn-icon:theme(colors.zinc.400)]",
+          "[--btn-icon:--text-muted] data-[active]:[--btn-icon:--color-text] data-[hover]:[--btn-icon:theme(--color-text)]",
         ],
         input: [
           // Optical border, implemented as the button background to avoid corner artifacts

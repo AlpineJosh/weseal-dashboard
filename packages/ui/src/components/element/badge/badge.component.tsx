@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentPropsWithRef } from "react";
+import React from "react";
 import { cva } from "class-variance-authority";
 
 import type { ColorVariants } from "../../../lib/colors";

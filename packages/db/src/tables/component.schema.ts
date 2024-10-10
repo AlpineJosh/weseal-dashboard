@@ -10,7 +10,6 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { componentOverview } from "../views/overview";
 import { batch, location } from "./inventory.schema";
 
 export const department = pgTable("department", {
@@ -122,15 +121,5 @@ export const subcomponentRelations = relations(subcomponent, ({ one }) => ({
     fields: [subcomponent.subcomponentId],
     references: [component.id],
     relationName: "subcomponentSubcomponent",
-  }),
-  componentOverview: one(componentOverview, {
-    fields: [subcomponent.componentId],
-    references: [componentOverview.id],
-    relationName: "subcomponentComponentOverview",
-  }),
-  subcomponentOverview: one(componentOverview, {
-    fields: [subcomponent.subcomponentId],
-    references: [componentOverview.id],
-    relationName: "subcomponentSubcomponentOverview",
   }),
 }));

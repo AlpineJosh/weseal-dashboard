@@ -47,11 +47,11 @@ const Nav = () => (
           <Icon icon={faBoxes} />
           <Sidebar.Label>Inventory</Sidebar.Label>
         </Sidebar.Item>
-        <Sidebar.Item href="/">
+        <Sidebar.Item href="/receiving">
           <Icon icon={faInboxIn} />
           <Sidebar.Label>Receiving</Sidebar.Label>
         </Sidebar.Item>
-        <Sidebar.Item href="/">
+        <Sidebar.Item href="/despatching">
           <Icon icon={faInboxOut} />
           <Sidebar.Label>Despatching</Sidebar.Label>
         </Sidebar.Item>
@@ -73,7 +73,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const [user, setUser] = useImmer<User | null>(null);
 
-  const resetInventory = api.resetInventory.useMutation();
+  // const resetInventory = api.resetInventory.useMutation();
 
   // const {
   //   data: { session },

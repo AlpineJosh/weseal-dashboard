@@ -250,6 +250,9 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-rc.458
         version: 11.0.0-rc.458
+      drizzle-orm:
+        specifier: ^0.32.0
+        version: 0.32.2(@neondatabase/serverless@0.9.5)(@types/pg@8.11.6)(@types/react@18.3.10)(postgres@3.4.4)(react@18.3.1)(sqlite3@5.1.7)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.32.2(@neondatabase/serverless@0.9.5)(@types/pg@8.11.6)(@types/react@18.3.10)(postgres@3.4.4)(react@18.3.1)(sqlite3@5.1.7))(zod@3.23.8)
@@ -513,7 +516,7 @@ importers:
         version: 7.37.0(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-3edc000d-20240926(eslint@9.11.1(jiti@1.21.6))
+        version: 5.1.0-rc-1460d67c-20241003(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-turbo:
         specifier: ^2.1.1
         version: 2.1.2(eslint@9.11.1(jiti@1.21.6))
@@ -5727,8 +5730,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9
 
-  eslint-plugin-react-hooks@5.1.0-rc-3edc000d-20240926:
-    resolution: {integrity: sha512-9E3TnhvxK6OWwG8EQyGlb2V9n0NQ+e1euW3Jj+t3M+6CkoBAKX25OPOn6QLK9Ylxib3xd4houOOUmrvwCSa8Jw==}
+  eslint-plugin-react-hooks@5.1.0-rc-1460d67c-20241003:
+    resolution: {integrity: sha512-6RB5ld4hvk8hDc0JNMyid5/+SQ0ZyRtmmZV2lSvnWAA0zLIANUpSf7QNb7gtPYVop4qSu79hJpBsDGwdtXluig==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -15884,7 +15887,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-3edc000d-20240926(eslint@9.11.1(jiti@1.21.6)):
+  eslint-plugin-react-hooks@5.1.0-rc-1460d67c-20241003(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
       eslint: 9.11.1(jiti@1.21.6)
 

@@ -1,6 +1,7 @@
 "use client";
 
 import type { SeparatorProps } from "react-aria-components";
+import React from "react";
 import { cva, VariantProps } from "class-variance-authority";
 import { Separator as AriaSeparator } from "react-aria-components";
 
