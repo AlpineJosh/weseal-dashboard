@@ -56,7 +56,10 @@ type Options<T extends object> =
   | T[]
   | ((query: string) => AsyncData<DataQueryResponse<T>>);
 
-type UseOptionsProps<T extends object> = Aria.ComboBoxProps<T> & {
+type UseOptionsProps<T extends object> = Omit<
+  Aria.ComboBoxProps<T>,
+  "items"
+> & {
   isLoading: boolean;
   items: T[];
 };
@@ -64,16 +67,12 @@ type UseOptionsProps<T extends object> = Aria.ComboBoxProps<T> & {
 const useOptions = <T extends object, K extends keyof T & keyof Draft<T>>(
   optionsFn: Options<T>,
   keyAccessor: K,
-  setSelectedKey: ((key: Aria.Key | null) => void) | undefined,
+  onSelectionChange: ((key: Aria.Key | null) => void) | undefined,
   selectedKey: Aria.Key | null,
 ): UseOptionsProps<T> => {
   if (typeof optionsFn === "function") {
     const [options, setOptions] = useImmer<T[]>([]);
     const [filterText, setFilterText] = useImmer<string>("");
-
-    if (!setSelectedKey) {
-      [selectedKey, setSelectedKey] = useImmer<Aria.Key | null>(null);
-    }
 
     const { data, isLoading } = optionsFn(filterText);
 
@@ -113,7 +112,9 @@ const useOptions = <T extends object, K extends keyof T & keyof Draft<T>>(
       },
       selectedKey,
       onSelectionChange: (key) => {
-        setSelectedKey?.(key);
+        // const value = options.find((option) => option[keyAccessor] === key);
+        // setFilterText((value?.[keyAccessor] as string) ?? "");
+        onSelectionChange?.(key);
       },
       isLoading,
     };
@@ -136,13 +137,15 @@ const Root = <T extends object>({
   options,
   keyAccessor,
   className,
+  selectedKey,
+  onSelectionChange,
   ...props
 }: ComboboxProps<T>) => {
-  const { isLoading, onSelectionChange, ...optionProps } = useOptions(
+  const { isLoading, ...optionProps } = useOptions(
     options,
     keyAccessor,
-    props.onSelectionChange,
-    props.selectedKey ?? null,
+    onSelectionChange,
+    selectedKey ?? null,
   );
 
   return (

@@ -5,9 +5,10 @@ import { useImmer } from "use-immer";
 import type { RouterInputs, RouterOutputs } from "@repo/api";
 import { Table } from "@repo/ui/components/display";
 
-type TaskItem = RouterInputs["task"]["create"]["items"][number] & {
-  componentId: string;
-};
+type TaskItem =
+  RouterInputs["inventory"]["tasks"]["create"]["items"][number] & {
+    componentId: string;
+  };
 
 export interface LocationPickerItemProps {
   id: string;
@@ -53,8 +54,8 @@ export const LocationPicker = ({
 };
 
 type LocationsType = NonNullable<
-  RouterOutputs["component"]["get"]
->["locations"][number] & {
+  RouterOutputs["inventory"]["quantity"]["rows"][number]
+> & {
   blocked: boolean;
   using: number;
 };
@@ -71,19 +72,30 @@ const LocationPickerItem = ({
     id,
   });
 
+  const { data: quantities } = api.inventory.quantity.useQuery({
+    filter: {
+      componentId: {
+        eq: id,
+      },
+      free: {
+        gt: 0,
+      },
+    },
+  });
+
   useEffect(() => {
-    if (component) {
+    if (quantities) {
       const locs = [];
-      for (const location of component.locations) {
+      for (const quantity of quantities.rows) {
         locs.push({
-          ...location,
+          ...quantity,
           blocked: false,
           using: 0,
         });
       }
       setLocations(locs);
     }
-  }, [component]);
+  }, [quantities]);
 
   const calculateQuantities = () => {
     const batches = [];
@@ -96,8 +108,8 @@ const LocationPickerItem = ({
         const use = Math.min(location.total, remaining);
         remaining -= use;
         batches.push({
-          pickLocationId: location.location.id,
-          batchId: location.batch.id,
+          pickLocationId: location.locationId,
+          batchId: location.batchId,
           quantity: use,
           componentId: id,
         });
@@ -154,16 +166,18 @@ const LocationPickerItem = ({
                   }}
                 />
               </Table.Cell>
-              <Table.Cell>{location.location.name}</Table.Cell>
+              <Table.Cell>{location.locationName}</Table.Cell>
               <Table.Cell>
-                {location.batch.batchReference ||
-                  location.batch.entryDate.toLocaleDateString()}
+                {location.batchReference ||
+                  (location.batchEntryDate
+                    ? location.batchEntryDate.toLocaleDateString()
+                    : "")}
               </Table.Cell>
               <Table.Cell>
                 {value.find(
                   (batch) =>
-                    batch.pickLocationId === location.location.id &&
-                    batch.batchId === location.batch.id,
+                    batch.pickLocationId === location.locationId &&
+                    batch.batchId === location.batchId,
                 )?.quantity ?? 0}{" "}
                 / {location.total}
               </Table.Cell>

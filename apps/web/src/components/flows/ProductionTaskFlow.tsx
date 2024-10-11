@@ -8,6 +8,7 @@ import type { RouterInputs, RouterOutputs } from "@repo/api";
 import { Combobox, Input } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
 
 type ProductionTaskFormProps = {
   onExit: () => void;
@@ -18,17 +19,18 @@ export const ProductionTaskForm = ({
   onExit,
   onSave,
 }: ProductionTaskFormProps) => {
-  const [query, setQuery] = useState<string>("");
   const utils = api.useUtils();
 
-  const [task, setTask] = useImmer<RouterInputs["task"]["create"]>({
+  const [task, setTask] = useImmer<
+    RouterInputs["inventory"]["tasks"]["create"]
+  >({
     type: "production",
     assignedToId: "",
     items: [],
   });
 
   const [items, setItems] = useImmer<
-    (RouterInputs["task"]["create"]["items"][number] & {
+    (RouterInputs["inventory"]["tasks"]["create"]["items"][number] & {
       componentId: string;
     })[]
   >([]);
@@ -59,9 +61,9 @@ export const ProductionTaskForm = ({
     { enabled: !!values.componentId },
   );
 
-  const { mutate: createTask } = api.task.create.useMutation({
+  const { mutate: createTask } = api.inventory.tasks.create.useMutation({
     onSuccess: () => {
-      utils.task.list.invalidate();
+      utils.inventory.tasks.list.invalidate();
     },
   });
 
@@ -88,32 +90,36 @@ export const ProductionTaskForm = ({
           <Field name="component">
             <Field.Label>Component</Field.Label>
             <Field.Description>Select the component to build</Field.Description>
-            <Field.Control>
-              <Combobox<RouterOutputs["component"]["list"]["rows"][number]>
-                options={(query) => {
-                  return api.component.list.useQuery({
-                    filter: {
-                      hasSubcomponents: true,
-                      search: query,
-                    },
-                  });
-                }}
-                onSelectionChange={(componentId) => {
-                  setValues((draft) => {
-                    draft.componentId = componentId as string;
-                  });
-                }}
-                keyAccessor="id"
-              >
-                {(component) => {
-                  return (
-                    <Combobox.Option key={component.id} value={component}>
-                      {component.id}
-                    </Combobox.Option>
-                  );
-                }}
-              </Combobox>
-            </Field.Control>
+
+            <Combobox
+              options={(query) => {
+                return api.component.list.useQuery({
+                  filter: {
+                    hasSubcomponents: { eq: true },
+                  },
+                  search: { query },
+                }) as AsyncData<
+                  DataQueryResponse<
+                    RouterOutputs["component"]["list"]["rows"][number]
+                  >
+                >;
+              }}
+              onSelectionChange={(componentId) => {
+                setValues((draft) => {
+                  draft.componentId = componentId as string;
+                });
+              }}
+              selectedKey={values.componentId}
+              keyAccessor="id"
+            >
+              {(component) => {
+                return (
+                  <Combobox.Option key={component.id} value={component}>
+                    {component.id}
+                  </Combobox.Option>
+                );
+              }}
+            </Combobox>
           </Field>
           <Field name="quantity">
             <Field.Label>Quantity</Field.Label>
@@ -134,37 +140,36 @@ export const ProductionTaskForm = ({
             <Field.Label>Production Location</Field.Label>
             <Field.Description>Component destination</Field.Description>
             <Field.Control>
-              <Field.Control>
-                <Combobox<
-                  RouterOutputs["inventory"]["locations"]["rows"][number]
-                >
-                  options={(query) => {
-                    return api.inventory.locations.useQuery({
-                      filter: {
-                        search: query,
-                      },
-                    });
-                  }}
-                  onSelectionChange={(locationId) => {
-                    setValues((draft) => {
-                      draft.putLocationId = locationId as number;
-                    });
-                  }}
-                  keyAccessor="id"
-                >
-                  {(location) => {
-                    return (
-                      <Combobox.Option
-                        key={location.id}
-                        textValue={location.name}
-                        value={location}
-                      >
-                        {location.name} - {location.group.name}
-                      </Combobox.Option>
-                    );
-                  }}
-                </Combobox>
-              </Field.Control>
+              <Combobox
+                options={(query) => {
+                  return api.inventory.locations.list.useQuery({
+                    search: { query },
+                  }) as AsyncData<
+                    DataQueryResponse<
+                      RouterOutputs["inventory"]["locations"]["list"]["rows"][number]
+                    >
+                  >;
+                }}
+                onSelectionChange={(locationId) => {
+                  setValues((draft) => {
+                    draft.putLocationId = locationId as number;
+                  });
+                }}
+                selectedKey={values.putLocationId}
+                keyAccessor="id"
+              >
+                {(location) => {
+                  return (
+                    <Combobox.Option
+                      key={location.id}
+                      textValue={location.name ?? ""}
+                      value={location}
+                    >
+                      {location.name} - {location.groupName}
+                    </Combobox.Option>
+                  );
+                }}
+              </Combobox>
             </Field.Control>
           </Field>
           <Field name="batchReference">

@@ -6,6 +6,7 @@ import type { RouterOutputs } from "@repo/api";
 import { Combobox, Input, Select } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
 
 export function StockTransferTaskForm({
   onSave,
@@ -40,15 +41,19 @@ export function StockTransferTaskForm({
           <Field.Label>Component</Field.Label>
           <Field.Description>Select the component to build</Field.Description>
           <Field.Control>
-            <Combobox<RouterOutputs["component"]["list"]["rows"][number]>
+            <Combobox
               keyAccessor="id"
               options={(query) => {
                 return api.component.list.useQuery({
                   filter: {
-                    hasSubcomponents: true,
-                    search: query,
+                    hasSubcomponents: { eq: true },
                   },
-                });
+                  search: { query },
+                }) as AsyncData<
+                  DataQueryResponse<
+                    RouterOutputs["component"]["list"]["rows"][number]
+                  >
+                >;
               }}
               onSelectionChange={(componentId) => {
                 setValues((draft) => {
@@ -72,13 +77,15 @@ export function StockTransferTaskForm({
             Select the location to pick from
           </Field.Description>
           <Field.Control>
-            <Combobox<RouterOutputs["inventory"]["locations"]["rows"][number]>
+            <Combobox
               options={(query) => {
-                return api.inventory.locations.useQuery({
-                  filter: {
-                    search: query,
-                  },
-                });
+                return api.inventory.locations.list.useQuery({
+                  search: { query },
+                }) as AsyncData<
+                  DataQueryResponse<
+                    RouterOutputs["inventory"]["locations"]["list"]["rows"][number]
+                  >
+                >;
               }}
               onSelectionChange={(locationId) => {
                 setValues((draft) => {
@@ -92,9 +99,9 @@ export function StockTransferTaskForm({
                   <Combobox.Option
                     key={location.id}
                     value={location}
-                    textValue={location.name}
+                    textValue={location.name ?? ""}
                   >
-                    {location.name} - {location.group.name}
+                    {location.name} - {location.groupName ?? ""}
                   </Combobox.Option>
                 );
               }}
@@ -121,13 +128,15 @@ export function StockTransferTaskForm({
           <Field.Description>Select destination location</Field.Description>
           <Field.Control>
             <Field.Control>
-              <Combobox<RouterOutputs["inventory"]["locations"]["rows"][number]>
+              <Combobox
                 options={(query) => {
-                  return api.inventory.locations.useQuery({
-                    filter: {
-                      search: query,
-                    },
-                  });
+                  return api.inventory.locations.list.useQuery({
+                    search: { query },
+                  }) as AsyncData<
+                    DataQueryResponse<
+                      RouterOutputs["inventory"]["locations"]["list"]["rows"][number]
+                    >
+                  >;
                 }}
                 onSelectionChange={(locationId) => {
                   setValues((draft) => {
@@ -141,9 +150,9 @@ export function StockTransferTaskForm({
                     <Combobox.Option
                       key={location.id}
                       value={location}
-                      textValue={location.name}
+                      textValue={location.name ?? ""}
                     >
-                      {location.name} - {location.group.name}
+                      {location.name} - {location.groupName ?? ""}
                     </Combobox.Option>
                   );
                 }}

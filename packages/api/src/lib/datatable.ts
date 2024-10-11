@@ -50,6 +50,7 @@ const stringFilterSchema = z.object({
   endsWith: z.string().optional(),
   contains: z.string().optional(),
   notContains: z.string().optional(),
+  eq: z.string().optional(),
 });
 
 const dateFilterSchema = z.object({
@@ -235,6 +236,9 @@ export const datatable = <T extends Table>(
               : undefined,
             columnFilter.notContains !== undefined
               ? not(ilike(column, `%${columnFilter.notContains}%`))
+              : undefined,
+            columnFilter.eq !== undefined
+              ? eq(column, columnFilter.eq)
               : undefined,
           );
         } else if (column.dataType === "number") {

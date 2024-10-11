@@ -25,8 +25,13 @@ import {
 
 export const batchLocationQuantity = pgTable("batch_location_quantity", {
   componentId: varchar("component_id").notNull(),
-  batchId: varchar("batch_id").notNull(),
+  componentDescription: varchar("component_description").notNull(),
+  componentUnit: varchar("component_unit"),
+  batchId: integer("batch_id").notNull(),
+  batchReference: varchar("batch_reference"),
+  batchEntryDate: date("batch_entry_date", { mode: "date" }),
   locationId: integer("location_id").notNull(),
+  locationName: varchar("location_name").notNull(),
   total: real("total").notNull(),
   allocated: real("allocated").notNull(),
   free: real("free").notNull(),

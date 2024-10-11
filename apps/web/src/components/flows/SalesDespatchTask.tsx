@@ -8,6 +8,7 @@ import type { RouterInputs, RouterOutputs } from "@repo/api";
 import { Combobox } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
 
 export function SalesDespatchTaskForm({
   onSave,
@@ -16,28 +17,11 @@ export function SalesDespatchTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
-  const [query, setQuery] = useState<string>("");
-
   const [values, setValues] = useImmer<{
     orderId: number | undefined;
-    quantity: number;
-    locationId: number | undefined;
   }>({
     orderId: undefined,
-    quantity: 1,
-    locationId: undefined,
   });
-  const [task, setTask] = useImmer<RouterInputs["task"]["create"]>({
-    type: "production",
-    assignedToId: "",
-    items: [],
-  });
-
-  const [items, setItems] = useImmer<
-    (RouterInputs["task"]["create"]["items"][number] & {
-      componentId: string;
-    })[]
-  >([]);
 
   const { data: order } = api.despatching.order.get.useQuery(
     {
@@ -46,15 +30,28 @@ export function SalesDespatchTaskForm({
     { enabled: !!values.orderId },
   );
 
-  const { mutate: createTask } = api.task.create.useMutation();
+  const { data: orderItems } = api.despatching.order.items.list.useQuery(
+    {
+      filter: {
+        orderId: { eq: values.orderId as number },
+      },
+    },
+    { enabled: !!values.orderId },
+  );
+
+  const [items, setItems] = useImmer<
+    (RouterInputs["inventory"]["tasks"]["create"]["items"][number] & {
+      componentId: string;
+    })[]
+  >([]);
+
+  const { mutate: createTask } = api.inventory.tasks.create.useMutation();
   const save = () => {
     createTask({
-      type: "production",
+      type: "despatch",
       assignedToId: "1",
-      items: items.map((item) => ({
-        ...item,
-        locationId: item.pickLocationId as number,
-      })),
+      salesOrderId: values.orderId as number,
+      items,
     });
   };
 
@@ -67,9 +64,7 @@ export function SalesDespatchTaskForm({
           console.log(values);
         }}
         schema={z.object({
-          componentId: z.string(),
-          locationId: z.number(),
-          quantity: z.number(),
+          orderId: z.number(),
         })}
         defaultValues={values}
       >
@@ -78,19 +73,21 @@ export function SalesDespatchTaskForm({
             <Field.Label>Sales Order</Field.Label>
             <Field.Description>Select the order to despatch</Field.Description>
             <Field.Control>
-              <Combobox<
-                RouterOutputs["despatching"]["order"]["list"]["rows"][number]
-              >
+              <Combobox
                 options={(query) => {
                   return api.despatching.order.list.useQuery({
                     pagination: {
                       page: 1,
                       size: 10,
                     },
-                    filter: {
-                      search: query,
+                    search: {
+                      query,
                     },
-                  });
+                  }) as AsyncData<
+                    DataQueryResponse<
+                      RouterOutputs["despatching"]["order"]["list"]["rows"][number]
+                    >
+                  >;
                 }}
                 onSelectionChange={(orderId) => {
                   setValues((draft) => {
@@ -104,7 +101,7 @@ export function SalesDespatchTaskForm({
                     <Combobox.Option
                       key={order.id}
                       value={order}
-                      textValue={order.id.toString()}
+                      textValue={order.id?.toString() ?? ""}
                     >
                       {order.id}
                     </Combobox.Option>
@@ -118,10 +115,10 @@ export function SalesDespatchTaskForm({
       {values.orderId && (
         <LocationPicker
           components={
-            order?.items?.map((item) => {
+            orderItems?.rows.map((item) => {
               return {
-                id: item.componentId,
-                quantity: item.quantityOrdered,
+                id: item.componentId!,
+                quantity: item.quantityOrdered ?? 0,
               };
             }) ?? []
           }

@@ -8,6 +8,7 @@ import { Combobox, Input } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
 
 export function PurchaseReceiptTaskForm({
   onSave,
@@ -28,9 +29,20 @@ export function PurchaseReceiptTaskForm({
     locationId: undefined,
   });
 
-  const { data: order } = api.receiving.order.get.useQuery(
+  const { data: order } = api.receiving.orders.get.useQuery(
     {
       id: values.orderId as number,
+    },
+    { enabled: !!values.orderId },
+  );
+
+  const { data: orderItems } = api.receiving.orders.items.list.useQuery(
+    {
+      filter: {
+        orderId: {
+          eq: values.orderId as number,
+        },
+      },
     },
     { enabled: !!values.orderId },
   );
@@ -44,17 +56,17 @@ export function PurchaseReceiptTaskForm({
     }[]
   >([]);
 
-  const { mutate: createTask } = api.task.create.useMutation();
+  const { mutate: receiveOrder } = api.receiving.orders.receive.useMutation();
   const save = () => {
-    // createTask({
-    //   type: "production",
-    //   assignedToId: "1",
-    //   items: items.map((item) => ({
-    //     ...item,
-    //     locationId: item.locationId as number,
-    //   })),
-    // });
-    console.log(items);
+    receiveOrder({
+      id: values.orderId as number,
+      putLocationId: values.locationId as number,
+      receiptDate: new Date(),
+      items: items.map((item) => ({
+        componentId: item.componentId,
+        quantity: item.quantity,
+      })),
+    });
     onSave();
   };
 
@@ -78,19 +90,21 @@ export function PurchaseReceiptTaskForm({
             <Field.Label>Order</Field.Label>
             <Field.Description>Select the order to receive</Field.Description>
             <Field.Control>
-              <Combobox<
-                RouterOutputs["receiving"]["order"]["list"]["rows"][number]
-              >
+              <Combobox
                 options={(query) => {
-                  return api.receiving.order.list.useQuery({
+                  return api.receiving.orders.list.useQuery({
                     pagination: {
                       page: 1,
                       size: 10,
                     },
-                    filter: {
-                      search: query,
+                    search: {
+                      query,
                     },
-                  });
+                  }) as AsyncData<
+                    DataQueryResponse<
+                      RouterOutputs["receiving"]["orders"]["list"]["rows"][number]
+                    >
+                  >;
                 }}
                 onSelectionChange={(orderId) => {
                   setValues((draft) => {
@@ -104,9 +118,9 @@ export function PurchaseReceiptTaskForm({
                     <Combobox.Option
                       key={order.id}
                       value={order}
-                      textValue={order.id.toString()}
+                      textValue={order.id?.toString() ?? ""}
                     >
-                      {order.id} - {order.supplier.name}
+                      {order.id} - {order.supplierName}
                     </Combobox.Option>
                   );
                 }}
@@ -120,15 +134,17 @@ export function PurchaseReceiptTaskForm({
             </Field.Description>
             <Field.Control>
               <Field.Control>
-                <Combobox<
-                  RouterOutputs["inventory"]["locations"]["rows"][number]
-                >
+                <Combobox
                   options={(query) => {
-                    return api.inventory.locations.useQuery({
-                      filter: {
-                        search: query,
+                    return api.inventory.locations.list.useQuery({
+                      search: {
+                        query,
                       },
-                    });
+                    }) as AsyncData<
+                      DataQueryResponse<
+                        RouterOutputs["inventory"]["locations"]["list"]["rows"][number]
+                      >
+                    >;
                   }}
                   keyAccessor="id"
                   onSelectionChange={(locationId) => {
@@ -141,9 +157,9 @@ export function PurchaseReceiptTaskForm({
                     return (
                       <Combobox.Option
                         value={location}
-                        textValue={location.name}
+                        textValue={location.name ?? ""}
                       >
-                        {location.name} - {location.group.name}
+                        {location.name} - {location.groupName}
                       </Combobox.Option>
                     );
                   }}
@@ -162,10 +178,10 @@ export function PurchaseReceiptTaskForm({
             <Table.Column>Quantity Received</Table.Column>
           </Table.Header>
           <Table.Body>
-            {order.items.map((item) => (
+            {orderItems?.rows.map((item) => (
               <Table.Row key={item.id}>
-                <Table.Cell>{item.component.id}</Table.Cell>
-                <Table.Cell>{item.component.description}</Table.Cell>
+                <Table.Cell>{item.componentId}</Table.Cell>
+                <Table.Cell>{item.componentDescription}</Table.Cell>
                 <Table.Cell>{item.quantityOrdered}</Table.Cell>
                 <Table.Cell>
                   <Input

@@ -80,7 +80,6 @@ function useData<
     const result = source(query);
     data = result?.data;
     isLoading = result?.isLoading || false;
-    error = result?.error;
   } else {
     let setData: (draft: DataQueryResponse<TData>) => void;
     [data, setData] = useImmer<DataQueryResponse<TData>>({
