@@ -6,17 +6,17 @@ import { signUpSchema } from "@/utils/supabase/schemas";
 
 import { Input } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
-import { Field, Form } from "@repo/ui/components/form";
+import { Field, ManagedForm } from "@repo/ui/components/form";
 
 export default function Signup() {
   return (
-    <Form
+    <ManagedForm
       className="flex min-w-64 flex-1 flex-col space-y-4"
       onSubmit={({ email, password }) => signUpAction({ email, password })}
       schema={signUpSchema}
     >
       <h1 className="text-2xl font-medium">Sign up</h1>
-      <p className="text text-sm text-foreground">
+      <p className="text text-foreground text-sm">
         Already have an account?{" "}
         <Link className="font-medium text-primary underline" href="/sign-in">
           Sign in
@@ -26,7 +26,7 @@ export default function Signup() {
       <Field name="email">
         <Field.Label>Email</Field.Label>
         <Field.Control>
-          <Input placeholder="you@weseal.com" />
+          <Input type="email" placeholder="you@weseal.com" />
         </Field.Control>
         <Field.Message />
       </Field>
@@ -40,9 +40,9 @@ export default function Signup() {
         </Field.Message>
       </Field>
 
-      <Button type="submit" variant="primary">
+      <Button type="submit" variant="solid">
         Sign up
       </Button>
-    </Form>
+    </ManagedForm>
   );
 }

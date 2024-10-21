@@ -1,33 +1,45 @@
 import type { ComponentPropsWithoutRef } from "react";
-import React, { forwardRef } from "react";
+import React from "react";
 
-export const Root = forwardRef<
-  HTMLFieldSetElement,
-  ComponentPropsWithoutRef<"fieldset">
->(({ children, ...props }, ref) => {
+import { cn } from "../../../lib/class-merge";
+
+type FieldsetProps = ComponentPropsWithoutRef<"fieldset">;
+
+const Root = ({ children, className, ...props }: FieldsetProps) => {
   return (
-    <fieldset ref={ref} {...props}>
+    <fieldset
+      {...props}
+      className={cn(
+        "[&>*+[data-slot=control]]:mt-6 [&>[data-slot=text]]:mt-1",
+        className,
+      )}
+    >
       {children}
     </fieldset>
   );
-});
+};
 
-Root.displayName = "Fieldset.Root";
+Root.displayName = "Fieldset";
 
-export const Legend = forwardRef<
-  HTMLLegendElement,
-  ComponentPropsWithoutRef<"legend">
->(({ children, ...props }, ref) => {
+type LegendProps = ComponentPropsWithoutRef<"legend">;
+
+const Legend = ({ children, className, ...props }: LegendProps) => {
   return (
-    <legend ref={ref} {...props}>
+    <legend
+      {...props}
+      className={cn(
+        "text-base/6 font-semibold text-content data-[disabled]:opacity-50 sm:text-sm/6",
+        className,
+      )}
+    >
       {children}
     </legend>
   );
-});
-
+};
 Legend.displayName = "Fieldset.Legend";
 
-export const Fieldset = {
-  Root,
+export const Fieldset = Object.assign(Root, {
   Legend,
-};
+});
+
+export type { FieldsetProps, LegendProps };

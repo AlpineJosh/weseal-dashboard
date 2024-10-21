@@ -1,8 +1,5 @@
-"use client";
-
-import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
-import { useImmer } from "use-immer";
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 
 import {
   faBoxes,
@@ -19,8 +16,6 @@ import { Sidebar } from "@repo/ui/components/navigation";
 interface AppLayoutProps {
   children: React.ReactNode;
 }
-
-const supabase = createClient();
 
 const Nav = () => (
   <Sidebar>
@@ -62,28 +57,25 @@ const Nav = () => (
   </Sidebar>
 );
 
+const Authenticated = async ({ children }: { children: React.ReactNode }) => {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+  return <>{children}</>;
+};
+
 export default function AppLayout({ children }: AppLayoutProps) {
-  // const pathname = usePathname();
-
-  const [user, setUser] = useImmer<User | null>(null);
-
-  // const resetInventory = api.resetInventory.useMutation();
-
-  // const {
-  //   data: { session },
-  // } = await supabase.auth.getSession();
-
-  // if (!session) {
-  //   redirect("/sign-in");
-  // }
-
-  // await supabase.auth.getUser().then(({ data }) => {
-  //   setUser(data.user);
-  // });
-
   return (
-    <SidebarLayout navbar={<Nav />} sidebar={<Nav />}>
-      {children}
-    </SidebarLayout>
+    <Authenticated>
+      <SidebarLayout navbar={<Nav />} sidebar={<Nav />}>
+        {children}
+      </SidebarLayout>
+    </Authenticated>
   );
 }

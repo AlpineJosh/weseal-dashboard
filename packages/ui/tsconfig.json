@@ -11,6 +11,6 @@
       "@repo/ui/lib/*": ["src/lib/*"]
     }
   },
-  "include": ["./*.ts", "./src/**/*.{ts,tsx}"],
+  "include": ["*.ts", "src"],
   "exclude": ["node_modules", ".storybook", ".turbo", "storybook-static"]
 }

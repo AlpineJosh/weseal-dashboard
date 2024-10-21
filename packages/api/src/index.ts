@@ -4,6 +4,7 @@ import { componentRouter } from "./routers/component";
 import { despatchingRouter } from "./routers/despatching";
 import { inventoryRouter } from "./routers/inventory";
 import { productionRouter } from "./routers/production";
+import { profileRouter } from "./routers/profile";
 import { receivingRouter } from "./routers/receiving";
 import {
   createCallerFactory,
@@ -17,6 +18,7 @@ const appRouter = createTRPCRouter({
   despatching: despatchingRouter,
   receiving: receivingRouter,
   inventory: inventoryRouter,
+  profile: profileRouter,
 });
 
 type AppRouter = typeof appRouter;

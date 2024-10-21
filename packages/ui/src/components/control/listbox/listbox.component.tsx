@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import type { FieldValues } from "react-hook-form";
 import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
 
@@ -53,9 +53,9 @@ const variants = {
   section: cva(),
 };
 
-type ListboxProps<T> = Aria.ListBoxProps<T>;
+type ListboxProps<T extends FieldValues> = Aria.ListBoxProps<T>;
 
-const Root = <T extends object>({
+const Root = <T extends FieldValues>({
   layout = "stack",
   orientation = "vertical",
   className,
@@ -74,16 +74,17 @@ const Root = <T extends object>({
   );
 };
 
-type ListboxOptionProps<T> = Aria.ListBoxItemProps<T>;
+type ListboxOptionProps<T> = Omit<Aria.ListBoxItemProps<T>, "id"> & {
+  id: Aria.Key;
+};
 
 export function Option<T extends object>({
   children,
-  textValue,
   className,
+  textValue,
   ...props
 }: ListboxOptionProps<T>) {
-  textValue ??= typeof children === "string" ? children : undefined;
-
+  textValue ??= typeof children === "string" ? children : textValue;
   return (
     <Aria.ListBoxItem
       {...props}

@@ -1,64 +1,60 @@
 "use client";
 
-import React, {
-  ComponentPropsWithRef,
-  Fragment,
-  ReactNode,
-  useEffect,
-} from "react";
+import type { ComponentPropsWithRef, ReactNode } from "react";
+import React, { Fragment, useEffect } from "react";
 import * as Aria from "react-aria-components";
 import { useImmer } from "use-immer";
 
+import type { AsyncData } from "@repo/ui/lib/async";
 import { faAngleDown, faAngleUp, faFilter } from "@repo/pro-light-svg-icons";
-import { AsyncData } from "@repo/ui/lib/async";
 
 import { Checkbox, Input } from "../../control";
 import { Button, Icon } from "../../element";
 import { Pagination } from "../../navigation";
 import { Table } from "../table";
 
-type DatatableColumn<TData extends object> = {
+interface DatatableColumn<TData extends object> {
   id: string;
   label: string;
   sortKey?: keyof TData;
   isRowHeader?: boolean;
   cell: (row: TData) => ReactNode;
-};
+}
 
-type DataPaginationInput = {
+interface DataPaginationInput {
   page: number;
   size: number;
-};
+}
 
-type DataSortInput<TData extends object> = {
+interface DataSortInput<TData extends object> {
   field: keyof TData;
   order: "asc" | "desc";
-};
+}
 
-type DataQueryInput<TData extends object> = {
+interface DataQueryInput<TData extends object> {
   pagination?: DataPaginationInput;
   sort?: DataSortInput<TData>[];
   search?: {
     query: string;
     fields?: (keyof TData)[];
   };
-};
+}
 
-type DataPaginationResponse = {
+interface DataPaginationResponse {
   page: number;
   size: number;
   total: number;
-};
+}
 
-type DataSortResponse<TData extends object> = {
+interface DataSortResponse<TData extends object> {
   field: string;
   order: "asc" | "desc";
-};
+}
 
-type DataQueryResponse<TData extends object> = {
+interface DataQueryResponse<TData extends object> {
   rows: TData[];
   pagination: DataPaginationResponse;
-};
+}
 
 type DataEndpoint<TData extends object> = (
   input: DataQueryInput<TData>,
@@ -149,6 +145,7 @@ const Root = <TData extends object>({
   initialQuery,
   selectionMode = "none",
   selectionBehaviour,
+  ...props
 }: DatatableProps<TData>) => {
   const { rows, pagination, isLoading, query, setQuery } = useData(
     data,
@@ -182,8 +179,6 @@ const Root = <TData extends object>({
     });
   };
 
-  console.log(query.sort);
-
   const sortDirections = query.sort?.reduce(
     (acc, sort) => {
       acc[sort.field as any] = sort.order;
@@ -191,8 +186,6 @@ const Root = <TData extends object>({
     },
     {} as Record<string, "asc" | "desc">,
   );
-
-  console.log(sortDirections);
 
   return (
     <div className="">
@@ -213,6 +206,7 @@ const Root = <TData extends object>({
         </Button>
       </div>
       <Table
+        {...props}
         selectionBehavior={selectionBehaviour}
         selectionMode={selectionMode}
       >

@@ -2,12 +2,8 @@
 
 import { api } from "@/utils/trpc/react";
 
-import { Modal, Table } from "@repo/ui/components/display";
-import { Badge, Button } from "@repo/ui/components/element";
-import { Link } from "@repo/ui/components/navigation";
-
 export default function ReceivingPage() {
-  const { data } = api.receiving.order.list.useQuery({ filter: {} });
+  const { data } = api.receiving.orders.list.useQuery({ filter: {} });
   return (
     <div className="flex flex-col space-y-4">
       <h1 className="text-2xl font-semibold">Purchase Orders</h1>

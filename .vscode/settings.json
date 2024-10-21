@@ -34,6 +34,6 @@
     "editor.formatOnSave": false
   },
   "[sql]": {
-    "editor.defaultFormatter": "adpyke.vscode-sql-formatter"
+    "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
   }
 }

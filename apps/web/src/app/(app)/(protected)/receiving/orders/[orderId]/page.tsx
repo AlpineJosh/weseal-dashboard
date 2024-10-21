@@ -3,75 +3,75 @@
 import { api } from "@/utils/trpc/react";
 
 import { faPlus } from "@repo/pro-solid-svg-icons";
-import { Icon, Table } from "@repo/ui/components/display";
-import { Badge, Button } from "@repo/ui/components/element";
-import { Card } from "@repo/ui/components/layout";
+import { Table } from "@repo/ui/components/display";
+import { Badge, Button, Icon } from "@repo/ui/components/element";
 
 export default function ReceivingPage({
   params,
 }: {
   params: { orderId: string };
 }) {
-  const { data } = api.receiving.order.get.useQuery({ id: +params.orderId });
+  const { data } = api.receiving.orders.get.useQuery({ id: +params.orderId });
+
+  const { data: items } = api.receiving.orders.items.list.useQuery({
+    filter: {
+      orderId: {
+        eq: +params.orderId,
+      },
+    },
+  });
+
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex w-full flex-row items-center">
-        <div className="grow">
-          <span className="flex flex-row items-baseline space-x-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              Purchase Order
+    <>
+      <div className="flex flex-col space-y-4">
+        <div className="flex w-full flex-row items-center">
+          <div className="grow">
+            <span className="flex flex-row items-baseline space-x-2">
+              <span className="text-muted-foreground text-sm font-medium">
+                Purchase Order
+              </span>
+              <Badge>{data?.isCancelled ? "Cancelled" : "Pending"}</Badge>
             </span>
-            <Badge variant="primary">
-              {data?.isComplete ? "Complete" : "Pending"}
-            </Badge>
-          </span>
-          <h1 className="text-2xl font-semibold"># {params.orderId}</h1>
-          <h3 className="font-medium">{data?.supplier.name}</h3>
+            <h1 className="text-2xl font-semibold"># {params.orderId}</h1>
+            <h3 className="font-medium">{data?.supplierName}</h3>
+          </div>
+          <div>
+            <Button variant="solid">Receive Goods</Button>
+          </div>
         </div>
-        <div>
-          <Button variant="primary">Receive Goods</Button>
-        </div>
-      </div>
-      <div className="w-full border-b" />
-      <h3 className="font-semibold text-muted-foreground">
-        Purchase Order Components
-      </h3>
-      <Card>
+        <div className="w-full border-b" />
+        <h3 className="text-muted-foreground font-semibold">
+          Purchase Order Components
+        </h3>
         <Table className="border-b">
           <Table.Header>
-            <Table.Row>
-              <Table.Head>Component</Table.Head>
-              <Table.Head>Ordered</Table.Head>
-              <Table.Head>Received</Table.Head>
-            </Table.Row>
+            <Table.Column>Component</Table.Column>
+            <Table.Column>Ordered</Table.Column>
+            <Table.Column>Received</Table.Column>
           </Table.Header>
           <Table.Body>
-            {data?.items.map((item, index) => (
+            {items?.rows.map((item, index) => (
               <Table.Row key={index}>
-                <Table.Cell>{item.component.id}</Table.Cell>
+                <Table.Cell>{item.componentId}</Table.Cell>
                 <Table.Cell>{item.quantityOrdered}</Table.Cell>
                 <Table.Cell>{item.sageQuantityReceived}</Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>
         </Table>
-      </Card>
-      <div className="w-full border-b" />
-      <div className="flex flex-row items-center justify-between">
-        <h3 className="font-semibold text-muted-foreground">Deliveries</h3>
-        <Button variant="primary">
-          <Icon icon={faPlus} />
-          Add Delivery
-        </Button>
-      </div>
-      <Card>
+        <div className="w-full border-b" />
+        <div className="flex flex-row items-center justify-between">
+          <h3 className="text-muted-foreground font-semibold">Deliveries</h3>
+          <Button variant="solid">
+            <Icon icon={faPlus} />
+            Add Delivery
+          </Button>
+        </div>
         <Table className="border-b">
           <Table.Header>
-            <Table.Row>
-              <Table.Head>Due Date</Table.Head>
-              <Table.Head>Receipt Date</Table.Head>
-              <Table.Head>Status</Table.Head>
-            </Table.Row>
+            <Table.Column>Due Date</Table.Column>
+            <Table.Column>Receipt Date</Table.Column>
+            <Table.Column>Status</Table.Column>
           </Table.Header>
           <Table.Body>
             <Table.Row>
@@ -81,7 +81,7 @@ export default function ReceivingPage({
             </Table.Row>
           </Table.Body>
         </Table>
-      </Card>
-    </div>
+      </div>
+    </>
   );
 }

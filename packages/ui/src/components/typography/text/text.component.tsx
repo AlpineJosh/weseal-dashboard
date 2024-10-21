@@ -14,7 +14,7 @@ const Text = ({ className, ...props }: TextProps) => {
     <AriaText
       data-slot="text"
       {...props}
-      className={cn(className, "text-base/6 text-content-muted sm:text-sm/6")}
+      className={cn("text-base/6 text-content-muted sm:text-sm/6", className)}
     />
   );
 };
@@ -26,8 +26,8 @@ const TextLink = ({ className, ...props }: TextLinkProps) => {
     <Link
       {...props}
       className={cn(
+        "font-medium text-content underline decoration-content/50 data-[hovered]:decoration-content",
         className,
-        "text-content underline decoration-content/50 data-[hovered]:decoration-content",
       )}
     />
   );

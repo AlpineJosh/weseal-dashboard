@@ -25,6 +25,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@react-aria/utils": "^3.25.3",
     "@repo/pro-light-svg-icons": "workspace:^",
     "@repo/pro-solid-svg-icons": "workspace:^",
     "class-variance-authority": "^0.7.0",
@@ -33,6 +34,7 @@
     "next-themes": "^0.3.0",
     "react-aria-components": "^1.3.3",
     "react-hook-form": "^7.52.1",
+    "react-merge-refs": "^2.1.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "use-immer": "^0.10.0"

@@ -6,54 +6,32 @@ import { SalesDespatchTaskForm } from "@/components/flows/SalesDespatchTask";
 import { StockTransferTaskForm } from "@/components/flows/StockTransferTask";
 import { api } from "@/utils/trpc/react";
 
-import { RouterInputs, RouterOutputs } from "@repo/api";
-import { faBarsFilter, faFilterList, faSort } from "@repo/pro-solid-svg-icons";
-import { Datatable, Modal, Table } from "@repo/ui/components/display";
-import {
-  Badge,
-  Button,
-  Divider,
-  Icon,
-  Menu,
-} from "@repo/ui/components/element";
-import { Link } from "@repo/ui/components/navigation";
+import { Datatable, Modal } from "@repo/ui/components/display";
+import { Button, Divider } from "@repo/ui/components/element";
 import { Heading, Subheading } from "@repo/ui/components/typography";
-
-// import { DataTable } from "@repo/ui/components/datatable/datatable";
-
-// import { supabase } from "@/supabase/client";
 
 export const runtime = "edge";
 
-const taskTypes = {
-  receipt: { label: "Receipt", color: "green" },
-  despatch: { label: "Despatch", color: "red" },
-  production: { label: "Production", color: "blue" },
-  transfer: { label: "Transfer", color: "yellow" },
-  correction: { label: "Correction", color: "purple" },
-  wastage: { label: "Wastage", color: "gray" },
-  lost: { label: "Lost", color: "black" },
-  found: { label: "Found", color: "white" },
-};
+// const taskTypes = {
+//   receipt: { label: "Receipt", color: "green" },
+//   despatch: { label: "Despatch", color: "red" },
+//   production: { label: "Production", color: "blue" },
+//   transfer: { label: "Transfer", color: "yellow" },
+//   correction: { label: "Correction", color: "purple" },
+//   wastage: { label: "Wastage", color: "gray" },
+//   lost: { label: "Lost", color: "black" },
+//   found: { label: "Found", color: "white" },
+// };
 
 export default function DashboardPage() {
-  // You can await this here if you don't want to show Suspense fallback below
-  // const { data } = api.purchaseOrder.all.useQuery({ query });
-
-  // const signInWithSSO = async () => {
-  //   const { data } = await supabase.auth.signInWithSSO({
-  //     domain: "weseal.com",
-  //   });
-
-  //   if (data) {
-  //     window.location.href = data.url
-  //   }
-  // };
-
-  // console.log(data);
-
-  const completeTaskItem = api.inventory.tasks.items.complete.useMutation();
   const utils = api.useUtils();
+  const { mutate: completeTaskItem } =
+    api.inventory.tasks.items.complete.useMutation({
+      onSuccess: async () => {
+        await utils.inventory.tasks.items.list.invalidate();
+      },
+    });
+
   return (
     <div className="flex flex-col space-y-2">
       <div className="flex flex-row items-center justify-between">
@@ -105,6 +83,7 @@ export default function DashboardPage() {
       <Subheading level={2}>Tasks</Subheading>
 
       <Datatable
+        aria-label="Tasks"
         idKey="id"
         selectionMode="multiple"
         selectionBehaviour="toggle"
@@ -159,16 +138,7 @@ export default function DashboardPage() {
                   <Button
                     variant="plain"
                     color="primary"
-                    onPress={() =>
-                      completeTaskItem.mutate(
-                        { id: row.id },
-                        {
-                          onSuccess: () => {
-                            utils.inventory.tasks.items.list.invalidate();
-                          },
-                        },
-                      )
-                    }
+                    onPress={() => completeTaskItem({ id: row.id as number })}
                   >
                     Mark Complete
                   </Button>
@@ -196,6 +166,7 @@ export default function DashboardPage() {
       <Subheading level={2}>Sage Discrepancies</Subheading>
 
       <Datatable
+        aria-label="Sage Discrepancies"
         idKey="id"
         columns={[
           {

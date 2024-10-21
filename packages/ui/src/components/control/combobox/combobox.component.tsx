@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import type { Draft } from "immer";
+import React, { useEffect, useRef } from "react";
 import { cva } from "class-variance-authority";
-import { Draft } from "immer";
 import * as Aria from "react-aria-components";
 import { useImmer } from "use-immer";
 
@@ -10,41 +10,28 @@ import { faAngleDown } from "@repo/pro-light-svg-icons";
 import { Listbox } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Popover } from "@repo/ui/components/utility";
-import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
 import { cn } from "@repo/ui/lib/class-merge";
+
+import type { ControlRenderProps } from "../../form/field/field.component";
 
 const variants = {
   root: cva(),
   group: cva([
-    // Basic layout
     "group relative block w-full",
-    // Background color + shadow applied to inset pseudo element, so shadow blends with border in light mode
     "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
-    // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
     "dark:before:hidden",
-    // Hide default focus styles
     "focus:outline-none",
-    // Focus ring
     "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:data-[focus]:ring-2 after:data-[focus]:ring-ring",
-    // Disabled state
     "data-[disabled]:opacity-50 before:data-[disabled]:bg-content/5 before:data-[disabled]:shadow-none",
   ]),
   input: cva([
-    // Basic layout
     "relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
-    // Set minimum height for when no value is selected
     "min-h-11 sm:min-h-9",
-    // Horizontal padding
     "pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing[1.5])-1px)] sm:pl-[calc(theme(spacing.3)-1px)]",
-    // Typography
     "text-left text-base/6 text-content data-[placeholder]:text-content-muted sm:text-sm/6 forced-colors:text-[CanvasText]",
-    // Border
     "border border-content/10 group-data-[active]:border-content/20 group-data-[hovered]:border-content/20",
-    // Background color
     "bg-transparent dark:bg-white/5",
-    // Invalid state
     "group-data-[invalid]:border-red-500 group-data-[invalid]:group-data-[hovered]:border-red-500 group-data-[invalid]:dark:border-red-600 group-data-[invalid]:data-[hovered]:dark:border-red-600",
-    // Disabled state
     "group-data-[disabled]:border-content/20 group-data-[disabled]:opacity-100 group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hovered]:group-data-[disabled]:border-white/15",
     "focus:outline-none",
   ]),
@@ -52,112 +39,118 @@ const variants = {
   icon: cva(["flex size-3 items-center text-content-muted"]),
 };
 
-type Options<T extends object> =
-  | T[]
-  | ((query: string) => AsyncData<DataQueryResponse<T>>);
-
-type UseOptionsProps<T extends object> = Omit<
-  Aria.ComboBoxProps<T>,
-  "items"
-> & {
+interface DataFunctionResult<T> {
   isLoading: boolean;
   items: T[];
-};
+}
 
-const useOptions = <T extends object, K extends keyof T & keyof Draft<T>>(
-  optionsFn: Options<T>,
-  keyAccessor: K,
-  onSelectionChange: ((key: Aria.Key | null) => void) | undefined,
-  selectedKey: Aria.Key | null,
-): UseOptionsProps<T> => {
-  if (typeof optionsFn === "function") {
-    const [options, setOptions] = useImmer<T[]>([]);
-    const [filterText, setFilterText] = useImmer<string>("");
+type KeyAccessor<T> = (item: T) => Aria.Key;
 
-    const { data, isLoading } = optionsFn(filterText);
+// Utility to infer the data type from the data function
+type ExtractDataType<
+  T extends (filterText: string) => DataFunctionResult<object>,
+> = T extends (filterText: string) => DataFunctionResult<infer U> ? U : never;
 
-    useEffect(() => {
-      setOptions((draft) => {
-        const newOptions: T[] = data?.rows ?? [];
+interface AsyncComboboxProps<
+  TDataFunction extends (filterText: string) => DataFunctionResult<object>, // Keeping any for better inference
+> {
+  children: (item: ExtractDataType<TDataFunction>) => React.ReactNode;
+  keyAccessor: KeyAccessor<ExtractDataType<TDataFunction>>;
+  data: TDataFunction;
+}
 
-        for (let i = draft.length - 1; i >= 0; i--) {
-          const option = draft[i];
-          if (
-            option?.[keyAccessor] !== selectedKey &&
-            !newOptions.some(
-              (newOption) => newOption[keyAccessor] === option?.[keyAccessor],
-            )
-          ) {
-            draft.splice(i, 1);
-          }
+const AsyncRoot = <
+  TDataFunction extends (filterText: string) => DataFunctionResult<object>,
+>({ // Changed from unknown to any
+  data,
+  keyAccessor,
+  ...props
+}: AsyncComboboxProps<TDataFunction>) => {
+  type TData = ExtractDataType<TDataFunction>;
+
+  const ref = useRef<HTMLInputElement>(null);
+
+  const [options, setOptions] = useImmer<TData[]>([]);
+
+  const { items, isLoading } = data(ref.current?.value ?? "");
+
+  useEffect(() => {
+    setOptions((draft) => {
+      const newOptions: TData[] = items as TData[];
+
+      // Remove old options not in the new list
+      for (let i = draft.length - 1; i >= 0; i--) {
+        const option = draft[i];
+        if (
+          option &&
+          keyAccessor(option as TData) !== ref.current?.value &&
+          !newOptions.some(
+            (newOption) =>
+              keyAccessor(newOption) === keyAccessor(option as TData),
+          )
+        ) {
+          void draft.splice(i, 1);
         }
+      }
 
-        for (const newOption of newOptions) {
-          if (
-            !draft.some(
-              (option) => option[keyAccessor] === newOption[keyAccessor],
-            )
-          ) {
-            draft.push(newOption as Draft<T>);
-          }
+      // Add new options
+      for (const newOption of newOptions) {
+        if (
+          !draft.some(
+            (option) => keyAccessor(option as TData) === keyAccessor(newOption),
+          )
+        ) {
+          draft.push(newOption as Draft<TData>);
         }
-      });
-    }, [data, isLoading]);
+      }
+    });
+  }, [items, isLoading, ref.current?.value, setOptions, keyAccessor]);
 
-    return {
-      items: options,
-      inputValue: filterText,
-      onInputChange: (query) => {
-        setFilterText(query);
-      },
-      selectedKey,
-      onSelectionChange: (key) => {
-        // const value = options.find((option) => option[keyAccessor] === key);
-        // setFilterText((value?.[keyAccessor] as string) ?? "");
-        onSelectionChange?.(key);
-      },
-      isLoading,
-    };
-  } else {
-    return { items: optionsFn, isLoading: false };
-  }
+  const message = isLoading
+    ? "Loading..."
+    : options.length === 0
+      ? "No results"
+      : undefined;
+
+  return <Root {...props} items={options} message={message} />;
 };
 
 type ComboboxProps<T extends object> = Omit<
   Aria.ComboBoxProps<T>,
-  "children" | "items"
-> & {
-  children: React.ReactNode | ((item: T) => React.ReactNode);
-  options: Options<T>;
-  keyAccessor: keyof T & keyof Draft<T>;
-};
+  "children" | "items" | "onSelectionChange" | "selectedKey"
+> &
+  Partial<ControlRenderProps<Aria.Key | null>> & {
+    items?: T[];
+    children: React.ReactNode | ((item: T) => React.ReactNode);
+    message?: React.ReactNode;
+    placeholder?: string;
+  };
 
 const Root = <T extends object>({
-  children,
-  options,
-  keyAccessor,
   className,
-  selectedKey,
-  onSelectionChange,
+  children,
+  menuTrigger = "focus",
+  allowsEmptyCollection = true,
+  value,
+  onChange,
+  message,
+  placeholder,
   ...props
 }: ComboboxProps<T>) => {
-  const { isLoading, ...optionProps } = useOptions(
-    options,
-    keyAccessor,
-    onSelectionChange,
-    selectedKey ?? null,
-  );
-
   return (
     <Aria.ComboBox
       {...props}
       className={cn(variants.root(), className)}
-      menuTrigger="focus"
-      allowsEmptyCollection={true}
-      {...optionProps}
+      menuTrigger={menuTrigger}
+      allowsEmptyCollection={allowsEmptyCollection}
+      onSelectionChange={onChange}
+      selectedKey={value}
     >
       <Aria.Group data-slot="control" className={cn(variants.group())}>
-        <Aria.Input placeholder="Search" className={cn(variants.input())} />
+        <Aria.Input
+          placeholder={placeholder}
+          className={cn(variants.input())}
+        />
         <Aria.Button className={cn(variants.button())}>
           <Icon
             icon={faAngleDown}
@@ -167,13 +160,9 @@ const Root = <T extends object>({
         </Aria.Button>
       </Aria.Group>
       <Popover className="min-w-[--trigger-width]">
-        {isLoading ? (
+        {message ? (
           <div className="flex h-full w-full items-center justify-center p-4 text-xs text-content-muted">
-            Loading...
-          </div>
-        ) : optionProps.items.length === 0 ? (
-          <div className="flex h-full w-full items-center justify-center p-4 text-xs text-content-muted">
-            No results
+            {message}
           </div>
         ) : (
           <Listbox className="max-h-[inherit] overflow-auto p-1 outline-0">
@@ -190,4 +179,9 @@ export const Combobox = Object.assign(Root, {
   Section: Listbox.Section,
 });
 
-export type { ComboboxProps };
+export const AsyncCombobox = Object.assign(AsyncRoot, {
+  Option: Listbox.Option,
+  Section: Listbox.Section,
+});
+
+export type { ComboboxProps, AsyncComboboxProps };

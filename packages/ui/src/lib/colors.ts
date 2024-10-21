@@ -29,7 +29,8 @@ const baseColors = {
 };
 
 export const colorVariants = {
-  default: baseColors.zinc,
+  default:
+    "[--color:--content] [--color-border:--content] [--color-text:--background]",
   primary: baseColors.blue,
   secondary: baseColors.lime,
   destructive: baseColors.red,

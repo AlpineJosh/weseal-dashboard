@@ -36,6 +36,20 @@
       "when": 1726403247648,
       "tag": "0004_purple_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1728895117297,
+      "tag": "0005_curious_bloodscream",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1728895502397,
+      "tag": "0008_slimy_excalibur",
+      "breakpoints": true
     }
   ]
 }

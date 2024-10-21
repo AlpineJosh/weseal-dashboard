@@ -11,4 +11,5 @@ export default {
   out: "./supabase/migrations",
   dialect: "postgresql",
   dbCredentials: { url: nonPoolingUrl },
+  schemaFilter: ["public", "sage", "bit_systems"],
 } satisfies Config;

@@ -11,6 +11,7 @@ import {
   serial,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -24,6 +25,7 @@ import {
 
 import "./receiving.schema";
 
+import { profile } from "./profile.schema";
 import { purchaseReceiptItem } from "./receiving.schema";
 
 export const batchMovementType = pgEnum("batch_movement_type", [
@@ -47,7 +49,7 @@ export const batchMovement = pgTable("batch_movement", {
     .notNull()
     .references(() => location.id),
   quantity: real("quantity").notNull(),
-  userId: varchar("user_id").notNull(),
+  userId: uuid("user_id").references(() => profile.id),
   type: batchMovementType("type").notNull(),
   purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
     () => purchaseReceiptItem.id,
@@ -125,8 +127,8 @@ export const task = pgTable("task", {
   id: serial("id").notNull().primaryKey(),
   type: batchMovementType("type").notNull(),
   isCancelled: boolean("is_cancelled").notNull().default(false),
-  assignedToId: varchar("assigned_to_user_id").notNull(),
-  createdById: varchar("created_by_user_id").notNull(),
+  assignedToId: uuid("assigned_to_user_id").references(() => profile.id),
+  createdById: uuid("created_by_user_id").references(() => profile.id),
   productionJobId: integer("production_job_id").references(
     () => productionJob.id,
   ),

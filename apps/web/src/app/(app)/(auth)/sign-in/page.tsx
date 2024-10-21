@@ -1,51 +1,62 @@
 "use client";
 
-import Link from "next/link";
 import { signInAction } from "@/app/actions";
 import { signInSchema } from "@/utils/supabase/schemas";
 
 import { Input } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
-import { Field, Form } from "@repo/ui/components/form";
+import { Field, FieldGroup, ManagedForm } from "@repo/ui/components/form";
+import { Heading, Text, TextLink } from "@repo/ui/components/typography";
 
-export default function Signin() {
+export default function Signin({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
+  const error = searchParams.error;
+
   return (
-    <Form
-      className="flex min-w-64 flex-1 flex-col space-y-4"
-      onSubmit={({ email, password }) => signInAction({ email, password })}
+    <ManagedForm
+      className="flex min-w-64 flex-1 flex-col space-y-2"
+      onSubmit={({ email, password }) => {
+        void signInAction({ email, password });
+      }}
       schema={signInSchema}
     >
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="font-medium text-foreground underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
-      <Field name="email">
-        <Field.Label>Email</Field.Label>
-        <Field.Control>
-          <Input placeholder="you@weseal.com" />
-        </Field.Control>
-      </Field>
-      <Field name="password">
-        <Field.Label>Password</Field.Label>
-        <Field.Control>
-          <Input type="password" placeholder="Your password" />
-        </Field.Control>
-        <Field.Description>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
-          >
-            Forgot Password?
-          </Link>
-        </Field.Description>
-        <Field.Message />
-      </Field>
-      <Button type="submit" variant="primary">
+      <Heading>Sign in</Heading>
+      <FieldGroup>
+        <Field name="email">
+          <Field.Label>Email</Field.Label>
+          <Field.Control>
+            <Input type="email" placeholder="you@weseal.com" />
+          </Field.Control>
+          <Field.Message />
+        </Field>
+        <Field name="password">
+          <Field.Label>Password</Field.Label>
+          <Field.Control>
+            <Input type="password" placeholder="Your password" />
+          </Field.Control>
+          <Field.Message />
+        </Field>
+      </FieldGroup>
+
+      <TextLink className="block text-sm" href="/forgot-password">
+        Forgot Password?
+      </TextLink>
+      {error && (
+        <Text className="block text-sm text-destructive">
+          {error === "Invalid login credentials"
+            ? "Invalid email or password"
+            : "Something went wrong"}
+        </Text>
+      )}
+      <Button type="submit" color="primary" variant="solid" className="w-full">
         Sign in
       </Button>
-    </Form>
+      <Text>
+        Don't have an account? <TextLink href="/sign-up">Sign up</TextLink>
+      </Text>
+    </ManagedForm>
   );
 }

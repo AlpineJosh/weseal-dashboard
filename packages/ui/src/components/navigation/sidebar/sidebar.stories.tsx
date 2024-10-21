@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import type { ComponentType } from "react";
 import React from "react";
 
 import { faHome } from "@repo/pro-solid-svg-icons";
-import { Button, Icon } from "@repo/ui/components/element";
-import { Dialog } from "@repo/ui/components/utility";
+import { Icon } from "@repo/ui/components/element";
 
 import type { SidebarProps } from "./sidebar.component";
 import { Sidebar } from "./sidebar.component";

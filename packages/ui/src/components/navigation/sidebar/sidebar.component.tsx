@@ -1,12 +1,9 @@
-"use client";
+import React, { useId } from "react";
+import { LayoutGroup } from "framer-motion";
 
-import React, { Fragment, useId } from "react";
-import { LayoutGroup, motion } from "framer-motion";
-import * as Aria from "react-aria-components";
-import { useImmer } from "use-immer";
-
+import type { SidebarItemProps } from "./sidebar-item.component";
 import { cn } from "../../../lib/class-merge";
-import { Link, LinkProps } from "../../element/link";
+import { Item } from "./sidebar-item.component";
 
 type SidebarProps = React.ComponentPropsWithRef<"nav">;
 
@@ -62,7 +59,7 @@ const Section = ({
   className,
   ...props
 }: React.ComponentPropsWithRef<"div">) => {
-  let id = useId();
+  const id = useId();
 
   return (
     <LayoutGroup id={id}>
@@ -112,57 +109,6 @@ const Heading = ({
         "mb-1 px-2 text-xs font-medium text-content-muted",
       )}
     />
-  );
-};
-
-type SidebarItemProps = {
-  current?: boolean;
-} & (LinkProps | Aria.ButtonProps);
-
-const Item = ({ current, className, children, ...props }: SidebarItemProps) => {
-  let classes = cn(
-    // Base
-    "text-current flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium sm:py-2 sm:text-sm/5",
-    // Leading icon/icon-only
-    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:text-content-muted sm:data-[slot=icon]:*:size-5",
-    // Trailing icon (down chevron or similar)
-    "data-[slot=icon]:last:*:ml-auto data-[slot=icon]:last:*:size-5 sm:data-[slot=icon]:last:*:size-4",
-    // Avatar
-    "data-[slot=avatar]:*:-m-0.5 data-[slot=avatar]:*:size-7 data-[slot=avatar]:*:[--ring-opacity:10%] sm:data-[slot=avatar]:*:size-6",
-    // Hover
-    "data-[hovered]:bg-content/5 data-[slot=icon]:*:data-[hovered]:text-content",
-    // Active
-    "data-[active]:bg-content/5 data-[slot=icon]:*:data-[active]:text-content",
-    // Current
-    "data-[slot=icon]:*:data-[current]:text-content",
-  );
-
-  return (
-    <span className={cn(className, "relative")}>
-      {current && (
-        <motion.span
-          layoutId="current-indicator"
-          className="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-content"
-        />
-      )}
-      {"href" in props ? (
-        <Link
-          className={classes}
-          {...props}
-          data-current={current ? "true" : undefined}
-        >
-          {children}
-        </Link>
-      ) : (
-        <Aria.Button
-          {...props}
-          className={cn("cursor-default", classes)}
-          data-current={current ? "true" : undefined}
-        >
-          {children}
-        </Aria.Button>
-      )}
-    </span>
   );
 };
 

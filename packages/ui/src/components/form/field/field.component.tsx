@@ -1,156 +1,249 @@
 "use client";
 
-import type { ComponentPropsWithoutRef } from "react";
-import type { FieldPath, FieldValues } from "react-hook-form";
-import React, { createContext, forwardRef, useContext, useId } from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { Label as AriaLabel } from "react-aria-components";
-import { useFormContext } from "react-hook-form";
+import type { ComponentPropsWithRef } from "react";
+import type {
+  FieldPath,
+  FieldPathValue,
+  FieldValues,
+  Noop,
+  UseControllerReturn,
+} from "react-hook-form";
+import type { Updater } from "use-immer";
+import React, { createContext, useContext, useEffect, useId } from "react";
+import * as Aria from "react-aria-components";
+import { useController } from "react-hook-form";
+import { useImmer } from "use-immer";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
-interface FieldContextValue<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> {
-  id: string;
-  name: TName;
+import type { TextProps } from "../../typography";
+import { Text } from "../../typography";
+
+interface FieldIds {
+  fieldId: string;
+  controlId: string;
+  labelId: string;
+  descriptionId: string;
+  messageId: string;
 }
+
+type FieldContextValue<TFieldValues extends FieldValues = FieldValues> =
+  UseControllerReturn<TFieldValues> & {
+    ids: FieldIds;
+    setIds: Updater<FieldIds>;
+  };
 
 const FieldContext = createContext<FieldContextValue>({} as FieldContextValue);
 
-interface FieldProps extends ComponentPropsWithoutRef<"div"> {
+type FieldProps = ComponentPropsWithRef<"div"> & {
   name: string;
-}
+};
+
+// type FieldReturn = {
+//   ids: FieldIds;
+//   control: UseFormRegisterReturn &
+//       InputHTMLAttributes<HTMLInputElement> &
+//       React.RefCallback<HTMLInputElement>;
+//   label: Aria.LabelProps;
+//   description: Aria.TextProps;
+//   message: Aria.FieldErrorProps;
+// }
 
 const useFormField = () => {
-  const { name, id } = useContext(FieldContext);
-  const { getFieldState, formState } = useFormContext();
-
-  const fieldState = getFieldState(name, formState);
-
-  if (!name) {
-    throw new Error("useFormField should be used within <FormField>");
-  }
+  const { ids, field, fieldState, setIds } = useContext(FieldContext);
 
   return {
-    id,
-    name,
-    formItemId: `${id}-form-item`,
-    formDescriptionId: `${id}-form-item-description`,
-    formMessageId: `${id}-form-item-message`,
-    ...fieldState,
+    control: {
+      id: ids.controlId,
+      "aria-describedby": fieldState.error
+        ? `${ids.descriptionId} ${ids.messageId}`
+        : ids.descriptionId,
+      "aria-invalid": fieldState.invalid,
+      "aria-labelledby": ids.labelId,
+      "aria-disabled": field.disabled,
+      ...field,
+    },
+    label: {
+      id: ids.labelId,
+      htmlFor: ids.controlId,
+    },
+    description: {
+      id: ids.descriptionId,
+    },
+    message: {
+      id: ids.messageId,
+      children: fieldState.error?.message
+        ? String(fieldState.error.message)
+        : undefined,
+      invalid: fieldState.invalid,
+    },
+    fieldState,
+    setIds,
   };
 };
 
-const Root = forwardRef<HTMLDivElement, FieldProps>(
-  ({ children, className, ...props }, _) => {
-    const id = useId();
+const Root = ({ id, name, children, className, ...props }: FieldProps) => {
+  const control = useController({ name });
 
-    props.id = props.id ?? id;
-    return (
-      <FieldContext.Provider value={{ id: props.id, name: props.name }}>
-        <div className={cn("flex flex-col space-y-1", className)} {...props}>
-          {children}
-        </div>
-      </FieldContext.Provider>
-    );
-  },
-);
+  const fieldId = useId();
+  id ??= fieldId;
+
+  const [ids, setIds] = useImmer<FieldIds>({
+    fieldId: fieldId,
+    controlId: `${fieldId}-control`,
+    labelId: `${fieldId}-label`,
+    descriptionId: `${fieldId}-description`,
+    messageId: `${fieldId}-message`,
+  });
+
+  return (
+    <FieldContext.Provider value={{ ids, setIds, ...control }}>
+      <div
+        className={cn(
+          "flex flex-col",
+          "[&>[data-slot=label]+[data-slot=control]]:mt-3",
+          "[&>[data-slot=label]+[data-slot=description]]:mt-1",
+          "[&>[data-slot=description]+[data-slot=control]]:mt-3",
+          "[&>[data-slot=control]+[data-slot=description]]:mt-3",
+          "[&>[data-slot=control]+[data-slot=error]]:mt-3",
+          "[&>[data-slot=label]]:font-medium",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    </FieldContext.Provider>
+  );
+};
 Root.displayName = "Field.Root";
 
-const Label = forwardRef<
-  React.ElementRef<typeof AriaLabel>,
-  React.ComponentPropsWithoutRef<typeof AriaLabel>
->(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
+type LabelProps = Aria.LabelProps;
+
+const Label = ({ id, className, ...props }: LabelProps) => {
+  const { label, setIds } = useFormField();
+
+  useEffect(() => {
+    if (id !== undefined && id !== label.id) {
+      setIds((draft) => {
+        draft.labelId = id;
+      });
+    }
+  }, [id, label.id, setIds]);
 
   return (
-    <AriaLabel
-      ref={ref}
-      className={cn(error && "text-destructive", className)}
-      htmlFor={formItemId}
+    <Aria.Label
+      data-slot="label"
+      className={cn("invalid:text-destructive", className)}
+      {...label}
       {...props}
     />
   );
-});
+};
 Label.displayName = "Field.Label";
 
-const Control = forwardRef<
-  React.ElementRef<typeof Slot>,
-  React.ComponentPropsWithoutRef<typeof Slot>
->(({ ...props }, ref) => {
-  const { name, error, formItemId, formDescriptionId, formMessageId } =
-    useFormField();
+export interface ControlRenderProps<TValue> {
+  id?: string;
+  onChange: (value: TValue) => void;
+  onBlur: Noop;
+  value: TValue;
+  name: string;
+  ref: React.RefCallback<HTMLInputElement>;
+}
 
-  const { register } = useFormContext();
-  const { ref: fieldRef, ...field } = register(name);
+interface ControlProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> {
+  children: React.ReactElement<
+    ControlRenderProps<FieldPathValue<TFieldValues, TName>>
+  >;
+}
 
-  return (
-    <Slot
-      ref={fieldRef}
-      id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
-      aria-invalid={!!error}
-      {...field}
-      {...props}
-    />
-  );
-});
+const Control = ({ children }: ControlProps) => {
+  const {
+    setIds,
+    control: { ref: _, ...control },
+  } = useFormField();
+
+  const childId = children.props.id;
+  useEffect(() => {
+    if (childId !== undefined && childId !== control.id) {
+      setIds((draft) => {
+        draft.controlId = childId;
+      });
+    }
+  }, [childId, control.id, setIds]);
+
+  return React.cloneElement(children, control);
+};
 Control.displayName = "Field.Control";
 
-const Description = forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => {
-  const { formDescriptionId } = useFormField();
+const Description = ({ id, className, ...props }: TextProps) => {
+  const { description, setIds } = useFormField();
+
+  useEffect(() => {
+    if (id !== undefined && id !== description.id) {
+      setIds((draft) => {
+        draft.descriptionId = id;
+      });
+    }
+  }, [id, description.id, setIds]);
 
   return (
-    <p
-      ref={ref}
-      id={formDescriptionId}
-      className={cn("text-muted-foreground text-[0.8rem]", className)}
+    <Text
+      data-slot="description"
+      {...description}
       {...props}
+      className={cn("text-xs text-content-muted", className)}
     />
   );
-});
+};
 Description.displayName = "Field.Description";
 
-const Message = forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, children, ...props }, ref) => {
-  const { error, formMessageId } = useFormField();
-  const body = error ? String(error.message) : children;
+const Message = ({ className, children, ...props }: TextProps) => {
+  const { message } = useFormField();
+  children = message.children ?? children;
 
-  if (!body) {
+  if (!children) {
     return null;
   }
 
   return (
-    <p
-      ref={ref}
-      id={formMessageId}
+    <Text
+      data-slot="message"
       className={cn(
-        "text-[0.8rem] font-medium",
-        error ? "text-accent" : "text-muted-foreground",
         className,
+        "text-xs font-medium text-content-muted invalid:text-destructive",
       )}
+      {...message}
       {...props}
     >
-      {body}
-    </p>
+      {children}
+    </Text>
   );
-});
+};
 Message.displayName = "Field.Message";
 
-export const Field = Object.assign(Root, {
+const FieldGroup = ({
+  children,
+  className,
+  ...props
+}: ComponentPropsWithRef<"div">) => {
+  return (
+    <div data-slot="control" {...props} className={cn("space-y-8", className)}>
+      {children}
+    </div>
+  );
+};
+FieldGroup.displayName = "Field.Group";
+
+const Field = Object.assign(Root, {
   Label,
   Control,
   Description,
   Message,
 });
+export { Field, FieldGroup };
+
+export type { FieldProps, ControlProps };

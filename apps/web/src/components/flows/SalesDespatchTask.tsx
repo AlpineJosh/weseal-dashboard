@@ -1,14 +1,26 @@
-import { useState } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
 import { api } from "@/utils/trpc/react";
-import { useImmer } from "use-immer";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { RouterInputs, RouterOutputs } from "@repo/api";
 import { Combobox } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
-import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
+
+const taskSchema = z.object({
+  salesOrderId: z.number(),
+  assignedToId: z.string(),
+  items: z.array(
+    z.object({
+      componentId: z.string(),
+      batchId: z.number(),
+      quantity: z.number(),
+      pickLocationId: z.number(),
+    }),
+  ),
+});
 
 export function SalesDespatchTaskForm({
   onSave,
@@ -17,42 +29,40 @@ export function SalesDespatchTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
-  const [values, setValues] = useImmer<{
-    orderId: number | undefined;
-  }>({
-    orderId: undefined,
+  const utils = api.useUtils();
+
+  const form = useForm<z.infer<typeof taskSchema>>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      salesOrderId: undefined,
+      assignedToId: undefined,
+      items: [],
+    },
   });
 
-  const { data: order } = api.despatching.order.get.useQuery(
-    {
-      id: values.orderId as number,
-    },
-    { enabled: !!values.orderId },
-  );
+  const salesOrderId = form.watch("salesOrderId");
 
   const { data: orderItems } = api.despatching.order.items.list.useQuery(
     {
       filter: {
-        orderId: { eq: values.orderId as number },
+        orderId: { eq: salesOrderId },
       },
     },
-    { enabled: !!values.orderId },
+    { enabled: !!salesOrderId },
   );
 
-  const [items, setItems] = useImmer<
-    (RouterInputs["inventory"]["tasks"]["create"]["items"][number] & {
-      componentId: string;
-    })[]
-  >([]);
+  const { mutate: createTask } = api.inventory.tasks.create.useMutation({
+    onSuccess: async () => {
+      await utils.inventory.tasks.list.invalidate();
+    },
+  });
 
-  const { mutate: createTask } = api.inventory.tasks.create.useMutation();
-  const save = () => {
+  const handleSave = (values: z.infer<typeof taskSchema>) => {
     createTask({
       type: "despatch",
-      assignedToId: "1",
-      salesOrderId: values.orderId as number,
-      items,
+      ...values,
     });
+    onSave();
   };
 
   return (
@@ -60,72 +70,87 @@ export function SalesDespatchTaskForm({
       <h1 className="text-2xl font-semibold">Prepare Despatch</h1>
       <Form
         className="flex flex-row space-x-4"
-        onSubmit={() => {
-          console.log(values);
-        }}
-        schema={z.object({
-          orderId: z.number(),
-        })}
-        defaultValues={values}
+        onSubmit={handleSave}
+        form={form}
       >
         <>
           <Field name="component">
             <Field.Label>Sales Order</Field.Label>
             <Field.Description>Select the order to despatch</Field.Description>
             <Field.Control>
-              <Combobox
-                options={(query) => {
-                  return api.despatching.order.list.useQuery({
-                    pagination: {
-                      page: 1,
-                      size: 10,
-                    },
-                    search: {
-                      query,
-                    },
-                  }) as AsyncData<
-                    DataQueryResponse<
-                      RouterOutputs["despatching"]["order"]["list"]["rows"][number]
-                    >
-                  >;
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } =
+                    api.despatching.order.list.useQuery({
+                      search: {
+                        query,
+                      },
+                    });
+
+                  return { items: data?.rows ?? [], isLoading };
                 }}
-                onSelectionChange={(orderId) => {
-                  setValues((draft) => {
-                    draft.orderId = orderId as number;
-                  });
-                }}
-                keyAccessor="id"
+                keyAccessor={(order) => order.id}
               >
                 {(order) => {
                   return (
                     <Combobox.Option
-                      key={order.id}
-                      value={order}
-                      textValue={order.id?.toString() ?? ""}
+                      id={order.id}
+                      textValue={order.id.toString()}
                     >
-                      {order.id}
+                      #{order.id} - {order.customerName}
                     </Combobox.Option>
                   );
                 }}
-              </Combobox>
+              </AsyncCombobox>
+            </Field.Control>
+          </Field>
+          <Field name="assignedToId">
+            <Field.Label>Assigned To</Field.Label>
+            <Field.Description>
+              Select the person to despatch the order
+            </Field.Description>
+            <Field.Control>
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } = api.profile.list.useQuery({
+                    search: { query },
+                  });
+
+                  return { items: data?.rows ?? [], isLoading };
+                }}
+                keyAccessor={(profile) => profile.id}
+              >
+                {(profile) => {
+                  return (
+                    <Combobox.Option id={profile.id}>
+                      {profile.name}
+                    </Combobox.Option>
+                  );
+                }}
+              </AsyncCombobox>
             </Field.Control>
           </Field>
         </>
       </Form>
-      {values.orderId && (
-        <LocationPicker
-          components={
-            orderItems?.rows.map((item) => {
-              return {
-                id: item.componentId!,
-                quantity: item.quantityOrdered ?? 0,
-              };
-            }) ?? []
-          }
-          value={items}
-          onChange={(items) => {
-            setItems(items);
-          }}
+      {salesOrderId && (
+        <Controller
+          control={form.control}
+          name="items"
+          render={({ field: { onChange, value } }) => (
+            <LocationPicker
+              components={
+                orderItems?.rows.map((item) => {
+                  return {
+                    id: item.componentId,
+                    quantity:
+                      item.quantityOrdered - (item.quantityDespatched ?? 0),
+                  };
+                }) ?? []
+              }
+              value={value}
+              onChange={onChange}
+            />
+          )}
         />
       )}
       <div className="flex justify-end gap-2">
@@ -133,13 +158,10 @@ export function SalesDespatchTaskForm({
           Cancel
         </Button>
         <Button
-          isDisabled={!order}
+          isDisabled={!salesOrderId}
           variant="solid"
           color="primary"
-          onPress={() => {
-            save();
-            close();
-          }}
+          type="submit"
         >
           Create Despatch Task
         </Button>

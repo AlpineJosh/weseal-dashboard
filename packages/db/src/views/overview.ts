@@ -56,8 +56,8 @@ export const batchLocationQuantityRelations = relations(
 );
 
 export const componentOverview = pgTable("component_overview", {
-  id: varchar("id"),
-  description: varchar("description"),
+  id: varchar("id").notNull(),
+  description: varchar("description").notNull(),
   hasSubcomponents: boolean("has_subcomponents").notNull(),
   totalQuantity: real("total_quantity").notNull(),
   allocatedQuantity: real("allocated_quantity").notNull(),
@@ -102,7 +102,7 @@ export const componentOverviewRelations = relations(
 );
 
 export const batchOverview = pgTable("batch_overview", {
-  id: integer("id"),
+  id: integer("id").notNull(),
   componentId: varchar("component_id"),
   componentDescription: varchar("component_description"),
   batchReference: varchar("batch_reference"),
@@ -129,8 +129,8 @@ export const batchOverviewRelations = relations(
 );
 
 export const subcomponentOverview = pgTable("subcomponent_overview", {
-  componentId: varchar("component_id"),
-  subcomponentId: varchar("subcomponent_id"),
+  componentId: varchar("component_id").notNull(),
+  subcomponentId: varchar("subcomponent_id").notNull(),
   quantity: real("quantity").notNull(),
   subcomponentDescription: varchar("subcomponent_description"),
   subcomponentTotalQuantity: real("subcomponent_total_quantity").notNull(),
@@ -146,8 +146,8 @@ export const subcomponentOverview = pgTable("subcomponent_overview", {
 });
 
 export const batchMovementOverview = pgTable("batch_movement_overview", {
-  id: serial("id"),
-  date: date("date", { mode: "date" }),
+  id: serial("id").notNull(),
+  date: date("date", { mode: "date" }).notNull(),
   batchId: integer("batch_id"),
   batchReference: varchar("batch_reference"),
   batchEntryDate: date("batch_entry_date", { mode: "date" }),
@@ -237,8 +237,8 @@ export const taskItemOverview = pgTable("task_item_overview", {
 });
 
 export const locationOverview = pgTable("location_overview", {
-  id: integer("id"),
-  name: varchar("name"),
+  id: integer("id").notNull(),
+  name: varchar("name").notNull(),
   details: varchar("details"),
   groupId: integer("group_id"),
   groupName: varchar("group_name"),
@@ -257,9 +257,9 @@ export const customerOverview = pgTable("customer_overview", {
 });
 
 export const salesOrderOverview = pgTable("sales_order_overview", {
-  id: integer("id"),
-  customerId: varchar("customer_id"),
-  customerName: varchar("customer_name"),
+  id: integer("id").notNull(),
+  customerId: varchar("customer_id").notNull(),
+  customerName: varchar("customer_name").notNull(),
   orderDate: timestamp("order_date"),
   isQuote: boolean("is_quote"),
   isCancelled: boolean("is_cancelled"),
@@ -271,21 +271,21 @@ export const salesOrderOverview = pgTable("sales_order_overview", {
 });
 
 export const salesOrderItemOverview = pgTable("sales_order_item_overview", {
-  id: integer("id"),
-  orderId: integer("order_id"),
-  componentId: varchar("component_id"),
-  componentDescription: varchar("component_description"),
-  quantityOrdered: real("quantity_ordered"),
+  id: integer("id").notNull(),
+  orderId: integer("order_id").notNull(),
+  componentId: varchar("component_id").notNull(),
+  componentDescription: varchar("component_description").notNull(),
+  quantityOrdered: real("quantity_ordered").notNull(),
   quantityDespatched: real("quantity_despatched"),
   quantityInStock: real("quantity_in_stock"),
   sageQuantityDespatched: real("sage_quantity_despatched"),
 });
 
 export const salesDespatchOverview = pgTable("sales_despatch_overview", {
-  id: integer("id"),
-  orderId: integer("order_id"),
-  customerId: varchar("customer_id"),
-  customerName: varchar("customer_name"),
+  id: integer("id").notNull(),
+  orderId: integer("order_id").notNull(),
+  customerId: varchar("customer_id").notNull(),
+  customerName: varchar("customer_name").notNull(),
   expectedDespatchDate: timestamp("expected_despatch_date"),
   despatchDate: timestamp("despatch_date"),
   isDespatched: boolean("is_despatched"),
@@ -295,12 +295,12 @@ export const salesDespatchOverview = pgTable("sales_despatch_overview", {
 export const salesDespatchItemOverview = pgTable(
   "sales_despatch_item_overview",
   {
-    id: integer("id"),
-    despatchId: integer("despatch_id"),
+    id: integer("id").notNull(),
+    despatchId: integer("despatch_id").notNull(),
     batchId: integer("batch_id"),
     batchReference: varchar("batch_reference"),
-    componentId: varchar("component_id"),
-    componentDescription: varchar("component_description"),
+    componentId: varchar("component_id").notNull(),
+    componentDescription: varchar("component_description").notNull(),
     quantity: real("quantity"),
   },
 );
@@ -356,9 +356,9 @@ export const supplierOverview = pgTable("supplier_overview", {
 });
 
 export const purchaseOrderOverview = pgTable("purchase_order_overview", {
-  id: integer("id"),
-  supplierId: varchar("supplier_id"),
-  supplierName: varchar("supplier_name"),
+  id: integer("id").notNull(),
+  supplierId: varchar("supplier_id").notNull(),
+  supplierName: varchar("supplier_name").notNull(),
   orderDate: timestamp("order_date"),
   isQuote: boolean("is_quote"),
   isCancelled: boolean("is_cancelled"),
@@ -372,21 +372,21 @@ export const purchaseOrderOverview = pgTable("purchase_order_overview", {
 export const purchaseOrderItemOverview = pgTable(
   "purchase_order_item_overview",
   {
-    id: integer("id"),
-    orderId: integer("order_id"),
-    componentId: varchar("component_id"),
-    componentDescription: varchar("component_description"),
-    quantityOrdered: real("quantity_ordered"),
+    id: integer("id").notNull(),
+    orderId: integer("order_id").notNull(),
+    componentId: varchar("component_id").notNull(),
+    componentDescription: varchar("component_description").notNull(),
+    quantityOrdered: real("quantity_ordered").notNull(),
     quantityReceived: real("quantity_received"),
     sageQuantityReceived: real("sage_quantity_received"),
   },
 );
 
 export const purchaseReceiptOverview = pgTable("purchase_receipt_overview", {
-  id: integer("id"),
-  orderId: integer("order_id"),
-  supplierId: varchar("supplier_id"),
-  supplierName: varchar("supplier_name"),
+  id: integer("id").notNull(),
+  orderId: integer("order_id").notNull(),
+  supplierId: varchar("supplier_id").notNull(),
+  supplierName: varchar("supplier_name").notNull(),
   expectedReceiptDate: timestamp("expected_receipt_date"),
   receiptDate: timestamp("receipt_date"),
   isReceived: boolean("is_received"),
@@ -396,12 +396,12 @@ export const purchaseReceiptOverview = pgTable("purchase_receipt_overview", {
 export const purchaseReceiptItemOverview = pgTable(
   "purchase_receipt_item_overview",
   {
-    id: integer("id"),
-    receiptId: integer("receipt_id"),
+    id: integer("id").notNull(),
+    receiptId: integer("receipt_id").notNull(),
     batchId: integer("batch_id"),
     batchReference: varchar("batch_reference"),
-    componentId: varchar("component_id"),
-    componentDescription: varchar("component_description"),
-    quantity: real("quantity"),
+    componentId: varchar("component_id").notNull(),
+    componentDescription: varchar("component_description").notNull(),
+    quantity: real("quantity").notNull(),
   },
 );

@@ -1,162 +1,179 @@
 import { api } from "@/utils/trpc/react";
-import { useImmer } from "use-immer";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { RouterOutputs } from "@repo/api";
-import { Combobox, Input, Select } from "@repo/ui/components/control";
+import { Combobox, Input } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
-import { AsyncData, DataQueryResponse } from "@repo/ui/lib/async";
+
+const taskSchema = z.object({
+  componentId: z.string(),
+  batchId: z.number(),
+  pickLocationId: z.number(),
+  putLocationId: z.number(),
+  assignedToId: z.string(),
+  quantity: z.number().min(0),
+});
 
 export function StockTransferTaskForm({
   onSave,
-  onExit,
+  // onExit,
 }: {
   onSave: () => void;
   onExit: () => void;
 }) {
-  const [values, setValues] = useImmer<{
-    componentId: string | undefined;
-    pickLocationId: string | undefined;
-    putLocationId: string | undefined;
-    quantity: number;
-  }>({
-    componentId: undefined,
-    pickLocationId: undefined,
-    putLocationId: undefined,
-    quantity: 1,
+  const utils = api.useUtils();
+  const form = useForm<z.infer<typeof taskSchema>>({
+    defaultValues: {
+      quantity: 1,
+      assignedToId: undefined,
+      batchId: undefined,
+      pickLocationId: undefined,
+      putLocationId: undefined,
+      componentId: undefined,
+    },
+    resolver: zodResolver(taskSchema),
   });
+  const componentId = form.watch("componentId");
+
+  const { mutate: createTask } = api.inventory.tasks.create.useMutation({
+    onSuccess: async () => {
+      await utils.inventory.tasks.list.invalidate();
+    },
+  });
+
+  const handleSubmit = ({
+    assignedToId,
+    ...value
+  }: z.infer<typeof taskSchema>) => {
+    createTask({
+      type: "transfer",
+      assignedToId,
+      items: [value],
+    });
+    onSave();
+  };
 
   return (
     <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Create Transfer Task</h1>
       <Form
         className="flex flex-col space-y-4"
-        onSubmit={() => {
-          onSave();
-        }}
-        schema={z.any()}
+        onSubmit={handleSubmit}
+        form={form}
       >
-        <Field name="component">
+        <Field name="componentId">
           <Field.Label>Component</Field.Label>
           <Field.Description>Select the component to build</Field.Description>
           <Field.Control>
-            <Combobox
-              keyAccessor="id"
-              options={(query) => {
-                return api.component.list.useQuery({
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } = api.component.list.useQuery({
                   filter: {
                     hasSubcomponents: { eq: true },
+                    totalQuantity: { gt: 0 },
                   },
                   search: { query },
-                }) as AsyncData<
-                  DataQueryResponse<
-                    RouterOutputs["component"]["list"]["rows"][number]
-                  >
-                >;
-              }}
-              onSelectionChange={(componentId) => {
-                setValues((draft) => {
-                  draft.componentId = componentId as string;
                 });
+                return {
+                  isLoading: isLoading,
+                  items: data?.rows ?? [],
+                };
               }}
+              keyAccessor={(component) => component.id}
             >
               {(component) => {
                 return (
-                  <Combobox.Option key={component.id} value={component}>
+                  <Combobox.Option id={component.id}>
                     {component.id}
                   </Combobox.Option>
                 );
               }}
-            </Combobox>
+            </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Field name="pickLocation">
+        <Field name="pickLocationId">
           <Field.Label>Pick Location</Field.Label>
           <Field.Description>
             Select the location to pick from
           </Field.Description>
           <Field.Control>
-            <Combobox
-              options={(query) => {
-                return api.inventory.locations.list.useQuery({
-                  search: { query },
-                }) as AsyncData<
-                  DataQueryResponse<
-                    RouterOutputs["inventory"]["locations"]["list"]["rows"][number]
-                  >
-                >;
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } = api.inventory.quantity.useQuery(
+                  {
+                    filter: {
+                      componentId: {
+                        eq: componentId,
+                      },
+                      total: {
+                        gt: 0,
+                      },
+                    },
+                    search: { query },
+                  },
+                  {
+                    enabled: !!componentId,
+                  },
+                );
+                return {
+                  isLoading: isLoading,
+                  items: data?.rows ?? [],
+                };
               }}
-              onSelectionChange={(locationId) => {
-                setValues((draft) => {
-                  draft.pickLocationId = locationId as string;
-                });
-              }}
-              keyAccessor="id"
+              keyAccessor={(location) =>
+                `${location.locationId}-${location.batchId}`
+              }
             >
               {(location) => {
                 return (
                   <Combobox.Option
-                    key={location.id}
-                    value={location}
-                    textValue={location.name ?? ""}
+                    id={`${location.locationId}-${location.batchId}`}
+                    textValue={`Loc: ${location.locationName} Batch: ${location.batchReference}`}
                   >
-                    {location.name} - {location.groupName ?? ""}
+                    Loc: {location.locationName} - Batch:{" "}
+                    {location.batchReference}
                   </Combobox.Option>
                 );
               }}
-            </Combobox>
+            </AsyncCombobox>
           </Field.Control>
         </Field>
         <Field name="quantity">
           <Field.Label>Quantity</Field.Label>
           <Field.Description>Amount to move</Field.Description>
           <Field.Control>
-            <Input
-              onChange={(e) => {
-                setValues({
-                  ...values,
-                  quantity: Math.max(+e.target.value, 1),
-                });
-              }}
-              type="number"
-            />
+            <Input type="number" />
           </Field.Control>
         </Field>
-        <Field name="putLocation">
+        <Field name="putLocationId">
           <Field.Label>Put Location</Field.Label>
           <Field.Description>Select destination location</Field.Description>
           <Field.Control>
             <Field.Control>
-              <Combobox
-                options={(query) => {
-                  return api.inventory.locations.list.useQuery({
-                    search: { query },
-                  }) as AsyncData<
-                    DataQueryResponse<
-                      RouterOutputs["inventory"]["locations"]["list"]["rows"][number]
-                    >
-                  >;
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } =
+                    api.inventory.locations.list.useQuery({
+                      search: { query },
+                    });
+                  return {
+                    isLoading: isLoading,
+                    items: data?.rows ?? [],
+                  };
                 }}
-                onSelectionChange={(locationId) => {
-                  setValues((draft) => {
-                    draft.putLocationId = locationId as string;
-                  });
-                }}
-                keyAccessor="id"
+                keyAccessor={(location) => location.id}
               >
                 {(location) => {
                   return (
-                    <Combobox.Option
-                      key={location.id}
-                      value={location}
-                      textValue={location.name ?? ""}
-                    >
-                      {location.name} - {location.groupName ?? ""}
+                    <Combobox.Option id={location.id} textValue={location.name}>
+                      {location.name} - {location.groupName}
                     </Combobox.Option>
                   );
                 }}
-              </Combobox>
+              </AsyncCombobox>
             </Field.Control>
           </Field.Control>
         </Field>

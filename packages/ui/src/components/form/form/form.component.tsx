@@ -19,23 +19,18 @@ import { renderChildren } from "@repo/ui/lib/helpers";
 type FormProps<T extends FieldValues> = Omit<
   ComponentPropsWithoutRef<typeof AriaForm>,
   "onSubmit" | "children"
-> &
-  UseFormProps<T> & {
-    onSubmit: SubmitHandler<T>;
-    onChange?: (data: T) => void;
-    children: Children<UseFormReturn<T>>;
-    schema: ZodSchema<T>;
-  };
+> & {
+  onSubmit: SubmitHandler<T>;
+  form: UseFormReturn<T>;
+  children: Children<UseFormReturn<T>>;
+};
 
-const Root = <T extends FieldValues>({
+const Form = <T extends FieldValues>({
   onSubmit,
-  schema,
-  defaultValues,
+  form,
   children,
   ...props
 }: FormProps<T>) => {
-  const form = useForm<T>({ resolver: zodResolver(schema), defaultValues });
-
   return (
     <FormProvider {...form}>
       <AriaForm onSubmit={form.handleSubmit(onSubmit)} {...props}>
@@ -45,6 +40,33 @@ const Root = <T extends FieldValues>({
   );
 };
 
-Root.displayName = "Form";
+type ManagedFormProps<T extends FieldValues> = Omit<
+  ComponentPropsWithoutRef<typeof AriaForm>,
+  "onSubmit" | "children"
+> &
+  UseFormProps<T> & {
+    onSubmit: SubmitHandler<T>;
+    schema: ZodSchema<T>;
+    children: Children<UseFormReturn<T>>;
+  };
 
-export { Root as Form };
+const ManagedForm = <T extends FieldValues>({
+  onSubmit,
+  defaultValues,
+  schema,
+  children,
+  ...props
+}: ManagedFormProps<T>) => {
+  const form = useForm<T>({
+    resolver: zodResolver(schema),
+    defaultValues,
+  });
+  return (
+    <Form form={form} onSubmit={onSubmit} {...props}>
+      {children}
+    </Form>
+  );
+};
+
+export { Form, ManagedForm };
+export type { FormProps, ManagedFormProps };

@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 
@@ -95,15 +95,13 @@ const LocationPickerItem = ({
       }
       setLocations(locs);
     }
-  }, [quantities]);
+  }, [quantities, setLocations]);
 
-  const calculateQuantities = () => {
+  useEffect(() => {
     const batches = [];
     let remaining = quantity;
 
-    for (let ii = 0; ii < locations.length; ii++) {
-      const location = locations[ii]!;
-
+    for (const location of locations) {
       if (!location.blocked && remaining > 0) {
         const use = Math.min(location.total, remaining);
         remaining -= use;
@@ -115,12 +113,8 @@ const LocationPickerItem = ({
         });
       }
     }
-    return batches.map((batch) => ({ ...batch, componentId: id }));
-  };
 
-  useEffect(() => {
-    const newBatches = calculateQuantities();
-    const hasChanges = newBatches.some((newBatch) => {
+    const hasChanges = batches.some((newBatch) => {
       const existingBatch = value.find(
         (batch) =>
           batch.pickLocationId === newBatch.pickLocationId &&
@@ -130,9 +124,9 @@ const LocationPickerItem = ({
     });
 
     if (hasChanges) {
-      onChange(newBatches);
+      onChange(batches);
     }
-  }, [locations, quantity, onChange]);
+  }, [locations, quantity, onChange, value, id]);
 
   if (!component) return null;
 
@@ -161,14 +155,17 @@ const LocationPickerItem = ({
                   checked={!location.blocked}
                   onChange={() => {
                     setLocations((draft) => {
-                      draft![index]!.blocked = !draft![index]!.blocked;
+                      const loc = draft[index];
+                      if (loc) {
+                        loc.blocked = !loc.blocked;
+                      }
                     });
                   }}
                 />
               </Table.Cell>
               <Table.Cell>{location.locationName}</Table.Cell>
               <Table.Cell>
-                {location.batchReference ||
+                {location.batchReference ??
                   (location.batchEntryDate
                     ? location.batchEntryDate.toLocaleDateString()
                     : "")}
