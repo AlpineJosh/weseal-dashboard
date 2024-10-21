@@ -53,7 +53,7 @@ type ExtractDataType<
 
 interface AsyncComboboxProps<
   TDataFunction extends (filterText: string) => DataFunctionResult<object>, // Keeping any for better inference
-> {
+> extends Partial<ControlRenderProps<Aria.Key | null>> {
   children: (item: ExtractDataType<TDataFunction>) => React.ReactNode;
   keyAccessor: KeyAccessor<ExtractDataType<TDataFunction>>;
   data: TDataFunction;
@@ -61,18 +61,20 @@ interface AsyncComboboxProps<
 
 const AsyncRoot = <
   TDataFunction extends (filterText: string) => DataFunctionResult<object>,
->({ // Changed from unknown to any
+>({
+  // Changed from unknown to any
   data,
   keyAccessor,
+  value,
   ...props
 }: AsyncComboboxProps<TDataFunction>) => {
   type TData = ExtractDataType<TDataFunction>;
 
-  const ref = useRef<HTMLInputElement>(null);
+  const [filterText, setFilterText] = useImmer("");
 
   const [options, setOptions] = useImmer<TData[]>([]);
 
-  const { items, isLoading } = data(ref.current?.value ?? "");
+  const { items, isLoading } = data(filterText);
 
   useEffect(() => {
     setOptions((draft) => {
@@ -83,7 +85,7 @@ const AsyncRoot = <
         const option = draft[i];
         if (
           option &&
-          keyAccessor(option as TData) !== ref.current?.value &&
+          keyAccessor(option as TData) !== value &&
           !newOptions.some(
             (newOption) =>
               keyAccessor(newOption) === keyAccessor(option as TData),
@@ -104,7 +106,7 @@ const AsyncRoot = <
         }
       }
     });
-  }, [items, isLoading, ref.current?.value, setOptions, keyAccessor]);
+  }, [items, isLoading, filterText, setOptions, keyAccessor, value]);
 
   const message = isLoading
     ? "Loading..."
@@ -112,7 +114,16 @@ const AsyncRoot = <
       ? "No results"
       : undefined;
 
-  return <Root {...props} items={options} message={message} />;
+  return (
+    <Root
+      {...props}
+      value={value}
+      inputValue={filterText}
+      onInputChange={setFilterText}
+      items={options}
+      message={message}
+    />
+  );
 };
 
 type ComboboxProps<T extends object> = Omit<
