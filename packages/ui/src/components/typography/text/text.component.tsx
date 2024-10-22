@@ -37,7 +37,7 @@ type StrongProps = ComponentPropsWithoutRef<"strong">;
 
 const Strong = ({ className, ...props }: StrongProps) => {
   return (
-    <strong {...props} className={cn(className, "font-medium text-content")} />
+    <strong {...props} className={cn("font-medium text-content", className)} />
   );
 };
 

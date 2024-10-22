@@ -1,6 +1,7 @@
 "use client";
 
-import React, { ComponentPropsWithRef } from "react";
+import type { ComponentPropsWithRef } from "react";
+import React from "react";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
@@ -9,23 +10,23 @@ type HeadingProps = { level?: 1 | 2 | 3 | 4 | 5 | 6 } & ComponentPropsWithRef<
 >;
 
 const Heading = ({ className, level = 1, ...props }: HeadingProps) => {
-  let Element: `h${typeof level}` = `h${level}`;
+  const Element: `h${typeof level}` = `h${level}`;
 
   return (
     <Element
       {...props}
-      className={cn(className, "text-2xl/8 font-semibold text-content")}
+      className={cn("text-2xl/8 font-semibold text-content", className)}
     />
   );
 };
 
 const Subheading = ({ className, level = 2, ...props }: HeadingProps) => {
-  let Element: `h${typeof level}` = `h${level}`;
+  const Element: `h${typeof level}` = `h${level}`;
 
   return (
     <Element
       {...props}
-      className={cn(className, "text-base font-semibold text-content")}
+      className={cn("text-base font-semibold text-content", className)}
     />
   );
 };

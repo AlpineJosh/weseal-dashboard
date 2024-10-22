@@ -37,6 +37,7 @@ const FieldContext = createContext<FieldContextValue>({} as FieldContextValue);
 
 type FieldProps = ComponentPropsWithRef<"div"> & {
   name: string;
+  valueAsNumber?: boolean;
 };
 
 // type FieldReturn = {

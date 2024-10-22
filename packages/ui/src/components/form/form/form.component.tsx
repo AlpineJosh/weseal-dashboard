@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentPropsWithoutRef } from "react";
+import type { Form as AriaForm } from "react-aria-components";
 import type {
   FieldValues,
   SubmitHandler,
@@ -10,7 +11,6 @@ import type {
 import type { ZodSchema } from "zod";
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form as AriaForm } from "react-aria-components";
 import { FormProvider, useForm } from "react-hook-form";
 
 import type { Children } from "@repo/ui/lib/helpers";
@@ -33,9 +33,9 @@ const Form = <T extends FieldValues>({
 }: FormProps<T>) => {
   return (
     <FormProvider {...form}>
-      <AriaForm onSubmit={form.handleSubmit(onSubmit)} {...props}>
+      <form onSubmit={form.handleSubmit(onSubmit)} {...props}>
         {renderChildren(children, form)}
-      </AriaForm>
+      </form>
     </FormProvider>
   );
 };

@@ -57,7 +57,11 @@ export const ProductionTaskForm = ({
     },
   });
 
+  const values = form.watch();
+  console.log(values);
+
   const componentId = form.watch("componentId");
+  const quantity = form.watch("quantity");
 
   const { data: subcomponents } = api.component.subcomponents.useQuery(
     {
@@ -73,6 +77,7 @@ export const ProductionTaskForm = ({
   });
 
   const handleSubmit = (value: z.infer<typeof taskSchema>) => {
+    console.log(value);
     createTask({
       type: "production",
       ...value,
@@ -81,19 +86,20 @@ export const ProductionTaskForm = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 self-stretch">
-      <h1 className="text-2xl font-semibold">Create Production Task</h1>
-      <Form
-        className="flex flex-row space-x-4"
-        onSubmit={handleSubmit}
-        form={form}
-      >
-        <>
+    <Form
+      className="flex flex-col space-x-4"
+      onSubmit={handleSubmit}
+      form={form}
+    >
+      <div className="flex flex-col gap-4 self-stretch">
+        <h1 className="text-2xl font-semibold">Create Production Task</h1>
+        <div className="flex flex-row gap-4">
           <Field name="componentId">
             <Field.Label>Component</Field.Label>
             <Field.Description>Select the component to build</Field.Description>
             <Field.Control>
               <AsyncCombobox
+                textValueAccessor={(component) => component.id}
                 keyAccessor={(component) => component.id}
                 data={(query: string) => {
                   const { data, isLoading } = api.component.list.useQuery({
@@ -110,7 +116,7 @@ export const ProductionTaskForm = ({
               >
                 {(component) => {
                   return (
-                    <Combobox.Option id={component.id}>
+                    <Combobox.Option id={component.id} textValue={component.id}>
                       {component.id}
                     </Combobox.Option>
                   );
@@ -122,7 +128,7 @@ export const ProductionTaskForm = ({
             <Field.Label>Quantity</Field.Label>
             <Field.Description>Amount to build</Field.Description>
             <Field.Control>
-              <Input type="number" />
+              <Input type="number" step="any" />
             </Field.Control>
           </Field>
           <Field name="putLocationId">
@@ -141,6 +147,7 @@ export const ProductionTaskForm = ({
                   };
                 }}
                 keyAccessor={(location) => location.id}
+                textValueAccessor={(location) => location.name}
               >
                 {(location) => {
                   return (
@@ -152,87 +159,92 @@ export const ProductionTaskForm = ({
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          {/* <Field name="batchReference">
+          <Field name="assignedToId">
+            <Field.Label>Assigned To</Field.Label>
+            <Field.Description>
+              Select the person to despatch the order
+            </Field.Description>
+            <Field.Control>
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } = api.profile.list.useQuery({
+                    search: { query },
+                  });
+
+                  return { items: data?.rows ?? [], isLoading };
+                }}
+                keyAccessor={(profile) => profile.id}
+                textValueAccessor={(profile) => profile.name ?? ""}
+              >
+                {(profile) => {
+                  return (
+                    <Combobox.Option id={profile.id}>
+                      {profile.name}
+                    </Combobox.Option>
+                  );
+                }}
+              </AsyncCombobox>
+            </Field.Control>
+          </Field>
+        </div>
+        {/* <Field name="batchReference">
             <Field.Label>Batch Reference</Field.Label>
             <Field.Description>Input the batch reference</Field.Description>
             <Field.Control>
               <Input type="text" />
             </Field.Control>
           </Field> */}
-        </>
-      </Form>
-      <div className="width-full flex max-h-[400px] flex-col overflow-y-auto">
-        {componentId ? (
-          <Controller
-            control={form.control}
-            name="items"
-            render={({ field: { value, onChange } }) => (
-              <LocationPicker
-                components={
-                  subcomponents?.map((subcomponent) => {
-                    return {
-                      id: subcomponent.subcomponentId,
-                      quantity:
-                        subcomponent.quantity * form.getValues("quantity"),
-                    };
-                  }) ?? []
-                }
-                value={value}
-                onChange={(items) => {
-                  onChange(items);
-                }}
-              />
-            )}
-          />
-        ) : (
-          <div className="flex min-h-[200px] flex-col items-center justify-center">
-            <span className="text-muted-foreground">
-              Please select a component
-            </span>
-          </div>
-        )}
+        <div className="width-full flex max-h-[400px] flex-col overflow-y-auto">
+          {componentId ? (
+            <Controller
+              control={form.control}
+              name="items"
+              render={({ field: { value, onChange } }) => (
+                <LocationPicker
+                  components={
+                    subcomponents?.map((subcomponent) => {
+                      return {
+                        id: subcomponent.subcomponentId,
+                        quantity: subcomponent.quantity * quantity,
+                      };
+                    }) ?? []
+                  }
+                  value={value}
+                  onChange={(items) => {
+                    onChange({
+                      target: {
+                        value: items.map((item) => ({
+                          ...item,
+                          quantity: Number(item.quantity),
+                        })),
+                      },
+                    });
+                  }}
+                />
+              )}
+            />
+          ) : (
+            <div className="flex min-h-[200px] flex-col items-center justify-center">
+              <span className="text-muted-foreground">
+                Please select a component
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="plain" color="default" onPress={onExit}>
+            Cancel
+          </Button>
+          <Button
+            isDisabled={!componentId}
+            variant="solid"
+            color="primary"
+            type="submit"
+          >
+            Create Task
+          </Button>
+        </div>
       </div>
-      <div className="flex justify-end gap-2">
-        <Button variant="plain" color="default" onPress={onExit}>
-          Cancel
-        </Button>
-        <Button
-          isDisabled={!componentId}
-          variant="solid"
-          color="primary"
-          type="submit"
-        >
-          Create Task
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-export const ComponentCombobox = () => {
-  return (
-    <AsyncCombobox
-      keyAccessor={(component) => component.id}
-      data={(query: string) => {
-        const { data, isLoading } = api.component.list.useQuery({
-          filter: {
-            hasSubcomponents: { eq: true },
-          },
-          search: { query },
-        });
-        return {
-          isLoading: isLoading,
-          items: data?.rows ?? [],
-        };
-      }}
-    >
-      {(component) => {
-        return (
-          <Combobox.Option id={component.id} value={component}>
-            {component.id}
-          </Combobox.Option>
-        );
-      }}
-    </AsyncCombobox>
+    </Form>
   );
 };

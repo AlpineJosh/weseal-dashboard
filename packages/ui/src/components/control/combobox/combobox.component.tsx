@@ -45,7 +45,7 @@ interface DataFunctionResult<T> {
 }
 
 type KeyAccessor<T> = (item: T) => Aria.Key;
-
+type TextValueAccessor<T> = (item: T) => string;
 // Utility to infer the data type from the data function
 type ExtractDataType<
   T extends (filterText: string) => DataFunctionResult<object>,
@@ -57,6 +57,7 @@ interface AsyncComboboxProps<
   children: (item: ExtractDataType<TDataFunction>) => React.ReactNode;
   keyAccessor: KeyAccessor<ExtractDataType<TDataFunction>>;
   data: TDataFunction;
+  textValueAccessor: TextValueAccessor<ExtractDataType<TDataFunction>>;
 }
 
 const AsyncRoot = <
@@ -66,6 +67,8 @@ const AsyncRoot = <
   data,
   keyAccessor,
   value,
+  onChange,
+  textValueAccessor,
   ...props
 }: AsyncComboboxProps<TDataFunction>) => {
   type TData = ExtractDataType<TDataFunction>;
@@ -79,7 +82,6 @@ const AsyncRoot = <
   useEffect(() => {
     setOptions((draft) => {
       const newOptions: TData[] = items as TData[];
-
       // Remove old options not in the new list
       for (let i = draft.length - 1; i >= 0; i--) {
         const option = draft[i];
@@ -95,6 +97,8 @@ const AsyncRoot = <
         }
       }
 
+      // console.log(draft.map((o) => o.id).toString());
+
       // Add new options
       for (const newOption of newOptions) {
         if (
@@ -105,8 +109,18 @@ const AsyncRoot = <
           draft.push(newOption as Draft<TData>);
         }
       }
+
+      // console.log(draft.map((o) => o.id).toString());
     });
   }, [items, isLoading, filterText, setOptions, keyAccessor, value]);
+
+  const handleChange = (key: Aria.Key | null) => {
+    const option = key ? options.find((o) => keyAccessor(o) === key) : null;
+    if (option) {
+      setFilterText(textValueAccessor(option));
+    }
+    onChange?.(key);
+  };
 
   const message = isLoading
     ? "Loading..."
@@ -117,6 +131,7 @@ const AsyncRoot = <
   return (
     <Root
       {...props}
+      onChange={handleChange}
       value={value}
       inputValue={filterText}
       onInputChange={setFilterText}

@@ -48,7 +48,7 @@ export const taskRouter = {
         .insert(schema.task)
         .values({
           ...input,
-          createdById: "",
+          createdById: input.assignedToId,
         })
         .returning({
           id: schema.task.id,

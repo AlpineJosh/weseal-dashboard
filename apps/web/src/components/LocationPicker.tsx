@@ -1,9 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 
 import type { RouterInputs, RouterOutputs } from "@repo/api";
+import { faBox, faHashtag, faShelves } from "@repo/pro-light-svg-icons";
+import { cn } from "@repo/ui";
+import { Input, Switch } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
+import { Icon } from "@repo/ui/components/element";
+import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
 type TaskItem =
   RouterInputs["inventory"]["tasks"]["create"]["items"][number] & {
@@ -39,7 +44,7 @@ export const LocationPicker = ({
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {components.map((component) => (
         <LocationPickerItem
           key={component.id}
@@ -58,20 +63,24 @@ type LocationsType = NonNullable<
 > & {
   blocked: boolean;
   using: number;
+  overridden: boolean;
 };
 
 const LocationPickerItem = ({
   id,
-  quantity,
+  quantity: defaultQuantity,
   value,
   onChange,
 }: LocationPickerItemProps) => {
+  const [quantity, setQuantity] = useImmer(defaultQuantity);
   const [locations, setLocations] = useImmer<LocationsType[]>([]);
 
   const { data: component } = api.component.get.useQuery({
     id,
   });
-
+  const totalUsing = useMemo(() => {
+    return value.reduce((acc, item) => acc + item.quantity, 0);
+  }, [value]);
   const { data: quantities } = api.inventory.quantity.useQuery({
     filter: {
       componentId: {
@@ -91,6 +100,7 @@ const LocationPickerItem = ({
           ...quantity,
           blocked: false,
           using: 0,
+          overridden: false,
         });
       }
       setLocations(locs);
@@ -98,11 +108,30 @@ const LocationPickerItem = ({
   }, [quantities, setLocations]);
 
   useEffect(() => {
+    setQuantity(defaultQuantity);
+  }, [defaultQuantity, setQuantity]);
+
+  useEffect(() => {
     const batches = [];
     let remaining = quantity;
 
     for (const location of locations) {
-      if (!location.blocked && remaining > 0) {
+      if (location.overridden) {
+        if (location.blocked) {
+          continue;
+        }
+        remaining -= location.using;
+        batches.push({
+          pickLocationId: location.locationId,
+          batchId: location.batchId,
+          quantity: location.using,
+          componentId: id,
+        });
+      }
+    }
+
+    for (const location of locations) {
+      if (!location.blocked && !location.overridden && remaining > 0) {
         const use = Math.min(location.total, remaining);
         remaining -= use;
         batches.push({
@@ -114,74 +143,126 @@ const LocationPickerItem = ({
       }
     }
 
-    const hasChanges = batches.some((newBatch) => {
-      const existingBatch = value.find(
-        (batch) =>
-          batch.pickLocationId === newBatch.pickLocationId &&
-          batch.batchId === newBatch.batchId,
-      );
-      return !existingBatch || existingBatch.quantity !== newBatch.quantity;
-    });
+    const hasChanges =
+      batches.length !== value.length ||
+      batches.some((newBatch) => {
+        const existingBatch = value.find(
+          (batch) =>
+            batch.pickLocationId === newBatch.pickLocationId &&
+            batch.batchId === newBatch.batchId,
+        );
+        return !existingBatch || existingBatch.quantity !== newBatch.quantity;
+      });
 
     if (hasChanges) {
       onChange(batches);
     }
   }, [locations, quantity, onChange, value, id]);
 
+  const getUsing = (location: LocationsType) => {
+    const existing = value.find(
+      (batch) =>
+        batch.pickLocationId === location.locationId &&
+        batch.batchId === location.batchId,
+    );
+    return existing?.quantity ?? 0;
+  };
+
+  const updateUsing = (location: LocationsType, quantity: number) => {
+    setLocations((draft) => {
+      const loc = draft.find(
+        (l) =>
+          l.locationId === location.locationId &&
+          l.batchId === location.batchId,
+      );
+      if (loc) {
+        loc.using = quantity;
+        loc.overridden = true;
+      }
+    });
+  };
+
   if (!component) return null;
 
   return (
-    <div className="relative flex flex-row border-b">
-      <div className="flex w-1/3 shrink-0 flex-col border-r p-2">
-        <span className="font-semibold">{component.id}</span>
-        <span className="text-muted-foreground text-sm">
+    <div className="flex flex-col space-y-2 border-b border-content/15 py-2">
+      <div className="flex flex-row items-baseline space-x-4">
+        <Heading level={5} className="text-lg">
+          {component.id}
+        </Heading>
+        <Text className="text-muted-foreground grow truncate text-sm">
           {component.description}
+        </Text>
+        <Text className={cn(totalUsing !== quantity && "text-destructive")}>
+          Using:{" "}
+          <Strong
+            className={cn(totalUsing !== quantity && "text-destructive-text")}
+          >
+            {totalUsing}
+          </Strong>
+        </Text>
+        <span className="flex flex-row items-baseline space-x-2">
+          <Text>Required:</Text>
+          <Input
+            type="number"
+            step="any"
+            className="w-24"
+            value={quantity}
+            min={0}
+            onChange={(e) => setQuantity(e.target.valueAsNumber)}
+          />
         </span>
-        <span className="text-lg">{quantity}</span>
       </div>
-      <Table>
-        <Table.Header>
-          <Table.Column />
-          <Table.Column isRowHeader>Location</Table.Column>
-          <Table.Column>Batch</Table.Column>
-          <Table.Column>Quantity</Table.Column>
-        </Table.Header>
-        <Table.Body>
-          {locations.map((location, index) => (
-            <Table.Row key={index}>
-              <Table.Cell>
-                <input
-                  type="checkbox"
-                  checked={!location.blocked}
-                  onChange={() => {
-                    setLocations((draft) => {
-                      const loc = draft[index];
-                      if (loc) {
-                        loc.blocked = !loc.blocked;
-                      }
-                    });
-                  }}
-                />
-              </Table.Cell>
-              <Table.Cell>{location.locationName}</Table.Cell>
-              <Table.Cell>
+      <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr] items-center gap-4">
+        {locations.map((location, index) => (
+          <>
+            <Switch
+              key={index}
+              isSelected={!location.blocked}
+              onChange={() => {
+                setLocations((draft) => {
+                  const loc = draft[index];
+                  if (loc) {
+                    loc.blocked = !loc.blocked;
+                    loc.overridden = false;
+                    loc.using = 0;
+                  }
+                });
+              }}
+            />
+            <span className="flex flex-row items-center space-x-2 text-content-muted">
+              <Icon icon={faShelves} />
+              <Text>{location.locationName}</Text>
+            </span>
+            <span className="flex flex-row items-center space-x-2 text-content-muted">
+              <Icon icon={faHashtag} />
+              <Text>
                 {location.batchReference ??
                   (location.batchEntryDate
                     ? location.batchEntryDate.toLocaleDateString()
                     : "")}
-              </Table.Cell>
-              <Table.Cell>
-                {value.find(
-                  (batch) =>
-                    batch.pickLocationId === location.locationId &&
-                    batch.batchId === location.batchId,
-                )?.quantity ?? 0}{" "}
-                / {location.total}
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
+              </Text>
+            </span>
+            <Text>
+              Available: <Strong>{location.free}</Strong>
+            </Text>
+            <span className="flex flex-row items-center justify-end space-x-2 text-content-muted">
+              <Text>Using:</Text>
+              <Input
+                type="number"
+                step="any"
+                className="w-24"
+                min={0}
+                max={location.free}
+                value={getUsing(location)}
+                onChange={(e) => {
+                  updateUsing(location, e.target.valueAsNumber);
+                }}
+              />
+            </span>
+          </>
+        ))}
+      </div>
     </div>
   );
 };
