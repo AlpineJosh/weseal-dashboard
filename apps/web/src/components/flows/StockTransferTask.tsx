@@ -10,8 +10,7 @@ import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
   componentId: z.string(),
-  batchId: z.number(),
-  pickLocationId: z.number(),
+  pickLocationId: z.string(),
   putLocationId: z.number(),
   assignedToId: z.string(),
   quantity: z.number().min(0),
@@ -29,7 +28,6 @@ export function StockTransferTaskForm({
     defaultValues: {
       quantity: 1,
       assignedToId: undefined,
-      batchId: undefined,
       pickLocationId: undefined,
       putLocationId: undefined,
       componentId: undefined,
@@ -46,15 +44,28 @@ export function StockTransferTaskForm({
 
   const handleSubmit = ({
     assignedToId,
-    ...value
+    quantity,
+    pickLocationId,
+    putLocationId,
   }: z.infer<typeof taskSchema>) => {
+    const pick = pickLocationId.toString().split("-");
     createTask({
       type: "transfer",
       assignedToId,
-      items: [value],
+      items: [
+        {
+          quantity,
+          pickLocationId: Number(pick[0]),
+          batchId: Number(pick[1]),
+          putLocationId,
+        },
+      ],
     });
     onSave();
   };
+
+  const state = form.watch();
+  console.log(state);
 
   return (
     <div className="flex flex-col gap-4 self-stretch">
@@ -83,6 +94,7 @@ export function StockTransferTaskForm({
                 };
               }}
               keyAccessor={(component) => component.id}
+              textValueAccessor={(component) => component.id}
             >
               {(component) => {
                 return (
@@ -126,6 +138,9 @@ export function StockTransferTaskForm({
               keyAccessor={(location) =>
                 `${location.locationId}-${location.batchId}`
               }
+              textValueAccessor={(location) =>
+                `${location.locationName} - ${location.batchReference}`
+              }
             >
               {(location) => {
                 return (
@@ -165,6 +180,7 @@ export function StockTransferTaskForm({
                   };
                 }}
                 keyAccessor={(location) => location.id}
+                textValueAccessor={(location) => location.name}
               >
                 {(location) => {
                   return (
@@ -175,6 +191,33 @@ export function StockTransferTaskForm({
                 }}
               </AsyncCombobox>
             </Field.Control>
+          </Field.Control>
+        </Field>
+        <Field name="assignedToId">
+          <Field.Label>Assigned To</Field.Label>
+          <Field.Description>
+            Select the person to despatch the order
+          </Field.Description>
+          <Field.Control>
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } = api.profile.list.useQuery({
+                  search: { query },
+                });
+
+                return { items: data?.rows ?? [], isLoading };
+              }}
+              keyAccessor={(profile) => profile.id}
+              textValueAccessor={(profile) => profile.name ?? ""}
+            >
+              {(profile) => {
+                return (
+                  <Combobox.Option id={profile.id}>
+                    {profile.name}
+                  </Combobox.Option>
+                );
+              }}
+            </AsyncCombobox>
           </Field.Control>
         </Field>
         <Button color="primary" type="submit">
