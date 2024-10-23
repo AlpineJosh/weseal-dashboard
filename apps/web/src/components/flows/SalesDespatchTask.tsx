@@ -53,85 +53,96 @@ export function SalesDespatchTaskForm({
 
   const { mutate: createTask } = api.inventory.tasks.create.useMutation({
     onSuccess: async () => {
-      await utils.inventory.tasks.list.invalidate();
+      await utils.inventory.tasks.items.list.invalidate();
     },
   });
 
-  const handleSave = (values: z.infer<typeof taskSchema>) => {
+  const handleSave = ({
+    items,
+    assignedToId,
+    salesOrderId,
+  }: z.infer<typeof taskSchema>) => {
     createTask({
       type: "despatch",
-      ...values,
+      assignedToId,
+      salesOrderId,
+      items: items.map(({ quantity, pickLocationId, batchId }) => ({
+        quantity,
+        pickLocationId,
+        batchId,
+      })),
     });
     onSave();
   };
 
   return (
-    <div className="flex flex-col gap-4 self-stretch">
+    <Form
+      className="flex flex-col gap-4 self-stretch"
+      onSubmit={handleSave}
+      form={form}
+    >
       <h1 className="text-2xl font-semibold">Prepare Despatch</h1>
-      <Form
-        className="flex flex-row space-x-4"
-        onSubmit={handleSave}
-        form={form}
-      >
-        <>
-          <Field name="component">
-            <Field.Label>Sales Order</Field.Label>
-            <Field.Description>Select the order to despatch</Field.Description>
-            <Field.Control>
-              <AsyncCombobox
-                data={(query) => {
-                  const { data, isLoading } =
-                    api.despatching.order.list.useQuery({
-                      search: {
-                        query,
-                      },
-                    });
+      <div className="flex flex-row space-x-4">
+        <Field name="salesOrderId">
+          <Field.Label>Sales Order</Field.Label>
+          <Field.Description>Select the order to despatch</Field.Description>
+          <Field.Control>
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } = api.despatching.order.list.useQuery(
+                  {
+                    search: {
+                      query,
+                    },
+                  },
+                );
 
-                  return { items: data?.rows ?? [], isLoading };
-                }}
-                keyAccessor={(order) => order.id}
-              >
-                {(order) => {
-                  return (
-                    <Combobox.Option
-                      id={order.id}
-                      textValue={order.id.toString()}
-                    >
-                      #{order.id} - {order.customerName}
-                    </Combobox.Option>
-                  );
-                }}
-              </AsyncCombobox>
-            </Field.Control>
-          </Field>
-          <Field name="assignedToId">
-            <Field.Label>Assigned To</Field.Label>
-            <Field.Description>
-              Select the person to despatch the order
-            </Field.Description>
-            <Field.Control>
-              <AsyncCombobox
-                data={(query) => {
-                  const { data, isLoading } = api.profile.list.useQuery({
-                    search: { query },
-                  });
+                return { items: data?.rows ?? [], isLoading };
+              }}
+              keyAccessor={(order) => order.id}
+              textValueAccessor={(order) => order.id.toString()}
+            >
+              {(order) => {
+                return (
+                  <Combobox.Option
+                    id={order.id}
+                    textValue={order.id.toString()}
+                  >
+                    #{order.id} - {order.customerName}
+                  </Combobox.Option>
+                );
+              }}
+            </AsyncCombobox>
+          </Field.Control>
+        </Field>
+        <Field name="assignedToId">
+          <Field.Label>Assigned To</Field.Label>
+          <Field.Description>
+            Select the person to despatch the order
+          </Field.Description>
+          <Field.Control>
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } = api.profile.list.useQuery({
+                  search: { query },
+                });
 
-                  return { items: data?.rows ?? [], isLoading };
-                }}
-                keyAccessor={(profile) => profile.id}
-              >
-                {(profile) => {
-                  return (
-                    <Combobox.Option id={profile.id}>
-                      {profile.name}
-                    </Combobox.Option>
-                  );
-                }}
-              </AsyncCombobox>
-            </Field.Control>
-          </Field>
-        </>
-      </Form>
+                return { items: data?.rows ?? [], isLoading };
+              }}
+              keyAccessor={(profile) => profile.id}
+              textValueAccessor={(profile) => profile.name ?? ""}
+            >
+              {(profile) => {
+                return (
+                  <Combobox.Option id={profile.id}>
+                    {profile.name}
+                  </Combobox.Option>
+                );
+              }}
+            </AsyncCombobox>
+          </Field.Control>
+        </Field>
+      </div>
       {salesOrderId && (
         <Controller
           control={form.control}
@@ -148,7 +159,16 @@ export function SalesDespatchTaskForm({
                 }) ?? []
               }
               value={value}
-              onChange={onChange}
+              onChange={(items) => {
+                onChange({
+                  target: {
+                    value: items.map((item) => ({
+                      ...item,
+                      quantity: Number(item.quantity),
+                    })),
+                  },
+                });
+              }}
             />
           )}
         />
@@ -166,6 +186,6 @@ export function SalesDespatchTaskForm({
           Create Despatch Task
         </Button>
       </div>
-    </div>
+    </Form>
   );
 }

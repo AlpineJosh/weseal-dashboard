@@ -72,7 +72,7 @@ export const ProductionTaskForm = ({
 
   const { mutate: createTask } = api.inventory.tasks.create.useMutation({
     onSuccess: async () => {
-      await utils.inventory.tasks.list.invalidate();
+      await utils.inventory.tasks.items.list.invalidate();
     },
   });
 
