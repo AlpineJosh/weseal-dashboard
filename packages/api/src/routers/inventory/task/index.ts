@@ -43,6 +43,7 @@ export const taskRouter = {
       return await taskOverview.query(input);
     }),
   create: publicProcedure.input(createTaskInput).mutation(async ({ input }) => {
+    console.log(input);
     const taskId = await db.transaction(async (tx) => {
       const result = await tx
         .insert(schema.task)
@@ -53,9 +54,13 @@ export const taskRouter = {
         .returning({
           id: schema.task.id,
         });
-      const task = result[0]!;
+      const task = result[0];
 
-      const taskItems = await tx.insert(schema.taskItem).values(
+      if (!task) {
+        throw new Error("Failed to create task");
+      }
+
+      await tx.insert(schema.taskItem).values(
         input.items.map((item) => ({
           ...item,
           taskId: task.id,

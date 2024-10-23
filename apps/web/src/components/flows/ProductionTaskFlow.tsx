@@ -76,14 +76,26 @@ export const ProductionTaskForm = ({
     },
   });
 
-  const handleSubmit = (value: z.infer<typeof taskSchema>) => {
-    console.log(value);
+  const handleSubmit = ({
+    putLocationId,
+    assignedToId,
+    items,
+  }: z.infer<typeof taskSchema>) => {
     createTask({
       type: "production",
-      ...value,
+      assignedToId: assignedToId,
+      items: items.map(({ batchId, quantity, pickLocationId }) => ({
+        batchId,
+        quantity,
+        pickLocationId,
+        putLocationId,
+      })),
     });
     onSave();
   };
+
+  const valid = form.formState.isValid;
+  console.log(valid);
 
   return (
     <Form

@@ -1,7 +1,8 @@
 import React from "react";
 
+import type { ButtonProps } from "@repo/ui/components/element";
 import { faArrowLeftLong, faArrowRightLong } from "@repo/pro-solid-svg-icons";
-import { Button, ButtonProps, Icon } from "@repo/ui/components/element";
+import { Button, Icon } from "@repo/ui/components/element";
 import { cn } from "@repo/ui/lib/class-merge";
 import { renderChildren } from "@repo/ui/lib/helpers";
 
@@ -50,7 +51,6 @@ const Pagination = ({
     >
       <PaginationButton
         isDisabled={currentPage === 1}
-        variant="plain"
         aria-label="Previous page"
         href={href ? href(currentPage - 1) : undefined}
         onPress={onPageChange ? () => onPageChange(currentPage - 1) : undefined}
@@ -95,7 +95,6 @@ const Pagination = ({
       ))}
       <PaginationButton
         isDisabled={currentPage === totalPages}
-        variant="plain"
         aria-label="Next page"
         href={href ? href(currentPage + 1) : undefined}
         onPress={onPageChange ? () => onPageChange(currentPage + 1) : undefined}
@@ -120,12 +119,11 @@ const PaginationButton = ({
   return (
     <Button
       {...props}
-      variant="plain"
       aria-current={current ? "page" : undefined}
       className={cn(
-        className,
         "min-w-[2.25rem] before:absolute before:-inset-px before:rounded-lg",
         current && "before:bg-content/5",
+        className,
       )}
     >
       {children}
