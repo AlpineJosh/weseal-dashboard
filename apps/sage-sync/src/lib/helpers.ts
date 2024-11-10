@@ -1,7 +1,5 @@
 import { getTableColumns, SQL, sql, Table } from "drizzle-orm";
 
-import { SyncParameters } from "~/models/types";
-
 export function asyncBatch<T>(
   items: T[],
   fn: (batch: T[]) => Promise<void>,
@@ -18,16 +16,6 @@ export const formatDate = (date: Date): string => {
   const isoString = date.toISOString();
   return isoString.replace("T", " ").replace("Z", "");
 };
-
-export function buildQuery(query: string, parameters?: SyncParameters) {
-  if (parameters) {
-    query += `
-      WHERE RECORD_MODIFY_DATE BETWEEN '${formatDate(parameters.startDate)}' AND '${formatDate(parameters.endDate)}'
-    `;
-  }
-
-  return query;
-}
 
 export function conflictUpdateAllExcept<
   T extends Table,

@@ -2,22 +2,22 @@
   "extends": "@repo/tsconfig/base.json",
   "compilerOptions": {
     "lib": ["es2022"],
-    "jsx": "preserve",
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./src/*"]
-    },
+    "baseUrl": "./",
     "plugins": [{ "transform": "tsconfig-paths" }],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "incremental": true,
-    "module": "esnext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
     "strictNullChecks": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "rootDir": "src",
     "outDir": "dist",
-    "types": ["node"]
+    "types": ["node"],
+    "noEmit": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
