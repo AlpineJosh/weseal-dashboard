@@ -13,7 +13,7 @@ const taskSchema = z.object({
   pickLocationId: z.string(),
   putLocationId: z.number(),
   assignedToId: z.string(),
-  quantity: z.number().min(0),
+  quantity: z.coerce.number().min(0),
 });
 
 export function StockTransferTaskForm({

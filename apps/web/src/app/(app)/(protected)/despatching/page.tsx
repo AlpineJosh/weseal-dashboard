@@ -15,7 +15,7 @@ export default function ReceivingPage() {
       <DatatableQueryProvider
         endpoint={api.despatching.order.list}
         defaultInput={{
-          sort: [{ field: "orderDate", order: "desc" }],
+          sort: [{ field: "orderDate" as const, order: "desc" }],
         }}
       >
         {(props) => (
@@ -33,7 +33,6 @@ export default function ReceivingPage() {
               <Datatable.Column id="orderDate" isSortable>
                 Order Date
               </Datatable.Column>
-
               <Datatable.Column id="despatchCount" isSortable>
                 Deliveries Sent
               </Datatable.Column>

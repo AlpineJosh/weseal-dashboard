@@ -25,13 +25,13 @@ export const runtime = "edge";
 // };
 
 export default function DashboardPage() {
-  // const utils = api.useUtils();
-  // const { mutate: completeTaskItem } =
-  //   api.inventory.tasks.items.complete.useMutation({
-  //     onSuccess: async () => {
-  //       await utils.inventory.tasks.items.list.invalidate();
-  //     },
-  //   });
+  const utils = api.useUtils();
+  const { mutate: completeTaskItem } =
+    api.inventory.tasks.items.complete.useMutation({
+      onSuccess: async () => {
+        await utils.inventory.tasks.items.list.invalidate();
+      },
+    });
 
   return (
     <div className="flex flex-col space-y-2">
@@ -85,7 +85,11 @@ export default function DashboardPage() {
 
       <DatatableQueryProvider
         endpoint={api.inventory.tasks.items.list}
-        defaultInput={{}}
+        defaultInput={{
+          filter: {
+            isComplete: { eq: false },
+          },
+        }}
       >
         {(props) => (
           <Datatable {...props} aria-label="Tasks">
@@ -124,7 +128,11 @@ export default function DashboardPage() {
                     {data.putLocationName}
                   </Datatable.Cell>
                   <Datatable.Cell id="actions">
-                    <Button>Mark Complete</Button>
+                    <Button
+                      onPress={() => completeTaskItem({ id: data.id ?? 0 })}
+                    >
+                      Mark Complete
+                    </Button>
                   </Datatable.Cell>
                 </Datatable.Row>
               )}

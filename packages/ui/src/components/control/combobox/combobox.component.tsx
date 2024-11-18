@@ -165,6 +165,7 @@ const Root = <T extends object>({
 }: ComboboxProps<T>) => {
   return (
     <Aria.ComboBox
+      data-slot="control"
       {...props}
       className={cn(variants.root(), className)}
       menuTrigger={menuTrigger}

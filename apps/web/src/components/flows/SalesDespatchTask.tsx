@@ -16,7 +16,7 @@ const taskSchema = z.object({
     z.object({
       componentId: z.string(),
       batchId: z.number(),
-      quantity: z.number(),
+      quantity: z.coerce.number(),
       pickLocationId: z.number(),
     }),
   ),

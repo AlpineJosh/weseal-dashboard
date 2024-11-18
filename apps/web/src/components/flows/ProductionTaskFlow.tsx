@@ -18,7 +18,7 @@ const taskSchema = z.object({
   componentId: z.string(),
   putLocationId: z.number(),
   assignedToId: z.string(),
-  quantity: z.number(),
+  quantity: z.coerce.number(),
   items: z.array(
     z.object({
       componentId: z.string(),
@@ -103,10 +103,10 @@ export const ProductionTaskForm = ({
       onSubmit={handleSubmit}
       form={form}
     >
-      <div className="flex flex-col gap-4 self-stretch">
+      <div className="flex flex-col items-stretch gap-4">
         <h1 className="text-2xl font-semibold">Create Production Task</h1>
         <div className="flex flex-row gap-4">
-          <Field name="componentId">
+          <Field name="componentId" className="flex-1">
             <Field.Label>Component</Field.Label>
             <Field.Description>Select the component to build</Field.Description>
             <Field.Control>
@@ -136,14 +136,23 @@ export const ProductionTaskForm = ({
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          <Field name="quantity">
+          <Field name="quantity" className="flex-1">
             <Field.Label>Quantity</Field.Label>
             <Field.Description>Amount to build</Field.Description>
             <Field.Control>
               <Input type="number" step="any" />
             </Field.Control>
           </Field>
-          <Field name="putLocationId">
+          <Field name="batchReference" className="flex-1">
+            <Field.Label>Batch Reference</Field.Label>
+            <Field.Description>Batch reference</Field.Description>
+            <Field.Control>
+              <Input type="text" />
+            </Field.Control>
+          </Field>
+        </div>
+        <div className="flex flex-row gap-4">
+          <Field name="putLocationId" className="flex-1">
             <Field.Label>Production Location</Field.Label>
             <Field.Description>Component destination</Field.Description>
             <Field.Control>
@@ -171,7 +180,7 @@ export const ProductionTaskForm = ({
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          <Field name="assignedToId">
+          <Field name="assignedToId" className="flex-1">
             <Field.Label>Assigned To</Field.Label>
             <Field.Description>
               Select the person to despatch the order

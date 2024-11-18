@@ -16,7 +16,7 @@ const taskSchema = z.object({
   items: z.array(
     z.object({
       componentId: z.string(),
-      quantity: z.number(),
+      quantity: z.coerce.number(),
       putLocationId: z.number().optional(),
     }),
   ),
