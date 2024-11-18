@@ -1,7 +1,8 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { count, eq, InferInsertModel } from "@repo/db";
+import type { InferInsertModel } from "@repo/db";
+import { eq } from "@repo/db";
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 

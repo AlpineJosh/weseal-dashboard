@@ -1,13 +1,14 @@
 "use client";
 
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
+import { format } from "date-fns";
 
-import { RouterOutputs } from "@repo/api";
-import { Datatable, Table } from "@repo/ui/components/display";
+import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
-import { Link } from "@repo/ui/components/navigation";
+import { Heading } from "@repo/ui/components/typography";
 
-const types: Record<
+const MOVEMENT_TYPES: Record<
   | "production"
   | "despatch"
   | "receipt"
@@ -16,7 +17,10 @@ const types: Record<
   | "wastage"
   | "lost"
   | "found",
-  { title: string; color: any }
+  {
+    title: string;
+    color: "green" | "purple" | "blue" | "orange" | "red" | "rose" | "teal";
+  }
 > = {
   production: { title: "Production", color: "green" },
   despatch: { title: "Despatch", color: "purple" },
@@ -31,101 +35,69 @@ const types: Record<
 export default function InventoryOverview() {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-muted-foreground text-2xl font-bold">
-        Transaction Log
-      </h1>
-
-      <Datatable
-        idKey="id"
-        data={({ ...query }) => {
-          const { isLoading, data } = api.inventory.movements.list.useQuery({
-            ...query,
-          });
-          return {
-            data,
-            isLoading,
-          };
+      <Heading level={1}>Transaction Log</Heading>
+      <DatatableQueryProvider
+        endpoint={api.inventory.movements.list}
+        defaultInput={{
+          sort: [{ field: "date", order: "desc" }],
         }}
-        columns={[
-          {
-            id: "id",
-            sortKey: "id",
-            isRowHeader: true,
-            label: "ID",
-            cell: (row) => {
-              return (
-                <Datatable.Cell>
-                  <Link href={`/inventory/movements/${row.id}`}>{row.id}</Link>
-                </Datatable.Cell>
-              );
-            },
-          },
-          {
-            id: "type",
-            sortKey: "type",
-            label: "Type",
-            cell: ({ type }) => {
-              return (
-                <Table.Cell>
-                  {type && (
-                    <Badge color={types[type].color}>{types[type].title}</Badge>
-                  )}
-                </Table.Cell>
-              );
-            },
-          },
-          {
-            id: "componentId",
-            sortKey: "componentId",
-            label: "Stock Code",
-            cell: ({ componentId }) => {
-              return (
-                <Table.Cell>
-                  <Link href={`/inventory/components/${componentId}`}>
-                    {componentId}
-                  </Link>
-                </Table.Cell>
-              );
-            },
-          },
-          {
-            id: "batchReference",
-            sortKey: "batchReference",
-            label: "Batch Reference",
-            cell: ({ batchReference }) => {
-              return <Table.Cell>{batchReference}</Table.Cell>;
-            },
-          },
-          {
-            id: "locationName",
-            sortKey: "locationName",
-            label: "Location",
-            cell: ({ locationName }) => {
-              return <Table.Cell>{locationName}</Table.Cell>;
-            },
-          },
-          {
-            id: "quantity",
-            sortKey: "quantity",
-            label: "Quantity",
-            cell: ({ quantity }) => {
-              return <Table.Cell>{quantity}</Table.Cell>;
-            },
-          },
-          {
-            id: "date",
-            sortKey: "date",
-            label: "Date",
-            cell: ({ date }) => {
-              return (
-                <Table.Cell>
-                  {date?.toLocaleDateString()} {date?.toLocaleTimeString()}
-                </Table.Cell>
-              );
-            },
-          },
-        ]}
-      />
+      >
+        {(props) => (
+          <Datatable {...props}>
+            <Datatable.Head>
+              <Datatable.Column id="date" isSortable>
+                Date
+              </Datatable.Column>
+              <Datatable.Column id="type" isSortable>
+                Type
+              </Datatable.Column>
+              <Datatable.Column id="component" isSortable>
+                Stock Code
+              </Datatable.Column>
+              <Datatable.Column id="batch" isSortable>
+                Batch Reference
+              </Datatable.Column>
+              <Datatable.Column id="location" isSortable>
+                Location
+              </Datatable.Column>
+              <Datatable.Column id="quantity" isSortable>
+                Quantity
+              </Datatable.Column>
+            </Datatable.Head>
+            <Datatable.Body data={props.data}>
+              {({ data }) => (
+                <Datatable.Row key={data.id}>
+                  <Datatable.Cell id="date">
+                    {format(data.date, "dd/MM/yy HH:mm")}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="type">
+                    {data.type && (
+                      <Badge color={MOVEMENT_TYPES[data.type].color}>
+                        {MOVEMENT_TYPES[data.type].title}
+                      </Badge>
+                    )}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="component">
+                    {data.componentId}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="batch">
+                    {data.batchReference ??
+                      data.batchEntryDate?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="location">
+                    {data.locationName}
+                  </Datatable.Cell>
+                  <Datatable.NumberCell
+                    id="quantity"
+                    value={data.quantity ?? 0}
+                    unit={data.componentUnit}
+                  />
+                </Datatable.Row>
+              )}
+            </Datatable.Body>
+          </Datatable>
+        )}
+      </DatatableQueryProvider>
     </div>
   );
 }

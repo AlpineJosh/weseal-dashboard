@@ -1,11 +1,17 @@
 import { z } from "zod";
 
+import type {
+  AnyColumn,
+  Column,
+  Simplify,
+  SQL,
+  SQLWrapper,
+  Table,
+} from "@repo/db";
 import {
   and,
-  AnyColumn,
   asc,
   between,
-  Column,
   count,
   desc,
   eq,
@@ -17,24 +23,9 @@ import {
   lte,
   not,
   or,
-  Simplify,
-  SQL,
   sql,
-  SQLWrapper,
-  Table,
 } from "@repo/db";
 import { db } from "@repo/db/client";
-
-const paginationSchema = z
-  .object({
-    page: z.number(),
-    size: z.number(),
-  })
-  .optional()
-  .default({
-    page: 1,
-    size: 10,
-  });
 
 const numberFilterSchema = z.object({
   lt: z.number().optional(),
@@ -121,14 +112,14 @@ type InputSchema<TTable extends Table> = z.ZodObject<{
   search: z.ZodOptional<SearchSchema<TTable>>;
 }>;
 
-type DatatableOutput<T extends Table> = {
+export interface DatatableOutput<T extends Table> {
   rows: T["$inferSelect"][];
   pagination: {
     page: number;
     size: number;
     total: number;
   };
-};
+}
 
 export const datatable = <T extends Table>(
   table: T,
@@ -307,7 +298,7 @@ export const datatable = <T extends Table>(
       }
     }
 
-    const orderBy = sort?.map(({ field, order }) =>
+    const orderBy = sort.map(({ field, order }) =>
       order === "asc"
         ? asc(columns[field as ColumnKey<T>] as AnyColumn)
         : desc(columns[field as ColumnKey<T>] as AnyColumn),

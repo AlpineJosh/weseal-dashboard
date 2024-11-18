@@ -1,6 +1,41 @@
 "use client";
 
+import { faBars } from "@repo/pro-light-svg-icons";
+
+import { Button, Icon, Menu } from "../../element";
+import { Dialog } from "../../utility";
+
 // import React, { useState } from "react";
+
+// function MobileSidebar({ open, close, children }: React.PropsWithChildren<{ open: boolean; close: () => void }>) {
+//   return (
+//     <Dialog.Content isOpen={open} onOpenChange={(open) => {
+//       if (!open) {
+//         close();
+//           }
+//         }}
+//       >
+
+//         <Dialog.Content
+//           transition
+//           className="fixed inset-0 bg-black/30 transition data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
+//       />
+//       <Headless.DialogPanel
+//         transition
+//         className="fixed inset-y-0 w-full max-w-80 p-2 transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+//       >
+//         <div className="flex h-full flex-col rounded-lg bg-white shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+//           <div className="-mb-3 px-4 pt-3">
+//             <Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
+//               <CloseMenuIcon />
+//             </Headless.CloseButton>
+//           </div>
+//           {children}
+//         </div>
+//       </Headless.DialogPanel>
+//     </Headless.Dialog>
+//   )
+// }
 
 const SidebarLayout = ({
   navbar,
@@ -14,7 +49,6 @@ const SidebarLayout = ({
 
   return (
     <div className="relative isolate flex min-h-svh w-full bg-background max-lg:flex-col lg:bg-background-muted">
-      {/* Sidebar on desktop */}
       <div className="fixed inset-y-0 left-0 w-64 max-lg:hidden">{sidebar}</div>
 
       {/* Sidebar on mobile */}
@@ -23,7 +57,23 @@ const SidebarLayout = ({
       </MobileSidebar> */}
 
       {/* Navbar on mobile */}
-      <header className="flex items-center px-4 lg:hidden">
+      <header className="flex items-center bg-primary p-2 text-background lg:hidden">
+        <Dialog.Trigger>
+          <Button variant="plain">
+            <Icon icon={faBars} className="size-6" />
+          </Button>
+        </Dialog.Trigger>
+        <Button variant="input" className="grow">
+          Search
+        </Button>
+        <Menu>
+          <Button variant="plain">
+            <Icon icon={faBars} />
+          </Button>
+          <Menu.Items>
+            <Menu.Item>Sign Out</Menu.Item>
+          </Menu.Items>
+        </Menu>
         <div className="py-2.5">
           {/* <NavbarItem
             onClick={() => setShowSidebar(true)}
@@ -32,7 +82,7 @@ const SidebarLayout = ({
             <OpenMenuIcon />
           </NavbarItem> */}
         </div>
-        <div className="min-w-0 flex-1">{navbar}</div>
+        {/* <div className="min-w-0 flex-1">{navbar}</div> */}
       </header>
 
       {/* Content */}

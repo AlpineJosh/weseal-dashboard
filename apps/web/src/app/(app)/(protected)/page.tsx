@@ -4,6 +4,7 @@ import { ProductionTaskForm } from "@/components/flows/ProductionTaskFlow";
 import { PurchaseReceiptTaskForm } from "@/components/flows/PurchaseReceiptTask";
 import { SalesDespatchTaskForm } from "@/components/flows/SalesDespatchTask";
 import { StockTransferTaskForm } from "@/components/flows/StockTransferTask";
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
 import { Datatable, Modal } from "@repo/ui/components/display";
@@ -24,13 +25,13 @@ export const runtime = "edge";
 // };
 
 export default function DashboardPage() {
-  const utils = api.useUtils();
-  const { mutate: completeTaskItem } =
-    api.inventory.tasks.items.complete.useMutation({
-      onSuccess: async () => {
-        await utils.inventory.tasks.items.list.invalidate();
-      },
-    });
+  // const utils = api.useUtils();
+  // const { mutate: completeTaskItem } =
+  //   api.inventory.tasks.items.complete.useMutation({
+  //     onSuccess: async () => {
+  //       await utils.inventory.tasks.items.list.invalidate();
+  //     },
+  //   });
 
   return (
     <div className="flex flex-col space-y-2">
@@ -82,158 +83,102 @@ export default function DashboardPage() {
       <Divider />
       <Subheading level={2}>Tasks</Subheading>
 
-      <Datatable
-        aria-label="Tasks"
-        idKey="id"
-        selectionMode="multiple"
-        selectionBehaviour="toggle"
-        columns={[
-          {
-            id: "componentId",
-            sortKey: "componentId",
-            isRowHeader: true,
-            label: "Stock Code",
-            cell: (row) => {
-              return <Datatable.Cell>{row.componentId}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "batchReference",
-            sortKey: "batchReference",
-            label: "Batch Reference",
-            cell: (row) => {
-              return <Datatable.Cell>{row.batchReference}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "quantity",
-            sortKey: "quantity",
-            label: "Quantity",
-            cell: (row) => {
-              return <Datatable.Cell>{row.quantity}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "pickLocationName",
-            sortKey: "pickLocationName",
-            label: "From Location",
-            cell: (row) => {
-              return <Datatable.Cell>{row.pickLocationName}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "putLocationName",
-            sortKey: "putLocationName",
-            label: "To Location",
-            cell: (row) => {
-              return <Datatable.Cell>{row.putLocationName}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "actions",
-            label: "Actions",
-            cell: (row) => {
-              return (
-                <Datatable.Cell>
-                  <Button
-                    variant="plain"
-                    color="primary"
-                    onPress={() => completeTaskItem({ id: row.id as number })}
-                  >
-                    Mark Complete
-                  </Button>
-                </Datatable.Cell>
-              );
-            },
-          },
-        ]}
-        data={({ ...query }) => {
-          const { isLoading, data } = api.inventory.tasks.items.list.useQuery({
-            ...query,
-            filter: {
-              isComplete: {
-                eq: false,
-              },
-            },
-          });
-          return {
-            data,
-            isLoading,
-          };
-        }}
-      />
+      <DatatableQueryProvider
+        endpoint={api.inventory.tasks.items.list}
+        defaultInput={{}}
+      >
+        {(props) => (
+          <Datatable {...props} aria-label="Tasks">
+            <Datatable.Head>
+              <Datatable.Column id="componentId" isSortable>
+                Stock Code
+              </Datatable.Column>
+              <Datatable.Column id="batchReference" isSortable>
+                Batch Reference
+              </Datatable.Column>
+              <Datatable.Column id="quantity" isSortable>
+                Quantity
+              </Datatable.Column>
+              <Datatable.Column id="pickLocationName" isSortable>
+                From Location
+              </Datatable.Column>
+              <Datatable.Column id="putLocationName" isSortable>
+                To Location
+              </Datatable.Column>
+              <Datatable.Column id="actions">Actions</Datatable.Column>
+            </Datatable.Head>
+            <Datatable.Body data={props.data}>
+              {({ data }) => (
+                <Datatable.Row key={data.id}>
+                  <Datatable.Cell id="componentId">
+                    {data.componentId}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="batchReference">
+                    {data.batchReference}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="quantity">{data.quantity}</Datatable.Cell>
+                  <Datatable.Cell id="pickLocationName">
+                    {data.pickLocationName}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="putLocationName">
+                    {data.putLocationName}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="actions">
+                    <Button>Mark Complete</Button>
+                  </Datatable.Cell>
+                </Datatable.Row>
+              )}
+            </Datatable.Body>
+          </Datatable>
+        )}
+      </DatatableQueryProvider>
       <Divider />
       <Subheading level={2}>Sage Discrepancies</Subheading>
-
-      <Datatable
-        aria-label="Sage Discrepancies"
-        idKey="id"
-        columns={[
-          {
-            id: "id",
-            isRowHeader: true,
-            sortKey: "id",
-            label: "Stock Code",
-            cell: (row) => {
-              return <Datatable.Cell>{row.id}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "description",
-            sortKey: "description",
-            label: "Description",
-            cell: (row) => {
-              return <Datatable.Cell>{row.description}</Datatable.Cell>;
-            },
-          },
-          // {
-          //   id: "category",
-          //   key: "category",
-          //   label: "Category",
-          //   cell: (row) => {
-          //     return <Table.Cell>{row.category?.name}</Table.Cell>;
-          //   },
-          // },
-          {
-            id: "totalQuantity",
-            sortKey: "totalQuantity",
-            label: "Total Quantity",
-            cell: (row) => {
-              return <Datatable.Cell>{row.totalQuantity}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "sageQuantity",
-            sortKey: "sageQuantity",
-            label: "Quantity In Sage",
-            cell: (row) => {
-              return <Datatable.Cell>{row.sageQuantity}</Datatable.Cell>;
-            },
-          },
-          {
-            id: "sageDiscrepancy",
-            sortKey: "sageDiscrepancy",
-            label: "Discrepancy",
-            cell: (row) => {
-              return <Datatable.Cell>{row.sageDiscrepancy}</Datatable.Cell>;
-            },
-          },
-        ]}
-        data={(query) => {
-          const { data, isLoading } = api.component.list.useQuery({
-            ...query,
-            filter: {
-              sageDiscrepancy: {
-                neq: 0,
-              },
-            },
-          });
-          return {
-            data,
-            isLoading,
-          };
-        }}
-      />
+      <DatatableQueryProvider
+        endpoint={api.component.list}
+        defaultInput={{ filter: { sageDiscrepancy: { neq: 0 } } }}
+      >
+        {(props) => (
+          <Datatable {...props} aria-label="Sage Discrepancies">
+            <Datatable.Head>
+              <Datatable.Column id="id" isSortable>
+                Stock Code
+              </Datatable.Column>
+              <Datatable.Column id="description" isSortable>
+                Description
+              </Datatable.Column>
+              <Datatable.Column id="totalQuantity" isSortable>
+                Total Quantity
+              </Datatable.Column>
+              <Datatable.Column id="sageQuantity" isSortable>
+                Quantity In Sage
+              </Datatable.Column>
+              <Datatable.Column id="sageDiscrepancy" isSortable>
+                Discrepancy
+              </Datatable.Column>
+            </Datatable.Head>
+            <Datatable.Body data={props.data}>
+              {({ data }) => (
+                <Datatable.Row key={data.id}>
+                  <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                  <Datatable.Cell id="description">
+                    {data.description}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="totalQuantity">
+                    {data.totalQuantity}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="sageQuantity">
+                    {data.sageQuantity}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="sageDiscrepancy">
+                    {data.sageDiscrepancy}
+                  </Datatable.Cell>
+                </Datatable.Row>
+              )}
+            </Datatable.Body>
+          </Datatable>
+        )}
+      </DatatableQueryProvider>
     </div>
   );
 }

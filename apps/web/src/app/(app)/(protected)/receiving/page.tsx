@@ -1,80 +1,76 @@
 "use client";
 
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
-import { Link } from "@repo/ui/components/navigation";
+import { Heading } from "@repo/ui/components/typography";
 
 export default function ReceivingPage() {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-muted-foreground text-2xl font-bold">
-        Purchase Orders
-      </h1>
+      <Heading level={1}>Purchase Orders</Heading>
 
-      <Datatable
-        idKey="id"
-        data={({ ...query }) => {
-          const { isLoading, data } = api.receiving.orders.list.useQuery({
-            ...query,
-          });
-          return {
-            data,
-            isLoading,
-          };
+      <DatatableQueryProvider
+        endpoint={api.receiving.orders.list}
+        defaultInput={{
+          sort: [{ field: "orderDate", order: "desc" }],
         }}
-        columns={[
-          {
-            id: "id",
-            isRowHeader: true,
-            sortKey: "id",
-            label: "Order Number",
-            cell: (row) => (
-              <Datatable.Cell>
-                <Link href={`/receiving/${row.id}`}>{row.id}</Link>
-              </Datatable.Cell>
-            ),
-          },
-          {
-            id: "supplier",
-            sortKey: "supplierName",
-            label: "Supplier",
-            cell: (row) => <Datatable.Cell>{row.supplierName}</Datatable.Cell>,
-          },
-          {
-            id: "status",
-            label: "Status",
-            cell: (row) => (
-              <Datatable.Cell>
-                <Badge>
-                  {row.isComplete
-                    ? "Completed"
-                    : row.isCancelled
-                      ? "Cancelled"
-                      : "Pending"}
-                </Badge>
-              </Datatable.Cell>
-            ),
-          },
-          {
-            id: "nextExpectedReceipt",
-            sortKey: "nextExpectedReceipt",
-            label: "Due Date",
-            cell: (row) => (
-              <Datatable.Cell>
-                {row.nextExpectedReceipt?.toLocaleDateString()}
-              </Datatable.Cell>
-            ),
-          },
-          {
-            id: "receiptCount",
-            sortKey: "receiptCount",
-            label: "Deliveries Received",
-            cell: (row) => <Datatable.Cell>{row.receiptCount}</Datatable.Cell>,
-          },
-        ]}
-      />
+      >
+        {(props) => (
+          <Datatable {...props}>
+            <Datatable.Head>
+              <Datatable.Column id="id" isSortable>
+                Order Number
+              </Datatable.Column>
+              <Datatable.Column id="supplier" isSortable>
+                Supplier
+              </Datatable.Column>
+              <Datatable.Column id="status" isSortable>
+                Status
+              </Datatable.Column>
+              <Datatable.Column id="orderDate" isSortable>
+                Order Date
+              </Datatable.Column>
+              <Datatable.Column id="nextExpectedReceipt" isSortable>
+                Due Date
+              </Datatable.Column>
+              <Datatable.Column id="receiptCount" isSortable>
+                Deliveries Received
+              </Datatable.Column>
+            </Datatable.Head>
+            <Datatable.Body data={props.data}>
+              {({ data }) => (
+                <Datatable.Row key={data.id}>
+                  <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                  <Datatable.Cell id="supplier">
+                    {data.supplierName}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="status">
+                    <Badge>
+                      {data.isQuote
+                        ? "Quoted"
+                        : data.isCancelled
+                          ? "Cancelled"
+                          : "Pending"}
+                    </Badge>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="orderDate">
+                    {data.orderDate?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="nextExpectedReceipt">
+                    {data.nextExpectedReceipt?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="receiptCount">
+                    {data.receiptCount}
+                  </Datatable.Cell>
+                </Datatable.Row>
+              )}
+            </Datatable.Body>
+          </Datatable>
+        )}
+      </DatatableQueryProvider>
     </div>
   );
 }

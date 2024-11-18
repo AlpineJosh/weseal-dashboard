@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
-import { Table } from "@repo/ui/components/display";
-import { Badge } from "@repo/ui/components/element";
+import { Datatable } from "@repo/ui/components/display";
+import { Badge, Divider } from "@repo/ui/components/element";
+import { Heading, Subheading, Text } from "@repo/ui/components/typography";
 
 export default function ComponentPage({
   params,
@@ -18,19 +19,19 @@ export default function ComponentPage({
   const { data: subcomponents } = api.component.subcomponents.useQuery({
     componentId: params.componentId,
   });
-
   return (
     <div className="w-full max-w-screen-xl">
       {data && (
-        <>
-          <h1 className="text-2xl font-bold">{data.id}</h1>
-          <span className="text-muted-foreground">{data.description}</span>
-          <div className="mt-1 flex flex-row space-x-2">
-            <Badge color="primary">Department: {data.departmentName}</Badge>
-            <Badge color="secondary">Category: {data.categoryName}</Badge>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Heading level={1}>{data.id}</Heading>
+            <Text className="text-content-muted">{data.description}</Text>
+            <div className="mt-1 flex flex-row space-x-2">
+              <Badge color="primary">Department: {data.departmentName}</Badge>
+              <Badge color="secondary">Category: {data.categoryName}</Badge>
+            </div>
           </div>
-          <div className="bg-border my-4 h-px w-full" />
-
+          <Divider />
           <div className="flex w-full flex-row justify-stretch space-x-4">
             <div className="flex flex-1 flex-col space-y-2 p-2">
               <h3 className="text-muted-foreground">Quantity In Stock</h3>
@@ -41,6 +42,7 @@ export default function ComponentPage({
                 <span className="text-muted-foreground">{data.unit}</span>
               </span>
             </div>
+            <Divider orientation="vertical" />
             <div className="flex flex-1 flex-col space-y-2 p-2">
               <h3 className="text-muted-foreground">Allocated</h3>
               <span className="flex flex-row items-baseline justify-end space-x-1">
@@ -50,6 +52,7 @@ export default function ComponentPage({
                 <span className="text-muted-foreground">{data.unit}</span>
               </span>
             </div>
+            <Divider orientation="vertical" />
             <div className="flex flex-1 flex-col space-y-2 p-2">
               <h3 className="text-muted-foreground">Free</h3>
               <span className="flex flex-row items-baseline justify-end space-x-1">
@@ -59,6 +62,7 @@ export default function ComponentPage({
                 <span className="text-muted-foreground">{data.unit}</span>
               </span>
             </div>
+            <Divider orientation="vertical" />
             <div className="flex flex-1 flex-col space-y-2 p-2">
               <h3 className="text-muted-foreground">Quantity In Sage</h3>
               <span className="flex flex-row items-baseline justify-end space-x-1">
@@ -69,85 +73,125 @@ export default function ComponentPage({
               </span>
             </div>
           </div>
-          <div className="my-4 flex flex-col space-y-4">
-            {subcomponents && subcomponents.length > 0 && (
-              <>
-                <h3 className="text-muted-foreground">Subcomponents</h3>
-                <div>
-                  {/* <Table>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.Head>Subcomponent</Table.Head>
-                        <Table.Head>Description</Table.Head>
-                        <Table.Head>Quantity Required</Table.Head>
-                        <Table.Head>Quantity Available</Table.Head>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {data.subcomponents.map((subcomponent) => (
-                        <Table.Row key={subcomponent.id}>
-                          <Table.Cell>
-                            <Link
-                              href={`/inventory/components/${subcomponent.subcomponentId}`}
-                            >
-                              {subcomponent.subcomponentId}
-                            </Link>
-                          </Table.Cell>
-                          <Table.Cell>
-                            {subcomponent.subcomponentOverview.description}
-                          </Table.Cell>
-                          <Table.Cell>{subcomponent.quantity}</Table.Cell>
-                          <Table.Cell>
-                            {subcomponent.subcomponentOverview.totalQuantity}
-                          </Table.Cell>
-                        </Table.Row>
-                      ))}
-                    </Table.Body>
-                  </Table> */}
-                </div>
-              </>
+
+          <Divider />
+          <Subheading>Current Inventory</Subheading>
+          <DatatableQueryProvider
+            endpoint={api.inventory.quantity}
+            defaultInput={{
+              filter: {
+                componentId: { eq: params.componentId },
+                total: { neq: 0 },
+              },
+            }}
+          >
+            {(props) => (
+              <Datatable {...props}>
+                <Datatable.Head>
+                  <Datatable.Column id="batchReference" isSortable>
+                    Batch
+                  </Datatable.Column>
+                  <Datatable.Column id="locationName" isSortable>
+                    Location
+                  </Datatable.Column>
+                  <Datatable.Column id="total" isSortable>
+                    Quantity
+                  </Datatable.Column>
+                </Datatable.Head>
+                <Datatable.Body data={props.data}>
+                  {({ data }) => (
+                    <Datatable.Row key={`${data.batchId}-${data.locationId}`}>
+                      <Datatable.Cell id="batchReference">
+                        {data.batchReference ??
+                          data.batchEntryDate?.toLocaleDateString()}
+                      </Datatable.Cell>
+                      <Datatable.Cell id="locationName">
+                        {data.locationName}
+                      </Datatable.Cell>
+                      <Datatable.NumberCell
+                        id="total"
+                        value={data.total}
+                        unit={data.componentUnit}
+                      />
+                    </Datatable.Row>
+                  )}
+                </Datatable.Body>
+              </Datatable>
             )}
-            {/* {data.locations.length > 0 && (
-              <>
-                <h3 className="text-muted-foreground">Locations</h3> */}
-            {/* <Card>
-                  <Table>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.Head>Location</Table.Head>
-                        <Table.Head>Batch</Table.Head>
-                        <Table.Head>Total</Table.Head>
-                        <Table.Head>Allocated</Table.Head>
-                        <Table.Head>Free</Table.Head>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {data.locations.map((location, index) => (
-                        <Table.Row key={index}>
-                          <Table.Cell>
-                            <Link
-                              className="hover:underline"
-                              href={`/inventory/locations/${location.locationId}`}
-                            >
-                              {location.location?.name}
-                            </Link>
-                          </Table.Cell>
-                          <Table.Cell>
-                            {location.batch?.batchReference}
-                          </Table.Cell>
-                          <Table.Cell>{location.total}</Table.Cell>
-                          <Table.Cell>{location.allocated}</Table.Cell>
-                          <Table.Cell>{location.free}</Table.Cell>
-                        </Table.Row>
-                      ))}
-                    </Table.Body>
-                  </Table>
-                </Card> */}
-            {/* </>
+          </DatatableQueryProvider>
+          <Divider />
+          {data.hasSubcomponents && (
+            <>
+              <Subheading>Subcomponents</Subheading>
+              <Datatable>
+                <Datatable.Head>
+                  <Datatable.Column id="id">ID</Datatable.Column>
+                  <Datatable.Column id="description">
+                    Description
+                  </Datatable.Column>
+                  <Datatable.Column id="total">Quantity</Datatable.Column>
+                </Datatable.Head>
+                <Datatable.Body data={subcomponents}>
+                  {({ data }) => (
+                    <Datatable.Row key={data.id}>
+                      <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                      <Datatable.Cell id="description">
+                        {data.subcomponent.description}
+                      </Datatable.Cell>
+                      <Datatable.NumberCell
+                        id="total"
+                        value={data.quantity}
+                        unit={data.subcomponent.unit}
+                      />
+                    </Datatable.Row>
+                  )}
+                </Datatable.Body>
+              </Datatable>
+            </>
+          )}
+          <Divider />
+          <Subheading>Movements</Subheading>
+          <DatatableQueryProvider
+            endpoint={api.inventory.movements.list}
+            defaultInput={{
+              filter: { componentId: { eq: params.componentId } },
+            }}
+          >
+            {(props) => (
+              <Datatable {...props}>
+                <Datatable.Head>
+                  <Datatable.Column id="id">ID</Datatable.Column>
+                  <Datatable.Column id="locationName">
+                    Location
+                  </Datatable.Column>
+                  <Datatable.Column id="batchReference">
+                    Batch Reference
+                  </Datatable.Column>
+                  <Datatable.Column id="quantity">Quantity</Datatable.Column>
+                </Datatable.Head>
+                <Datatable.Body data={props.data}>
+                  {({ data }) => (
+                    <Datatable.Row key={data.id}>
+                      <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                      <Datatable.Cell id="locationName">
+                        {data.locationName}
+                      </Datatable.Cell>
+                      <Datatable.Cell id="batchReference">
+                        {data.batchReference ??
+                          data.batchEntryDate?.toLocaleDateString()}
+                      </Datatable.Cell>
+                      <Datatable.NumberCell
+                        id="quantity"
+                        value={data.quantity ?? 0}
+                        unit={data.componentUnit}
+                      />
+                    </Datatable.Row>
+                  )}
+                </Datatable.Body>
+              </Datatable>
             )}
-          </div> */}
-          </div>
-        </>
+          </DatatableQueryProvider>
+        </div>
       )}
     </div>
   );

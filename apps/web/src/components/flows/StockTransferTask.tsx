@@ -83,7 +83,6 @@ export function StockTransferTaskForm({
               data={(query) => {
                 const { data, isLoading } = api.component.list.useQuery({
                   filter: {
-                    hasSubcomponents: { eq: true },
                     totalQuantity: { gt: 0 },
                   },
                   search: { query },
