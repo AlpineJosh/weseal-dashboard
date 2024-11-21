@@ -1,3 +1,5 @@
+import { Decimal } from "decimal.js";
+
 import { db } from "@repo/db/client";
 import schema from "@repo/db/schema";
 
@@ -6,7 +8,7 @@ type BatchMovement = typeof schema.batchMovement.$inferInsert;
 export interface Transaction {
   id: number;
   component_id: string;
-  quantity: number;
+  quantity: Decimal;
   reference: string | null;
   date: Date;
   reference_numeric: number | null;
@@ -18,13 +20,13 @@ export interface Transaction {
 
 interface Grn {
   orderId: number;
-  quantity: number;
+  quantity: Decimal;
   date: Date;
 }
 
 interface Gdn {
   orderId: number;
-  quantity: number;
+  quantity: Decimal;
   date: Date;
 }
 
@@ -37,14 +39,14 @@ interface BitSystemsBatch {
 interface BitSystemsItem {
   id: number;
   locationId: number;
-  quantity: number;
+  quantity: Decimal;
 }
 
 interface BitSystemsTraceableItem {
   id: number;
   itemId: number;
   batchId: number;
-  quantity: number;
+  quantity: Decimal;
 }
 
 export interface ResetData {
@@ -63,7 +65,7 @@ export class ResetComponent {
 
   private batches: {
     id: number;
-    remainingQuantity: number;
+    remainingQuantity: Decimal;
     entryDate: Date;
     reference?: string;
   }[] = [];
@@ -116,7 +118,7 @@ export class ResetComponent {
   ): Promise<BatchMovement[]> {
     const movements: BatchMovement[] = [];
 
-    let remainingQuantity = Number((-transaction.quantity).toFixed(6));
+    let remainingQuantity = new Decimal(transaction.quantity).negated();
 
     const sortedBatches = this.batches.sort(
       (a, b) => a.entryDate.getTime() - b.entryDate.getTime(),
@@ -126,28 +128,29 @@ export class ResetComponent {
       movements.push(movement);
     } else {
       for (const batch of sortedBatches) {
-        if (remainingQuantity <= 0) break;
+        if (remainingQuantity.lte(0)) break;
 
-        if (batch.remainingQuantity <= 0) continue;
+        if (batch.remainingQuantity.lte(0)) continue;
 
-        const qtyToUse = Number(
-          Math.min(batch.remainingQuantity, remainingQuantity).toFixed(6),
+        const qtyToUse = Decimal.min(
+          batch.remainingQuantity,
+          remainingQuantity,
         );
-        batch.remainingQuantity = Number(
-          (batch.remainingQuantity - qtyToUse).toFixed(6),
-        );
-        remainingQuantity = Number((remainingQuantity - qtyToUse).toFixed(6));
+        batch.remainingQuantity = batch.remainingQuantity.minus(qtyToUse);
+        remainingQuantity = remainingQuantity.minus(qtyToUse);
+
+        if (qtyToUse.equals(0)) continue;
 
         movements.push({
           batchId: batch.id,
-          quantity: -qtyToUse,
+          quantity: qtyToUse.negated().toNumber(),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
         });
       }
 
-      if (remainingQuantity > 0) {
+      if (remainingQuantity.gt(0)) {
         const batch = sortedBatches[0];
 
         if (!batch) {
@@ -155,11 +158,12 @@ export class ResetComponent {
           throw new Error("No batch found to allocate to.");
         }
 
-        batch.remainingQuantity -= remainingQuantity;
+        batch.remainingQuantity =
+          batch.remainingQuantity.minus(remainingQuantity);
 
         movements.push({
           batchId: batch.id,
-          quantity: -remainingQuantity,
+          quantity: remainingQuantity.negated().toNumber(),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
@@ -190,13 +194,13 @@ export class ResetComponent {
 
     this.batches.push({
       id: batch.id,
-      remainingQuantity: transaction.quantity,
+      remainingQuantity: new Decimal(transaction.quantity),
       entryDate: transaction.date,
     });
 
     const movement = {
       batchId: batch.id,
-      quantity: transaction.quantity,
+      quantity: transaction.quantity.toNumber(),
       date: transaction.date,
       locationId: this.defaultLocationId,
       type: transaction.type,
@@ -210,39 +214,40 @@ export class ResetComponent {
   ): Promise<BatchMovement[]> {
     const movements: BatchMovement[] = [];
 
+    let remainingQuantity = new Decimal(transaction.quantity);
+
     const sortedBatches = this.batches.sort(
       (a, b) => a.entryDate.getTime() - b.entryDate.getTime(),
     );
-
-    let remainingQuantity = Number(transaction.quantity.toFixed(6));
 
     if (sortedBatches.length === 0) {
       const movement = await this.createBatch(transaction);
       movements.push(movement);
     } else {
       for (const batch of sortedBatches) {
-        if (remainingQuantity <= 0) break;
+        if (remainingQuantity.lte(0)) break;
 
-        if (batch.remainingQuantity >= 0) continue;
+        if (batch.remainingQuantity.gte(0)) continue;
 
-        const qtyToAdd = Number(
-          Math.min(-batch.remainingQuantity, remainingQuantity).toFixed(6),
+        const qtyToAdd = Decimal.min(
+          batch.remainingQuantity.negated(),
+          remainingQuantity,
         );
-        batch.remainingQuantity = Number(
-          (batch.remainingQuantity + qtyToAdd).toFixed(6),
-        );
-        remainingQuantity = Number((remainingQuantity - qtyToAdd).toFixed(6));
+        batch.remainingQuantity = batch.remainingQuantity.plus(qtyToAdd);
+        remainingQuantity = remainingQuantity.minus(qtyToAdd);
+
+        if (qtyToAdd.equals(0)) continue;
 
         movements.push({
           batchId: batch.id,
-          quantity: qtyToAdd,
+          quantity: qtyToAdd.toNumber(),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
         });
       }
 
-      if (remainingQuantity > 0) {
+      if (remainingQuantity.gt(0)) {
         const batch = sortedBatches[sortedBatches.length - 1];
 
         if (!batch) {
@@ -250,11 +255,12 @@ export class ResetComponent {
           throw new Error("No batch found to allocate to.");
         }
 
-        batch.remainingQuantity += remainingQuantity;
+        batch.remainingQuantity =
+          batch.remainingQuantity.plus(remainingQuantity);
 
         movements.push({
           batchId: batch.id,
-          quantity: remainingQuantity,
+          quantity: remainingQuantity.toNumber(),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
@@ -316,7 +322,7 @@ export class ResetComponent {
     console.log(`Processing component ${this.id}`);
 
     for (const transaction of this.transactions) {
-      if (transaction.quantity > 0) {
+      if (transaction.quantity.gt(0)) {
         switch (transaction.type) {
           case "receipt":
             await this.handleReceiptTransaction(transaction);
@@ -342,6 +348,8 @@ export class ResetComponent {
         }
       }
     }
+
+    this.balanceLocations();
   }
 
   private async handleReceiptTransaction(transaction: Transaction) {
@@ -358,7 +366,7 @@ export class ResetComponent {
       .values({
         receiptId,
         batchId: movement.batchId,
-        quantity: transaction.quantity,
+        quantity: transaction.quantity.toNumber(),
       })
       .returning({ id: schema.purchaseReceiptItem.id });
 
@@ -379,6 +387,14 @@ export class ResetComponent {
       return this.handleCorrectionInTransaction(transaction);
     }
 
+    const matchingBatches = this.bitSystemsBatches.filter((batch) => {
+      return batch.date.getDate() === transaction.date.getDate();
+    });
+
+    if (matchingBatches.length > 0) {
+      transaction.reference = matchingBatches[0]?.reference ?? null;
+    }
+
     const movement = await this.createBatch(transaction);
 
     const productionJobItem = await db
@@ -386,7 +402,7 @@ export class ResetComponent {
       .values({
         jobId: productionJobId,
         batchId: movement.batchId,
-        productionQuantity: transaction.quantity,
+        productionQuantity: transaction.quantity.toNumber(),
         productionDate: transaction.date,
       })
       .returning({ id: schema.productionBatchOutput.id });
@@ -499,5 +515,187 @@ export class ResetComponent {
           }) as BatchMovement,
       ),
     );
+  }
+
+  private balanceLocations() {
+    // Calculate current batch quantities per location
+    const currentBatchLocations = new Map<number, Map<number, Decimal>>();
+
+    for (const movement of this.movements) {
+      const locationMap =
+        currentBatchLocations.get(movement.batchId) ??
+        new Map<number, Decimal>();
+      const currentQty = locationMap.get(movement.locationId) ?? new Decimal(0);
+      locationMap.set(movement.locationId, currentQty.plus(movement.quantity));
+      currentBatchLocations.set(movement.batchId, locationMap);
+    }
+
+    if (this.bitSystemsTraceableItems.length > 0) {
+      // Handle traceable items case - specific batches to specific locations
+      const desiredLocations = new Map<number, Map<number, Decimal>>();
+
+      // Create a map of BitSystems batch references to our batch IDs
+      const batchReferenceMap = new Map<string, number>();
+      for (const batch of this.batches) {
+        if (batch.reference) {
+          const bitBatch = this.bitSystemsBatches.find(
+            (b) => b.reference === batch.reference,
+          );
+          if (bitBatch) {
+            batchReferenceMap.set(bitBatch.reference, batch.id);
+          }
+        }
+      }
+
+      // Map traceable items to our batches using the reference map
+      for (const traceableItem of this.bitSystemsTraceableItems) {
+        const bitBatch = this.bitSystemsBatches.find(
+          (b) => b.id === traceableItem.batchId,
+        );
+        if (!bitBatch) continue;
+
+        const batchId = batchReferenceMap.get(bitBatch.reference);
+        if (!batchId) continue;
+
+        const item = this.bitSystemsItems.find(
+          (i) => i.id === traceableItem.itemId,
+        );
+        if (!item) continue;
+
+        const locationMap =
+          desiredLocations.get(batchId) ?? new Map<number, Decimal>();
+        const currentQty = locationMap.get(item.locationId) ?? new Decimal(0);
+        locationMap.set(
+          item.locationId,
+          currentQty.plus(traceableItem.quantity),
+        );
+        desiredLocations.set(batchId, locationMap);
+      }
+
+      this.createBalancingMovements(currentBatchLocations, desiredLocations);
+    } else {
+      // Handle non-traceable case - total quantities per location matter
+      const desiredTotalsByLocation = new Map<number, Decimal>();
+
+      // Sum up desired quantities per location from BitSystems items
+      for (const item of this.bitSystemsItems) {
+        const currentQty =
+          desiredTotalsByLocation.get(item.locationId) ?? new Decimal(0);
+        desiredTotalsByLocation.set(
+          item.locationId,
+          currentQty.plus(item.quantity),
+        );
+      }
+
+      // Calculate current totals per location
+      const currentTotalsByLocation = new Map<number, Decimal>();
+      for (const [_, locationMap] of currentBatchLocations) {
+        for (const [locationId, qty] of locationMap) {
+          const currentTotal =
+            currentTotalsByLocation.get(locationId) ?? new Decimal(0);
+          currentTotalsByLocation.set(locationId, currentTotal.plus(qty));
+        }
+      }
+
+      // Create movements to balance locations using the oldest batch
+      const sortedBatches = Array.from(currentBatchLocations.keys()).sort(
+        (a, b) => a - b,
+      );
+      const primaryBatchId = sortedBatches[0];
+
+      if (!primaryBatchId) return;
+
+      const today = new Date();
+
+      // Balance each location
+      for (const [locationId, desiredQty] of desiredTotalsByLocation) {
+        const currentQty =
+          currentTotalsByLocation.get(locationId) ?? new Decimal(0);
+        const difference = desiredQty.minus(currentQty);
+
+        if (!difference.equals(0)) {
+          this.movements.push({
+            batchId: primaryBatchId,
+            quantity: difference.toNumber(),
+            date: today,
+            locationId,
+            type: "correction",
+          });
+        }
+      }
+    }
+  }
+
+  private createBalancingMovements(
+    currentBatchLocations: Map<number, Map<number, Decimal>>,
+    desiredLocations: Map<number, Map<number, Decimal>>,
+  ) {
+    const today = new Date();
+
+    // Calculate total available quantity across all batches
+    let totalAvailable = new Decimal(0);
+    for (const [_, locations] of currentBatchLocations) {
+      for (const qty of locations.values()) {
+        totalAvailable = totalAvailable.plus(qty);
+      }
+    }
+
+    // Sort batches by date for FIFO
+    const batchesInFifoOrder = Array.from(currentBatchLocations.entries()).sort(
+      (a, b) => {
+        const batchA = this.batches.find((batch) => batch.id === a[0]);
+        const batchB = this.batches.find((batch) => batch.id === b[0]);
+        return (
+          (batchA?.entryDate.getTime() ?? 0) -
+          (batchB?.entryDate.getTime() ?? 0)
+        );
+      },
+    );
+
+    for (const [batchId, currentLocations] of batchesInFifoOrder) {
+      const desiredForBatch = desiredLocations.get(batchId);
+      if (!desiredForBatch) continue;
+
+      for (const [locationId, currentQty] of currentLocations) {
+        const desiredQty = desiredForBatch.get(locationId) ?? new Decimal(0);
+        const difference = desiredQty.minus(currentQty);
+
+        if (!difference.equals(0)) {
+          // Validate the movement won't create negative stock
+          const batchTotal = Array.from(currentLocations.values()).reduce(
+            (sum, qty) => sum.plus(qty),
+            new Decimal(0),
+          );
+
+          if (batchTotal.plus(difference).lt(0)) {
+            console.warn(
+              `Skipping invalid movement that would create negative stock for batch ${batchId}`,
+            );
+            continue;
+          }
+
+          this.movements.push({
+            batchId,
+            quantity: difference.toNumber(),
+            date: today,
+            locationId,
+            type: "correction",
+          });
+        }
+      }
+
+      // Add movements for locations that don't exist yet
+      for (const [locationId, desiredQty] of desiredForBatch) {
+        if (!currentLocations.has(locationId)) {
+          this.movements.push({
+            batchId,
+            quantity: desiredQty.toNumber(),
+            date: today,
+            locationId,
+            type: "correction",
+          });
+        }
+      }
+    }
   }
 }

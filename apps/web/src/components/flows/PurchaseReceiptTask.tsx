@@ -10,9 +10,8 @@ import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
-  purchaseOrderId: z.number(),
-  putLocationId: z.number(),
-  assignedToId: z.string(),
+  purchaseOrderId: z.coerce.number(),
+  putLocationId: z.coerce.number(),
   items: z.array(
     z.object({
       componentId: z.string(),
@@ -36,7 +35,6 @@ export function PurchaseReceiptTaskForm({
     defaultValues: {
       purchaseOrderId: undefined,
       putLocationId: undefined,
-      assignedToId: undefined,
       items: [],
     },
   });
@@ -77,6 +75,7 @@ export function PurchaseReceiptTaskForm({
   });
 
   const handleSubmit = (values: z.infer<typeof taskSchema>) => {
+    console.log(values);
     receiveOrder({
       id: values.purchaseOrderId,
       putLocationId: values.putLocationId,
@@ -109,19 +108,21 @@ export function PurchaseReceiptTaskForm({
                       search: {
                         query,
                       },
+                      sort: [{ field: "orderDate", order: "desc" }],
                     });
                   return {
                     items: data?.rows ?? [],
                     isLoading,
                   };
                 }}
+                textValueAccessor={(order) => order.id.toString()}
                 keyAccessor={(order) => order.id}
               >
                 {(order) => {
                   return (
                     <Combobox.Option
                       id={order.id}
-                      textValue={order.id?.toString() ?? ""}
+                      textValue={order.id.toString()}
                     >
                       #{order.id} - {order.supplierName}
                     </Combobox.Option>
@@ -130,7 +131,7 @@ export function PurchaseReceiptTaskForm({
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          <Field name="location">
+          <Field name="putLocationId">
             <Field.Label>Receiving Location</Field.Label>
             <Field.Description>
               Select the location to receive the order
@@ -150,13 +151,11 @@ export function PurchaseReceiptTaskForm({
                   };
                 }}
                 keyAccessor={(location) => location.id}
+                textValueAccessor={(location) => location.name}
               >
                 {(location) => {
                   return (
-                    <Combobox.Option
-                      id={location.id}
-                      textValue={location.name ?? ""}
-                    >
+                    <Combobox.Option id={location.id} textValue={location.name}>
                       {location.name} - {location.groupName}
                     </Combobox.Option>
                   );
@@ -165,42 +164,50 @@ export function PurchaseReceiptTaskForm({
             </Field.Control>
           </Field>
         </>
+        {purchaseOrderId && (
+          <Table className="-mx-4">
+            <Table.Head>
+              <Table.Column id="componentId">Component</Table.Column>
+              <Table.Column id="componentDescription">Description</Table.Column>
+              <Table.Column id="quantityOrdered">
+                Quantity Expected
+              </Table.Column>
+              <Table.Column id="quantityReceived">
+                Quantity Received
+              </Table.Column>
+            </Table.Head>
+            <Table.Body data={orderItems?.rows ?? []}>
+              {({ data }) => (
+                <Table.Row key={data.id}>
+                  <Table.Cell id="componentId">{data.componentId}</Table.Cell>
+                  <Table.Cell id="componentDescription">
+                    {data.componentDescription}
+                  </Table.Cell>
+                  <Table.Cell id="quantityOrdered">
+                    {data.quantityOrdered}
+                  </Table.Cell>
+                  <Table.Cell id="quantityReceived">
+                    <Input type="number" defaultValue={data.quantityOrdered} />
+                  </Table.Cell>
+                </Table.Row>
+              )}
+            </Table.Body>
+          </Table>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="plain" color="default" onPress={onExit}>
+            Cancel
+          </Button>
+          <Button
+            isDisabled={!purchaseOrderId}
+            variant="solid"
+            color="primary"
+            type="submit"
+          >
+            Receive Goods
+          </Button>
+        </div>
       </Form>
-      {purchaseOrderId && (
-        <Table className="-mx-4">
-          <Table.Header>
-            <Table.Column isRowHeader>Component</Table.Column>
-            <Table.Column>Description</Table.Column>
-            <Table.Column>Quantity Expected</Table.Column>
-            <Table.Column>Quantity Received</Table.Column>
-          </Table.Header>
-          <Table.Body>
-            {orderItems?.rows.map((item) => (
-              <Table.Row key={item.id}>
-                <Table.Cell>{item.componentId}</Table.Cell>
-                <Table.Cell>{item.componentDescription}</Table.Cell>
-                <Table.Cell>{item.quantityOrdered}</Table.Cell>
-                <Table.Cell>
-                  <Input type="number" defaultValue={item.quantityOrdered} />
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-      )}
-      <div className="flex justify-end gap-2">
-        <Button variant="plain" color="default" onPress={onExit}>
-          Cancel
-        </Button>
-        <Button
-          isDisabled={!purchaseOrderId}
-          variant="solid"
-          color="primary"
-          type="submit"
-        >
-          Receive Goods
-        </Button>
-      </div>
     </div>
   );
 }
