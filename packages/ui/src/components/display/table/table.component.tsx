@@ -28,32 +28,52 @@ import { Checkbox } from "../../control";
 import { Icon } from "../../element";
 
 const variants = {
-  table: cva("flex min-w-full flex-col text-sm/6 lg:grid"),
-  head: cva("hidden lg:contents"),
+  table: cva("flex h-full w-full flex-col overflow-y-auto text-sm/6 lg:grid", {
+    variants: {
+      density: {
+        compact: "text-sm/4 [--row-height:2rem]",
+        normal: "text-sm/6 [--row-height:2.5rem]",
+        comfortable: "text-sm/8 [--row-height:3rem]",
+      },
+    },
+    defaultVariants: {
+      density: "normal",
+    },
+  }),
+  head: cva([
+    "sticky top-0 hidden h-[var(--row-height)] bg-background/80 backdrop-blur-sm",
+    "lg:col-span-full lg:grid lg:grid-cols-subgrid lg:items-stretch lg:justify-stretch",
+  ]),
   column: cva(
-    "border-content/5 px-2 py-1 font-light text-content-muted lg:border-b lg:px-4 lg:py-2.5",
+    "flex flex-row items-center border-content/5 px-2 font-light text-content-muted lg:border-b lg:px-4",
     {
       variants: {
         sortable: {
-          true: "flex appearance-none flex-row items-center justify-between text-left outline-none hover:bg-content/5",
+          true: "appearance-none justify-between text-left outline-none hover:bg-content/5",
         },
       },
     },
   ),
-  body: cva("flex flex-col lg:contents"),
-  row: cva(
-    "grid grid-cols-[auto_1fr] border-b border-content/5 px-2 py-4 lg:contents lg:py-2",
-  ),
-  cell: cva(
-    "truncate border-content/5 px-2 py-1 lg:border-b lg:px-4 lg:py-2.5",
+  body: cva(
+    "lg:col-span-full lg:grid lg:auto-rows-[var(--row-height)] lg:grid-cols-subgrid lg:items-stretch lg:justify-stretch",
     {
       variants: {
-        selectable: {
-          true: "hover:bg-content/5",
+        isLoading: {
+          true: "opacity-50",
         },
       },
     },
   ),
+  row: cva(
+    "grid grid-cols-[auto_1fr] border-b border-content/5 lg:col-span-full lg:grid-cols-subgrid lg:items-center",
+  ),
+  cell: cva("truncate px-2 py-1 lg:px-4", {
+    variants: {
+      selectable: {
+        true: "hover:bg-content/5",
+      },
+    },
+  }),
 };
 
 type SortDirection = "asc" | "desc" | undefined;
@@ -95,6 +115,8 @@ interface TableContextValue {
   unregisterColumn: (id: Key) => void;
   sort: SortContextValue;
   selectionMode?: SelectionMode;
+  isLoading: boolean;
+  skeletonRows: number;
 }
 
 const TableContext = createContext<TableContextValue>({
@@ -106,6 +128,8 @@ const TableContext = createContext<TableContextValue>({
     value: [],
     handleSort: () => void 0,
   },
+  isLoading: false,
+  skeletonRows: 10,
 });
 
 const useTable = () => {
@@ -116,6 +140,8 @@ type TableProps = Omit<ComponentPropsWithoutRef<"div">, "children"> &
   TableSort & {
     selectionMode?: SelectionMode;
     children: [ReactElement<HeadProps>, ReactElement<BodyProps<unknown>>];
+    isLoading?: boolean;
+    skeletonRows?: number;
   };
 
 const Root = ({
@@ -125,6 +151,8 @@ const Root = ({
   sortValue,
   defaultSortValue,
   onSortChange,
+  isLoading = false,
+  skeletonRows = 10,
   ...props
 }: TableProps) => {
   const [columns, setColumns] = useImmer<ColumnDefinition[]>([]);
@@ -229,6 +257,8 @@ const Root = ({
           value: currentSort,
           handleSort: handleSortChange,
         },
+        isLoading,
+        skeletonRows,
       }}
     >
       <div
@@ -343,7 +373,9 @@ const Column: React.FC<ColumnProps> = ({
       />
     </Aria.Button>
   ) : (
-    <div className={cn(variants.column(), className)}>{children}</div>
+    <div className={cn(variants.column(), className)}>
+      <span>{children}</span>
+    </div>
   );
 };
 
@@ -355,6 +387,7 @@ interface BodySelection<TData> {
 type BodyProps<TData> = Omit<ComponentPropsWithoutRef<"div">, "children"> &
   BodySelection<TData> & {
     data?: TData[];
+    emptyMessage?: ReactNode;
     children: (props: RowRenderProps<TData>) => ReactElement<RowProps>;
   };
 
@@ -362,11 +395,36 @@ const Body = <TData,>({
   data,
   children,
   className,
+  emptyMessage = "No data found",
   ...props
 }: BodyProps<TData>) => {
+  const { isLoading, columns, skeletonRows } = useTable();
+
   return (
-    <div {...props} className={cn(variants.body(), className)}>
-      {data?.map((value) => children({ data: value, isSelected: false }))}
+    <div
+      {...props}
+      className={cn(
+        variants.body({ isLoading: isLoading && data !== undefined }),
+        className,
+      )}
+    >
+      {isLoading && data === undefined ? (
+        Array.from({ length: skeletonRows }).map((_, rowIndex) => (
+          <Row key={rowIndex}>
+            {columns.map((column) => (
+              <Cell key={column.id} id={column.id}>
+                <div className="h-4 w-full animate-pulse rounded-sm bg-content/5" />
+              </Cell>
+            ))}
+          </Row>
+        ))
+      ) : (data?.length ?? 0) > 0 ? (
+        data?.map((value) => children({ data: value, isSelected: false }))
+      ) : (
+        <div className="col-span-full row-span-3 flex flex-col items-center justify-center text-center text-content-muted">
+          {emptyMessage}
+        </div>
+      )}
     </div>
   );
 };
@@ -394,10 +452,15 @@ const useCell = (key: Key) => {
   return { column };
 };
 
-type CellProps = ComponentPropsWithoutRef<"div"> & {
+type CellProps = Omit<ComponentPropsWithoutRef<"div">, "id"> & {
   id: Key;
 };
-const Cell: React.FC<CellProps> = ({ id, children, className, ...props }) => {
+const Cell: React.FC<CellProps> = ({
+  id,
+  children,
+  className,
+  ...props
+}: CellProps) => {
   const { column } = useCell(id);
 
   if (!column) {

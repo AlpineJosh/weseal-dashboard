@@ -55,10 +55,11 @@ const Root = <TData extends object>({
   sortValue,
   onPaginationChange,
   onSortChange,
+  className,
   children,
 }: DatatableProps<TData>) => {
   return (
-    <div className="flex flex-col space-y-2">
+    <div className={cn("flex flex-col space-y-2", className)}>
       <div className="flex flex-row items-center justify-between gap-x-2">
         <Input
           type="search"
@@ -73,7 +74,12 @@ const Root = <TData extends object>({
           Filter
         </Button>
       </div>
-      <Table sortValue={sortValue} onSortChange={onSortChange}>
+      <Table
+        sortValue={sortValue}
+        onSortChange={onSortChange}
+        isLoading={isLoading}
+        skeletonRows={paginationValue.size}
+      >
         {children}
       </Table>
 
@@ -116,14 +122,6 @@ const Root = <TData extends object>({
           }}
           href={undefined}
         />
-      </div>
-      <div
-        className={cn(
-          "flex flex-row items-center justify-center gap-x-2 p-5",
-          !isLoading && data?.length !== 0 && "hidden",
-        )}
-      >
-        <div className="text-sm text-content-muted">No data found</div>
       </div>
     </div>
   );

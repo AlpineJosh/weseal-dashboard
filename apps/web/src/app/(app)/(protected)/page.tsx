@@ -9,7 +9,7 @@ import { api } from "@/utils/trpc/react";
 
 import { Datatable, Modal } from "@repo/ui/components/display";
 import { Button, Divider } from "@repo/ui/components/element";
-import { Heading, Subheading } from "@repo/ui/components/typography";
+import { Heading, Subheading, TextLink } from "@repo/ui/components/typography";
 
 export const runtime = "edge";
 
@@ -111,11 +111,18 @@ export default function DashboardPage() {
               </Datatable.Column>
               <Datatable.Column id="actions">Actions</Datatable.Column>
             </Datatable.Head>
-            <Datatable.Body data={props.data}>
+            <Datatable.Body
+              data={props.data}
+              emptyMessage="No open tasks remaining"
+            >
               {({ data }) => (
                 <Datatable.Row key={data.id}>
                   <Datatable.Cell id="componentId">
-                    {data.componentId}
+                    <TextLink
+                      href={`/inventory/components/${data.componentId}`}
+                    >
+                      {data.componentId}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="batchReference">
                     {data.batchReference}
@@ -168,19 +175,37 @@ export default function DashboardPage() {
             <Datatable.Body data={props.data}>
               {({ data }) => (
                 <Datatable.Row key={data.id}>
-                  <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                  <Datatable.Cell id="id">
+                    <TextLink
+                      href={`/inventory/components/${encodeURIComponent(data.id)}`}
+                    >
+                      {data.id}
+                    </TextLink>
+                  </Datatable.Cell>
                   <Datatable.Cell id="description">
                     {data.description}
                   </Datatable.Cell>
-                  <Datatable.Cell id="totalQuantity">
+                  <Datatable.NumberCell
+                    id="totalQuantity"
+                    value={data.totalQuantity}
+                    unit={data.unit}
+                  >
                     {data.totalQuantity}
-                  </Datatable.Cell>
-                  <Datatable.Cell id="sageQuantity">
+                  </Datatable.NumberCell>
+                  <Datatable.NumberCell
+                    id="sageQuantity"
+                    value={data.sageQuantity}
+                    unit={data.unit}
+                  >
                     {data.sageQuantity}
-                  </Datatable.Cell>
-                  <Datatable.Cell id="sageDiscrepancy">
+                  </Datatable.NumberCell>
+                  <Datatable.NumberCell
+                    id="sageDiscrepancy"
+                    value={data.sageDiscrepancy}
+                    unit={data.unit}
+                  >
                     {data.sageDiscrepancy}
-                  </Datatable.Cell>
+                  </Datatable.NumberCell>
                 </Datatable.Row>
               )}
             </Datatable.Body>

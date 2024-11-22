@@ -40,6 +40,8 @@ export const QueryProvider = <
     ...controlledInput,
   });
 
+  const [latestData, setLatestData] = useImmer<TOutput | undefined>(undefined);
+
   useEffect(() => {
     if (controlledInput) {
       setInput((current) => ({
@@ -54,7 +56,13 @@ export const QueryProvider = <
     isLoading: boolean;
   };
 
-  return <>{children({ data, isLoading, setInput, input })}</>;
+  useEffect(() => {
+    if (data !== undefined) {
+      setLatestData(data);
+    }
+  }, [data, setLatestData]);
+
+  return <>{children({ data: latestData, isLoading, setInput, input })}</>;
 };
 
 interface DatatableSort<TData> {
