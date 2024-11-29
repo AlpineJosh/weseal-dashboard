@@ -1,60 +1,98 @@
 "use client";
 
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
-import { Table } from "@repo/ui/components/display";
-import { Badge, Button } from "@repo/ui/components/element";
-import { Link } from "@repo/ui/components/navigation";
+import { Datatable } from "@repo/ui/components/display";
+import { Badge } from "@repo/ui/components/element";
+import { Heading, TextLink } from "@repo/ui/components/typography";
 
-export default function ReceivingPage() {
-  const { data } = api.despatching.order.list.useQuery({ filter: {} });
+export default function ReceivingOrdersOverview() {
   return (
-    <div className="flex flex-col space-y-4">
-      <h1 className="text-2xl font-semibold">Sales Orders</h1>
-      {/* <Card>
-        <Table className="border-b">
-          <Table.Header>
-            <Table.Row>
-              <Table.Head className="whitespace-nowrap">Sales Order</Table.Head>
-              <Table.Head>Account</Table.Head>
-              <Table.Head>Status</Table.Head>
-              <Table.Head>Order Date</Table.Head>
-              <Table.Head>Actions</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data?.rows.map((order) => (
-              <Table.Row key={order.id}>
-                <Table.Cell>{order.id}</Table.Cell>
-                <Table.Cell className="truncate">
-                  {order.customer.name}
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge>{order.isComplete ? "Despatched" : "Pending"}</Badge>
-                </Table.Cell>
-                <Table.Cell>{order.orderDate?.toLocaleDateString()}</Table.Cell>
-                <Table.Cell className="flex flex-row items-center space-x-2">
-                  <Link
-                    className="whitespace-nowrap"
-                    href="/inventory/tasks/create/despatching"
-                  >
-                    Despatch
-                  </Link>
-                  <Link
-                    className="whitespace-nowrap"
-                    href={`/receiving/orders/${order.id}`}
-                  >
-                    View Details
-                  </Link>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-        <div className="flex w-full flex-row justify-end p-2">
-          <Button>Next</Button>
-        </div>
-      </Card> */}
+    <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
+      <Heading level={1}>Sales Orders</Heading>
+
+      <DatatableQueryProvider
+        endpoint={api.despatching.order.list}
+        defaultInput={{
+          sort: [{ field: "orderDate", order: "desc" }],
+        }}
+      >
+        {(props) => (
+          <Datatable className="grow overflow-hidden" {...props}>
+            <Datatable.Head>
+              <Datatable.Column id="id" isSortable>
+                Order Number
+              </Datatable.Column>
+              <Datatable.Column id="customerName" isSortable>
+                Customer
+              </Datatable.Column>
+              <Datatable.Column id="status">Status</Datatable.Column>
+              <Datatable.Column id="orderDate" isSortable>
+                Order Date
+              </Datatable.Column>
+              <Datatable.Column id="nextExpectedDespatch" isSortable>
+                Next Despatch
+              </Datatable.Column>
+              <Datatable.Column id="despatchCount" isSortable>
+                Despatches Sent
+              </Datatable.Column>
+              <Datatable.Column id="remainingItemCount" isSortable>
+                Items Remaining
+              </Datatable.Column>
+            </Datatable.Head>
+            <Datatable.Body data={props.data}>
+              {({ data }) => (
+                <Datatable.Row key={`${data.id}`}>
+                  <Datatable.Cell id="id">
+                    <TextLink href={`/despatching/orders/${data.id}`}>
+                      {data.id}
+                    </TextLink>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="customerName">
+                    <TextLink href={`/customers/${data.customerId}`}>
+                      {data.customerName}
+                    </TextLink>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="status">
+                    <Badge
+                      color={
+                        data.isQuote
+                          ? "orange"
+                          : data.isCancelled
+                            ? "red"
+                            : data.remainingItemCount === 0
+                              ? "green"
+                              : "yellow"
+                      }
+                    >
+                      {data.isQuote
+                        ? "Quoted"
+                        : data.isCancelled
+                          ? "Cancelled"
+                          : data.remainingItemCount === 0
+                            ? "Completed"
+                            : "Pending"}
+                    </Badge>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="orderDate">
+                    {data.orderDate?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="nextExpectedDespatch">
+                    {data.nextExpectedDespatch?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="despatchCount">
+                    {data.despatchCount}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="remainingItemCount">
+                    {data.remainingItemCount}
+                  </Datatable.Cell>
+                </Datatable.Row>
+              )}
+            </Datatable.Body>
+          </Datatable>
+        )}
+      </DatatableQueryProvider>
     </div>
   );
 }

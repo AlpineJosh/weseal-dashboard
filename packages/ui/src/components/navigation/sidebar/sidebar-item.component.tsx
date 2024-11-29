@@ -59,4 +59,4 @@ const Item = ({ current, className, children, ...props }: SidebarItemProps) => {
 };
 
 export { Item };
-export type { SidebarItemProps };
+// export type { SidebarItemProps };

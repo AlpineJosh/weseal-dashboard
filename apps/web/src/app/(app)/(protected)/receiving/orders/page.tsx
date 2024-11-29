@@ -1,47 +1,98 @@
 "use client";
 
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
-export default function ReceivingPage() {
-  const { data } = api.receiving.orders.list.useQuery({ filter: {} });
+import { Datatable } from "@repo/ui/components/display";
+import { Badge } from "@repo/ui/components/element";
+import { Heading, TextLink } from "@repo/ui/components/typography";
+
+export default function ReceivingOrdersOverview() {
   return (
-    <div className="flex flex-col space-y-4">
-      <h1 className="text-2xl font-semibold">Purchase Orders</h1>
-      {/* <Table className="border-b">
-          <Table.Header>
-            <Table.Row>
-              <Table.Head>Purchase Order</Table.Head>
-              <Table.Head>Account</Table.Head>
-              <Table.Head>Status</Table.Head>
-              <Table.Head>Order Date</Table.Head>
-              <Table.Head>Actions</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data?.rows.map((order) => (
-              <Table.Row key={order.id}>
-                <Table.Cell>{order.id}</Table.Cell>
-                <Table.Cell>{order.supplier.name}</Table.Cell>
-                <Table.Cell>
-                  <Badge>{order.isComplete ? "Received" : "Pending"}</Badge>
-                </Table.Cell>
-                <Table.Cell>{order.orderDate?.toLocaleDateString()}</Table.Cell>
-                <Table.Cell className="flex gap-2 p-0">
-                  <Modal>
-                    <Link>Receive</Link>
-                    <Modal.Content>
-                      <p>Hello</p>
-                    </Modal.Content>
-                  </Modal>
-                  <Button variant="ghost">View Details</Button>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-        <div className="flex w-full flex-row justify-end p-2">
-          <Button>Next</Button>
-        </div> */}
+    <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
+      <Heading level={1}>Purchase Orders</Heading>
+
+      <DatatableQueryProvider
+        endpoint={api.receiving.orders.list}
+        defaultInput={{
+          sort: [{ field: "orderDate", order: "desc" }],
+        }}
+      >
+        {(props) => (
+          <Datatable className="grow overflow-hidden" {...props}>
+            <Datatable.Head>
+              <Datatable.Column id="id" isSortable>
+                Order Number
+              </Datatable.Column>
+              <Datatable.Column id="supplierName" isSortable>
+                Supplier
+              </Datatable.Column>
+              <Datatable.Column id="status">Status</Datatable.Column>
+              <Datatable.Column id="orderDate" isSortable>
+                Order Date
+              </Datatable.Column>
+              <Datatable.Column id="nextExpectedReceipt" isSortable>
+                Next Due Date
+              </Datatable.Column>
+              <Datatable.Column id="receiptCount" isSortable>
+                Deliveries Received
+              </Datatable.Column>
+              <Datatable.Column id="remainingItemCount" isSortable>
+                Items Remaining
+              </Datatable.Column>
+            </Datatable.Head>
+            <Datatable.Body data={props.data}>
+              {({ data }) => (
+                <Datatable.Row key={`${data.id}`}>
+                  <Datatable.Cell id="id">
+                    <TextLink href={`/receiving/orders/${data.id}`}>
+                      {data.id}
+                    </TextLink>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="supplierName">
+                    <TextLink href={`/suppliers/${data.supplierId}`}>
+                      {data.supplierName}
+                    </TextLink>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="status">
+                    <Badge
+                      color={
+                        data.isQuote
+                          ? "orange"
+                          : data.isCancelled
+                            ? "red"
+                            : data.remainingItemCount === 0
+                              ? "green"
+                              : "yellow"
+                      }
+                    >
+                      {data.isQuote
+                        ? "Quoted"
+                        : data.isCancelled
+                          ? "Cancelled"
+                          : data.remainingItemCount === 0
+                            ? "Received"
+                            : "Pending"}
+                    </Badge>
+                  </Datatable.Cell>
+                  <Datatable.Cell id="orderDate">
+                    {data.orderDate?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="nextExpectedReceipt">
+                    {data.nextExpectedReceipt?.toLocaleDateString()}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="receiptCount">
+                    {data.receiptCount}
+                  </Datatable.Cell>
+                  <Datatable.Cell id="remainingItemCount">
+                    {data.remainingItemCount}
+                  </Datatable.Cell>
+                </Datatable.Row>
+              )}
+            </Datatable.Body>
+          </Datatable>
+        )}
+      </DatatableQueryProvider>
     </div>
   );
 }

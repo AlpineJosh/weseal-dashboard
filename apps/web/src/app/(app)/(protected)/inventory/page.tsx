@@ -4,11 +4,11 @@ import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
-import { Heading, Text } from "@repo/ui/components/typography";
+import { Heading, Text, TextLink } from "@repo/ui/components/typography";
 
 export default function InventoryOverview() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
       <Heading level={1}>Current Inventory</Heading>
       <Text>A comprehensive view of live stock across all departments</Text>
 
@@ -23,7 +23,7 @@ export default function InventoryOverview() {
         }}
       >
         {(props) => (
-          <Datatable {...props}>
+          <Datatable className="grow overflow-hidden" {...props}>
             <Datatable.Head>
               <Datatable.Column id="component" isSortable>
                 Stock Code
@@ -50,17 +50,23 @@ export default function InventoryOverview() {
                   key={`${data.componentId}-${data.batchId}-${data.locationId}`}
                 >
                   <Datatable.Cell id="component">
-                    {data.componentId}
+                    <TextLink href={`/components/${data.componentId}`}>
+                      {data.componentId}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="description">
                     {data.componentDescription}
                   </Datatable.Cell>
                   <Datatable.Cell id="batch">
-                    {data.batchReference ??
-                      data.batchEntryDate?.toLocaleDateString()}{" "}
+                    <TextLink href={`/inventory/batches/${data.batchId}`}>
+                      {data.batchReference ??
+                        data.batchEntryDate?.toLocaleDateString()}{" "}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="location">
-                    {data.locationName}
+                    <TextLink href={`/inventory/locations/${data.locationId}`}>
+                      {data.locationName}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.NumberCell
                     id="quantity"

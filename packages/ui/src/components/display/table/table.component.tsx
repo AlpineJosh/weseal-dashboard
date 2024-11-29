@@ -28,7 +28,7 @@ import { Checkbox } from "../../control";
 import { Icon } from "../../element";
 
 const variants = {
-  table: cva("flex h-full w-full flex-col overflow-y-auto text-sm/6 lg:grid", {
+  table: cva("flex flex-col overflow-y-auto text-sm/6 lg:grid", {
     variants: {
       density: {
         compact: "text-sm/4 [--row-height:2rem]",

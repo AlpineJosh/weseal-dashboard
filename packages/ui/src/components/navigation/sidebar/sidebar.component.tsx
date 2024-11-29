@@ -1,7 +1,7 @@
 import React, { useId } from "react";
 import { LayoutGroup } from "framer-motion";
 
-import type { SidebarItemProps } from "./sidebar-item.component";
+// import type { SidebarItemProps } from "./sidebar-item.component";
 import { cn } from "../../../lib/class-merge";
 import { Item } from "./sidebar-item.component";
 
@@ -131,4 +131,4 @@ export const Sidebar = Object.assign(Root, {
   Label,
 });
 
-export type { SidebarItemProps, SidebarProps };
+export type { SidebarProps };

@@ -87,8 +87,10 @@ const SidebarLayout = ({
 
       {/* Content */}
       <main className="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2">
-        <div className="grow p-6 lg:rounded-lg lg:bg-background lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-content/5">
-          <div className="mx-auto max-w-6xl">{children}</div>
+        <div className="flex grow flex-col p-6 lg:rounded-lg lg:bg-background lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-content/5">
+          <div className="mx-auto flex min-h-0 max-w-6xl flex-1 flex-col">
+            {children}
+          </div>
         </div>
       </main>
     </div>
