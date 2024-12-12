@@ -10,12 +10,12 @@ import type { ResetData } from "./ResetComponent";
 import { ResetComponent } from "./ResetComponent";
 
 // const STOCK_CODES = [
-//   // "BOPZ056WH0280SQM", // component, no batch number
-//   // "WS051OR2800SQMEB090", // printed material, must have batch number, is BOMd into other products.
-//   // "WS051OR012003000EB090", // finished product, must have batch number, is not BOMd again.
-//   // "OL175GR006000050B", // Finished product, no batch number
-//   // "CARRIAGECHARGE", // Non-physical item, no batch number
-//   "BOP020CL4950SQM", // Biggest discrepancy
+// "BOPZ056WH0280SQM", // component, no batch number
+// "WS051OR2800SQMEB090", // printed material, must have batch number, is BOMd into other products.
+// "WS051OR012003000EB090", // finished product, must have batch number, is not BOMd again.
+// "OL175GR006000050B", // Finished product, no batch number
+// "CARRIAGECHARGE", // Non-physical item, no batch number
+// "BOP020CL4950SQM", // Biggest discrepancy
 // ];
 
 export class ResetHandler implements ResetData {
@@ -170,6 +170,7 @@ export class ResetHandler implements ResetData {
         outputComponentId: componentId,
         outputLocationId: 1,
         batchNumber: reference,
+        isActive: false,
       })
       .returning({ id: schema.productionJob.id })
       .then((ids) => ids[0]?.id)

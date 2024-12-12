@@ -92,14 +92,13 @@ export function PurchaseReceiptTaskForm({
     <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Receive Purchase Order</h1>
       <Form
-        className="flex flex-col space-y-4"
+        className="flex flex-col space-y-4 [--grid-cols:200px_1fr]"
         onSubmit={handleSubmit}
         form={form}
       >
         <>
-          <Field name="purchaseOrderId">
-            <Field.Label>Order</Field.Label>
-            <Field.Description>Select the order to receive</Field.Description>
+          <Field name="purchaseOrderId" layout="row">
+            <Field.Label>Purchase Order</Field.Label>
             <Field.Control>
               <AsyncCombobox
                 data={(query) => {
@@ -131,11 +130,8 @@ export function PurchaseReceiptTaskForm({
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          <Field name="putLocationId">
+          <Field name="putLocationId" layout="row">
             <Field.Label>Receiving Location</Field.Label>
-            <Field.Description>
-              Select the location to receive the order
-            </Field.Description>
             <Field.Control>
               <AsyncCombobox
                 data={(query) => {
@@ -165,7 +161,7 @@ export function PurchaseReceiptTaskForm({
           </Field>
         </>
         {purchaseOrderId && (
-          <Table className="-mx-4">
+          <Table className="">
             <Table.Head>
               <Table.Column id="componentId">Component</Table.Column>
               <Table.Column id="componentDescription">Description</Table.Column>

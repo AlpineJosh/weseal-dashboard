@@ -7,7 +7,6 @@ import {
   integer,
   pgEnum,
   pgTable,
-  real,
   serial,
   text,
   timestamp,
@@ -25,6 +24,7 @@ import {
 
 import "./receiving.schema";
 
+import { numericDecimal } from "../lib/numeric";
 import { profile } from "./profile.schema";
 import { purchaseReceiptItem } from "./receiving.schema";
 
@@ -48,7 +48,7 @@ export const batchMovement = pgTable("batch_movement", {
   locationId: integer("location_id")
     .notNull()
     .references(() => location.id),
-  quantity: real("quantity").notNull(),
+  quantity: numericDecimal("quantity").notNull(),
   userId: uuid("user_id").references(() => profile.id),
   type: batchMovementType("type").notNull(),
   purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
@@ -166,7 +166,7 @@ export const taskItem = pgTable("task_item", {
     .references(() => batch.id),
   pickLocationId: integer("pick_location_id").references(() => location.id),
   putLocationId: integer("put_location_id").references(() => location.id),
-  quantity: real("quantity").notNull(),
+  quantity: numericDecimal("quantity").notNull(),
   isComplete: boolean("is_complete").notNull().default(false),
   createdAt: timestamp("created_at")
     .notNull()

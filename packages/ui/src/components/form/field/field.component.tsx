@@ -10,6 +10,7 @@ import type {
 } from "react-hook-form";
 import type { Updater } from "use-immer";
 import React, { createContext, useContext, useEffect, useId } from "react";
+import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
 import { useController } from "react-hook-form";
 import { useImmer } from "use-immer";
@@ -18,6 +19,23 @@ import { cn } from "@repo/ui/lib/class-merge";
 
 import type { TextProps } from "../../typography";
 import { Text } from "../../typography";
+
+const variants = cva("flex flex-col", {
+  variants: {
+    layout: {
+      row: "grid grid-cols-[var(--grid-cols)] items-center",
+      column: [
+        "flex flex-col",
+        "[&>[data-slot=label]+[data-slot=control]]:mt-3",
+        "[&>[data-slot=label]+[data-slot=description]]:mt-1",
+        "[&>[data-slot=description]+[data-slot=control]]:mt-3",
+        "[&>[data-slot=control]+[data-slot=description]]:mt-3",
+        "[&>[data-slot=control]+[data-slot=error]]:mt-3",
+        "[&>[data-slot=label]]:font-medium",
+      ],
+    },
+  },
+});
 
 interface FieldIds {
   fieldId: string;
@@ -38,6 +56,7 @@ const FieldContext = createContext<FieldContextValue>({} as FieldContextValue);
 type FieldProps = ComponentPropsWithRef<"div"> & {
   name: string;
   valueAsNumber?: boolean;
+  layout?: "row" | "column";
 };
 
 // type FieldReturn = {
@@ -83,7 +102,14 @@ const useFormField = () => {
   };
 };
 
-const Root = ({ id, name, children, className, ...props }: FieldProps) => {
+const Root = ({
+  id,
+  name,
+  children,
+  className,
+  layout = "column",
+  ...props
+}: FieldProps) => {
   const control = useController({ name });
 
   const fieldId = useId();
@@ -99,19 +125,7 @@ const Root = ({ id, name, children, className, ...props }: FieldProps) => {
 
   return (
     <FieldContext.Provider value={{ ids, setIds, ...control }}>
-      <div
-        className={cn(
-          "flex flex-col",
-          "[&>[data-slot=label]+[data-slot=control]]:mt-3",
-          "[&>[data-slot=label]+[data-slot=description]]:mt-1",
-          "[&>[data-slot=description]+[data-slot=control]]:mt-3",
-          "[&>[data-slot=control]+[data-slot=description]]:mt-3",
-          "[&>[data-slot=control]+[data-slot=error]]:mt-3",
-          "[&>[data-slot=label]]:font-medium",
-          className,
-        )}
-        {...props}
-      >
+      <div className={cn(variants({ layout }), className)} {...props}>
         {children}
       </div>
     </FieldContext.Provider>

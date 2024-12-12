@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import React from "react";
 import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
@@ -29,6 +30,13 @@ const variants = {
     // Avatar
     "[&>[data-slot=avatar]]:-ml-1 [&>[data-slot=avatar]]:mr-2.5 [&>[data-slot=avatar]]:size-6 sm:[&>[data-slot=avatar]]:mr-2 sm:[&>[data-slot=avatar]]:size-5",
   ]),
+  section: cva([
+    "flex flex-col gap-1", // Added padding here instead
+    "[&:first-child]:-mt-1 [&:not(:first-child)]:mt-1 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-content/10", // Border above non-first sections
+  ]),
+  sectionHeader: cva([
+    "-mx-1 border-b border-content/10 bg-background-muted px-3.5 py-1 text-xs font-medium text-content-muted",
+  ]),
 };
 
 type MenuProps = Aria.MenuTriggerProps;
@@ -37,19 +45,40 @@ const Root = ({ children, ...props }: MenuProps) => {
   return <Aria.MenuTrigger {...props}>{children}</Aria.MenuTrigger>;
 };
 
-type MenuItemsProps<T extends object> = Aria.MenuProps<T>;
+type MenuItemsProps<T extends object> = Aria.MenuProps<T> & {
+  placement?: Aria.PopoverProps["placement"];
+};
 
 const Items = <T extends object>({
   children,
   className,
+  placement = "bottom start",
   ...props
 }: MenuItemsProps<T>) => {
   return (
-    <Popover>
+    <Popover placement={placement}>
       <Aria.Menu {...props} className={cn(variants.items(), className)}>
         {children}
       </Aria.Menu>
     </Popover>
+  );
+};
+
+type MenuSectionProps = Aria.SectionProps<unknown>;
+
+const Section = ({ children }: MenuSectionProps) => {
+  return (
+    <Aria.Section className={cn(variants.section())}>{children}</Aria.Section>
+  );
+};
+
+type MenuSectionHeaderProps = ComponentProps<"header">;
+
+const SectionHeader = ({ children }: MenuSectionHeaderProps) => {
+  return (
+    <Aria.Header className={cn(variants.sectionHeader())}>
+      {children}
+    </Aria.Header>
   );
 };
 
@@ -67,5 +96,10 @@ const Item = <T extends object>({
   );
 };
 
-export const Menu = Object.assign(Root, { Items, Item });
+export const Menu = Object.assign(Root, {
+  Items,
+  Item,
+  Section,
+  SectionHeader,
+});
 export type { MenuProps, MenuItemsProps, MenuItemProps };

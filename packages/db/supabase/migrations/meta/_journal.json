@@ -50,6 +50,20 @@
       "when": 1728895502397,
       "tag": "0008_slimy_excalibur",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1733132143379,
+      "tag": "0009_faithful_nick_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1733161044009,
+      "tag": "0010_familiar_echo",
+      "breakpoints": true
     }
   ]
 }

@@ -151,7 +151,9 @@ export default function DashboardPage() {
       <Subheading level={2}>Sage Discrepancies</Subheading>
       <DatatableQueryProvider
         endpoint={api.component.list}
-        defaultInput={{ filter: { sageDiscrepancy: { neq: 0 } } }}
+        defaultInput={{
+          filter: { sageDiscrepancy: { neq: 0 }, isTracked: { eq: true } },
+        }}
       >
         {(props) => (
           <Datatable {...props} aria-label="Sage Discrepancies">

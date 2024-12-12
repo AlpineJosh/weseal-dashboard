@@ -155,12 +155,20 @@ export default function ComponentPage({
             endpoint={api.inventory.movements.list}
             defaultInput={{
               filter: { componentId: { eq: params.componentId } },
+              sort: [
+                {
+                  field: "date",
+                  order: "desc",
+                },
+              ],
             }}
           >
             {(props) => (
               <Datatable {...props}>
                 <Datatable.Head>
-                  <Datatable.Column id="id">ID</Datatable.Column>
+                  <Datatable.Column id="date" isSortable>
+                    Date
+                  </Datatable.Column>
                   <Datatable.Column id="locationName">
                     Location
                   </Datatable.Column>
@@ -172,7 +180,9 @@ export default function ComponentPage({
                 <Datatable.Body data={props.data}>
                   {({ data }) => (
                     <Datatable.Row key={data.id}>
-                      <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                      <Datatable.Cell id="date">
+                        {data.date.toLocaleDateString()}
+                      </Datatable.Cell>
                       <Datatable.Cell id="locationName">
                         {data.locationName}
                       </Datatable.Cell>

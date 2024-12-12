@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Combobox, Input } from "@repo/ui/components/control";
-import { Button } from "@repo/ui/components/element";
+import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
@@ -18,7 +18,7 @@ const taskSchema = z.object({
 
 export function StockTransferTaskForm({
   onSave,
-  // onExit,
+  onExit,
 }: {
   onSave: () => void;
   onExit: () => void;
@@ -70,14 +70,14 @@ export function StockTransferTaskForm({
   return (
     <div className="flex flex-col gap-4 self-stretch">
       <h1 className="text-2xl font-semibold">Create Transfer Task</h1>
+      <Divider />
       <Form
-        className="flex flex-col space-y-4"
+        className="flex flex-col space-y-4 [--grid-cols:200px_1fr]"
         onSubmit={handleSubmit}
         form={form}
       >
-        <Field name="componentId">
+        <Field name="componentId" layout="row">
           <Field.Label>Component</Field.Label>
-          <Field.Description>Select the component to build</Field.Description>
           <Field.Control>
             <AsyncCombobox
               data={(query) => {
@@ -105,11 +105,8 @@ export function StockTransferTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Field name="pickLocationId">
+        <Field name="pickLocationId" layout="row">
           <Field.Label>Pick Location</Field.Label>
-          <Field.Description>
-            Select the location to pick from
-          </Field.Description>
           <Field.Control>
             <AsyncCombobox
               data={(query) => {
@@ -155,16 +152,14 @@ export function StockTransferTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Field name="quantity">
+        <Field name="quantity" layout="row">
           <Field.Label>Quantity</Field.Label>
-          <Field.Description>Amount to move</Field.Description>
           <Field.Control>
             <Input type="number" />
           </Field.Control>
         </Field>
-        <Field name="putLocationId">
+        <Field name="putLocationId" layout="row">
           <Field.Label>Put Location</Field.Label>
-          <Field.Description>Select destination location</Field.Description>
           <Field.Control>
             <Field.Control>
               <AsyncCombobox
@@ -192,11 +187,8 @@ export function StockTransferTaskForm({
             </Field.Control>
           </Field.Control>
         </Field>
-        <Field name="assignedToId">
+        <Field name="assignedToId" layout="row">
           <Field.Label>Assigned To</Field.Label>
-          <Field.Description>
-            Select the person to despatch the order
-          </Field.Description>
           <Field.Control>
             <AsyncCombobox
               data={(query) => {
@@ -219,9 +211,15 @@ export function StockTransferTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Button color="primary" type="submit">
-          Create Task
-        </Button>
+        <Divider />
+        <div className="flex justify-end gap-2">
+          <Button variant="plain" color="default" onPress={onExit}>
+            Cancel
+          </Button>
+          <Button color="primary" type="submit">
+            Create Task
+          </Button>
+        </div>
       </Form>
     </div>
   );

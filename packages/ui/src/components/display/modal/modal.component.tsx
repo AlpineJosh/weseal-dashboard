@@ -1,8 +1,9 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import type { DialogProps } from "react-aria-components";
 import React from "react";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
 
 import { Dialog } from "@repo/ui/components/utility";
@@ -54,7 +55,10 @@ const Root = ({ className, size, children, ...props }: ModalProps) => {
       <div className="fixed inset-0 w-screen overflow-y-auto pt-6 sm:pt-0">
         <div className="grid min-h-full grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr] sm:p-4">
           <Aria.Modal {...props} className={cn(variants.modal({ size }))}>
-            <Dialog.Content role="dialog" className={className}>
+            <Dialog.Content
+              role="dialog"
+              className={cn("outline-none", className)}
+            >
               {children}
             </Dialog.Content>
           </Aria.Modal>

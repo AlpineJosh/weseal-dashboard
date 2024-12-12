@@ -11,6 +11,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { numericDecimal } from "../lib/numeric";
 import {
   componentCategory,
   department,
@@ -26,15 +27,16 @@ import {
 export const batchLocationQuantity = pgTable("batch_location_quantity", {
   componentId: varchar("component_id").notNull(),
   componentDescription: varchar("component_description").notNull(),
+  isTracked: boolean("tracked").notNull(),
   componentUnit: varchar("component_unit"),
   batchId: integer("batch_id").notNull(),
   batchReference: varchar("batch_reference"),
   batchEntryDate: date("batch_entry_date", { mode: "date" }),
   locationId: integer("location_id").notNull(),
   locationName: varchar("location_name").notNull(),
-  total: real("total").notNull(),
-  allocated: real("allocated").notNull(),
-  free: real("free").notNull(),
+  total: numericDecimal("total").notNull(),
+  allocated: numericDecimal("allocated").notNull(),
+  free: numericDecimal("free").notNull(),
 });
 
 export const batchLocationQuantityRelations = relations(
@@ -59,17 +61,18 @@ export const componentOverview = pgTable("component_overview", {
   id: varchar("id").notNull(),
   description: varchar("description").notNull(),
   hasSubcomponents: boolean("has_subcomponents").notNull(),
-  totalQuantity: real("total_quantity").notNull(),
-  allocatedQuantity: real("allocated_quantity").notNull(),
-  freeQuantity: real("free_quantity").notNull(),
-  sageQuantity: real("sage_quantity").notNull(),
-  sageDiscrepancy: real("sage_discrepancy").notNull(),
+  totalQuantity: numericDecimal("total_quantity").notNull(),
+  allocatedQuantity: numericDecimal("allocated_quantity").notNull(),
+  freeQuantity: numericDecimal("free_quantity").notNull(),
+  sageQuantity: numericDecimal("sage_quantity").notNull(),
+  sageDiscrepancy: numericDecimal("sage_discrepancy").notNull(),
   unit: varchar("unit"),
   categoryId: smallint("category_id"),
   categoryName: varchar("category_name"),
   departmentId: integer("department_id"),
   departmentName: varchar("department_name"),
   isTraceable: boolean("traceable"),
+  isTracked: boolean("tracked"),
   defaultLocationId: integer("default_location_id"),
   requiresQualityCheck: boolean("requires_quality_check"),
   qualityCheckDetails: varchar("quality_check_details"),
@@ -107,13 +110,13 @@ export const batchOverview = pgTable("batch_overview", {
   componentDescription: varchar("component_description"),
   batchReference: varchar("batch_reference"),
   entryDate: date("entry_date", { mode: "date" }),
-  totalQuantity: real("total_quantity"),
-  allocatedQuantity: real("allocated_quantity"),
-  freeQuantity: real("free_quantity"),
+  totalQuantity: numericDecimal("total_quantity"),
+  freeQuantity: numericDecimal("free_quantity"),
   unit: varchar("unit"),
   categoryId: integer("category_id"),
   departmentId: integer("department_id"),
   isTraceable: boolean("traceable"),
+  isTracked: boolean("tracked"),
 });
 
 export const batchOverviewRelations = relations(
@@ -131,15 +134,23 @@ export const batchOverviewRelations = relations(
 export const subcomponentOverview = pgTable("subcomponent_overview", {
   componentId: varchar("component_id").notNull(),
   subcomponentId: varchar("subcomponent_id").notNull(),
-  quantity: real("quantity").notNull(),
+  quantity: numericDecimal("quantity").notNull(),
   subcomponentDescription: varchar("subcomponent_description"),
-  subcomponentTotalQuantity: real("subcomponent_total_quantity").notNull(),
-  subcomponentAllocatedQuantity: real(
+  subcomponentTotalQuantity: numericDecimal(
+    "subcomponent_total_quantity",
+  ).notNull(),
+  subcomponentAllocatedQuantity: numericDecimal(
     "subcomponent_allocated_quantity",
   ).notNull(),
-  subcomponentFreeQuantity: real("subcomponent_free_quantity").notNull(),
-  subcomponentSageQuantity: real("subcomponent_sage_quantity").notNull(),
-  subcomponentSageDiscrepancy: real("subcomponent_sage_discrepancy").notNull(),
+  subcomponentFreeQuantity: numericDecimal(
+    "subcomponent_free_quantity",
+  ).notNull(),
+  subcomponentSageQuantity: numericDecimal(
+    "subcomponent_sage_quantity",
+  ).notNull(),
+  subcomponentSageDiscrepancy: numericDecimal(
+    "subcomponent_sage_discrepancy",
+  ).notNull(),
   subcomponentUnit: varchar("subcomponent_unit"),
   subcomponentCategoryId: smallint("subcomponent_category_id"),
   subcomponentDepartmentId: integer("subcomponent_department_id"),
@@ -158,7 +169,7 @@ export const batchMovementOverview = pgTable("batch_movement_overview", {
   locationName: varchar("location_name"),
   locationGroupId: integer("location_group_id"),
   locationGroupName: varchar("location_group_name"),
-  quantity: real("quantity"),
+  quantity: numericDecimal("quantity"),
   userId: varchar("user_id"),
   type: batchMovementType("type"),
   purchaseReceiptItemId: integer("purchase_receipt_item_id"),
@@ -187,8 +198,8 @@ export const batchMovementCorrectionOverview = pgTable(
     componentDescription: varchar("component_description"),
     locationId: integer("location_id"),
     locationName: varchar("location_name"),
-    fromQuantity: real("from_quantity"),
-    toQuantity: real("to_quantity"),
+    fromQuantity: numericDecimal("from_quantity"),
+    toQuantity: numericDecimal("to_quantity"),
   },
 );
 
@@ -232,7 +243,7 @@ export const taskItemOverview = pgTable("task_item_overview", {
   putLocationName: varchar("put_location_name"),
   putLocationGroupId: integer("put_location_group_id"),
   putLocationGroupName: varchar("put_location_group_name"),
-  quantity: real("quantity"),
+  quantity: numericDecimal("quantity"),
   isComplete: boolean("is_complete"),
 });
 
@@ -276,9 +287,9 @@ export const salesOrderItemOverview = pgTable("sales_order_item_overview", {
   componentId: varchar("component_id").notNull(),
   componentDescription: varchar("component_description").notNull(),
   quantityOrdered: real("quantity_ordered").notNull(),
-  quantityDespatched: real("quantity_despatched"),
-  quantityInStock: real("quantity_in_stock"),
-  sageQuantityDespatched: real("sage_quantity_despatched"),
+  quantityDespatched: numericDecimal("quantity_despatched"),
+  quantityInStock: numericDecimal("quantity_in_stock"),
+  sageQuantityDespatched: numericDecimal("sage_quantity_despatched"),
 });
 
 export const salesDespatchOverview = pgTable("sales_despatch_overview", {
@@ -306,15 +317,15 @@ export const salesDespatchItemOverview = pgTable(
 );
 
 export const productionJobOverview = pgTable("production_job_overview", {
-  id: integer("id"),
-  outputComponentId: varchar("output_component_id"),
-  outputComponentDescription: varchar("output_component_description"),
+  id: integer("id").notNull(),
+  outputComponentId: varchar("output_component_id").notNull(),
+  outputComponentDescription: varchar("output_component_description").notNull(),
   batchNumber: varchar("batch_number"),
-  outputLocationId: integer("output_location_id"),
-  outputLocationName: varchar("output_location_name"),
-  targetQuantity: integer("target_quantity"),
-  outputQuantity: real("output_quantity"),
-  remainingInputTasks: integer("remaining_input_tasks"),
+  outputLocationId: integer("output_location_id").notNull(),
+  outputLocationName: varchar("output_location_name").notNull(),
+  targetQuantity: integer("target_quantity").notNull(),
+  outputQuantity: real("output_quantity").notNull(),
+  remainingInputTasks: integer("remaining_input_tasks").notNull(),
 });
 
 export const productionBatchInputOverview = pgTable(

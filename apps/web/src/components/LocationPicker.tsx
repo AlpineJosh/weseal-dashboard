@@ -3,10 +3,9 @@ import { api } from "@/utils/trpc/react";
 import { useImmer } from "use-immer";
 
 import type { RouterInputs, RouterOutputs } from "@repo/api";
-import { faBox, faHashtag, faShelves } from "@repo/pro-light-svg-icons";
+import { faHashtag, faShelves } from "@repo/pro-light-svg-icons";
 import { cn } from "@repo/ui";
 import { Input, Switch } from "@repo/ui/components/control";
-import { Table } from "@repo/ui/components/display";
 import { Icon } from "@repo/ui/components/element";
 import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
@@ -49,7 +48,7 @@ export const LocationPicker = ({
         <LocationPickerItem
           key={component.id}
           id={component.id}
-          quantity={component.quantity}
+          quantity={+component.quantity.toFixed(6)}
           value={value.filter((item) => item.componentId === component.id)}
           onChange={(items) => handleItemChange(items, component.id)}
         />
@@ -78,9 +77,11 @@ const LocationPickerItem = ({
   const { data: component } = api.component.get.useQuery({
     id,
   });
-  const totalUsing = useMemo(() => {
-    return value.reduce((acc, item) => acc + item.quantity, 0);
-  }, [value]);
+
+  const totalAvailable = useMemo(() => {
+    return locations.reduce((acc, location) => acc + location.free, 0);
+  }, [locations]);
+
   const { data: quantities } = api.inventory.quantity.useQuery({
     filter: {
       componentId: {
@@ -88,8 +89,15 @@ const LocationPickerItem = ({
       },
       free: {
         gt: 0,
+        null: false,
       },
     },
+    sort: [
+      {
+        field: "batchEntryDate",
+        order: "asc",
+      },
+    ],
   });
 
   useEffect(() => {
@@ -124,7 +132,7 @@ const LocationPickerItem = ({
         batches.push({
           pickLocationId: location.locationId,
           batchId: location.batchId,
-          quantity: location.using,
+          quantity: +location.using.toFixed(6),
           componentId: id,
         });
       }
@@ -137,7 +145,7 @@ const LocationPickerItem = ({
         batches.push({
           pickLocationId: location.locationId,
           batchId: location.batchId,
-          quantity: use,
+          quantity: +use.toFixed(6),
           componentId: id,
         });
       }
@@ -193,19 +201,19 @@ const LocationPickerItem = ({
         <Text className="text-muted-foreground grow truncate text-sm">
           {component.description}
         </Text>
-        <Text className={cn(totalUsing !== quantity && "text-destructive")}>
-          Using:{" "}
+        <Text className={cn(totalAvailable < quantity && "text-destructive")}>
+          Available:{" "}
           <Strong
-            className={cn(totalUsing !== quantity && "text-destructive-text")}
+            className={cn(totalAvailable < quantity && "text-destructive")}
           >
-            {totalUsing}
+            {totalAvailable}
           </Strong>
         </Text>
         <span className="flex flex-row items-baseline space-x-2">
           <Text>Required:</Text>
           <Input
             type="number"
-            step="any"
+            step={1}
             className="w-24"
             value={quantity}
             min={0}
@@ -213,7 +221,7 @@ const LocationPickerItem = ({
           />
         </span>
       </div>
-      <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr] items-center gap-4">
+      <div className="grid grid-cols-[auto_1fr_1fr_1fr_2fr] items-center gap-4">
         {locations.map((location, index) => (
           <>
             <Switch
@@ -250,8 +258,8 @@ const LocationPickerItem = ({
               <Text>Using:</Text>
               <Input
                 type="number"
-                step="any"
-                className="w-24"
+                className="flex-1"
+                step={1}
                 min={0}
                 max={location.free}
                 value={getUsing(location)}

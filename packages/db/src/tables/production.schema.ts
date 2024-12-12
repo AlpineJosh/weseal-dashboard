@@ -9,6 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { numericDecimal } from "../lib/numeric";
 import { component } from "./component.schema";
 import { batch, location } from "./inventory.schema";
 
@@ -56,7 +57,7 @@ export const productionBatchInput = pgTable("production_batch_input", {
   batchId: integer("batch_id")
     .notNull()
     .references(() => batch.id),
-  quantityAllocated: real("quantity_allocated").notNull().default(0),
+  quantityAllocated: numericDecimal("quantity_allocated").notNull().default(0),
   locationId: integer("location_id")
     .notNull()
     .references(() => location.id),

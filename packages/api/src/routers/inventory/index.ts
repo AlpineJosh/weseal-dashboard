@@ -1,5 +1,4 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import { z } from "zod";
 
 import schema from "@repo/db/schema";
 

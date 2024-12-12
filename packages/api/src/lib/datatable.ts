@@ -19,6 +19,7 @@ import {
   gt,
   gte,
   ilike,
+  isNull,
   lt,
   lte,
   not,
@@ -34,6 +35,7 @@ const numberFilterSchema = z.object({
   gte: z.number().optional(),
   eq: z.number().optional(),
   neq: z.number().optional(),
+  null: z.boolean().optional(),
 });
 
 const stringFilterSchema = z.object({
@@ -42,6 +44,7 @@ const stringFilterSchema = z.object({
   contains: z.string().optional(),
   notContains: z.string().optional(),
   eq: z.string().optional(),
+  null: z.boolean().optional(),
 });
 
 const dateFilterSchema = z.object({
@@ -52,11 +55,13 @@ const dateFilterSchema = z.object({
   eq: z.date().optional(),
   neq: z.date().optional(),
   between: z.tuple([z.date(), z.date()]).optional(),
+  null: z.boolean().optional(),
 });
 
 const booleanFilterSchema = z.object({
   eq: z.boolean().optional(),
   neq: z.boolean().optional(),
+  null: z.boolean().optional(),
 });
 
 type TableColumns<T extends Table> = T["_"]["columns"];
@@ -64,7 +69,7 @@ type ColumnKey<T extends Table> = keyof TableColumns<T> & string;
 
 type ColumnFilterSchema<TColumn extends Column> =
   TColumn["_"]["dataType"] extends infer TDataType
-    ? TDataType extends "number"
+    ? TDataType extends "number" | "custom"
       ? typeof numberFilterSchema
       : TDataType extends "string"
         ? typeof stringFilterSchema
@@ -148,14 +153,19 @@ export const datatable = <T extends Table>(
 
   const filter = Object.fromEntries(
     columnEntries
-      .filter(([key, column]) =>
-        ["string", "number", "date", "boolean"].includes(column.dataType),
+      .filter(([_, column]) =>
+        ["string", "number", "date", "boolean", "custom"].includes(
+          column.dataType as string,
+        ),
       )
       .map(([key, column]) => {
         let schema;
         if (column.dataType === "string") {
           schema = stringFilterSchema;
-        } else if (column.dataType === "number") {
+        } else if (
+          column.dataType === "number" ||
+          column.dataType === "custom"
+        ) {
           schema = numberFilterSchema;
         } else if (column.dataType === "date") {
           schema = dateFilterSchema;
@@ -181,6 +191,7 @@ export const datatable = <T extends Table>(
   const query = async (
     input: z.infer<InputSchema<T>>,
   ): Promise<DatatableOutput<T>> => {
+    console.log(input);
     const {
       pagination = { page: 1, size: 10 },
       sort = [],
@@ -231,8 +242,16 @@ export const datatable = <T extends Table>(
             columnFilter.eq !== undefined
               ? eq(column, columnFilter.eq)
               : undefined,
+            columnFilter.null !== undefined
+              ? columnFilter.null
+                ? isNull(column)
+                : not(isNull(column))
+              : undefined,
           );
-        } else if (column.dataType === "number") {
+        } else if (
+          column.dataType === "number" ||
+          column.dataType === "custom"
+        ) {
           const columnFilter = filter[key] as z.infer<
             typeof numberFilterSchema
           >;
@@ -255,6 +274,11 @@ export const datatable = <T extends Table>(
               : undefined,
             columnFilter.neq !== undefined
               ? not(eq(column, columnFilter.neq))
+              : undefined,
+            columnFilter.null !== undefined
+              ? columnFilter.null
+                ? isNull(column)
+                : not(isNull(column))
               : undefined,
           );
         } else if (column.dataType === "date") {
@@ -281,6 +305,11 @@ export const datatable = <T extends Table>(
             columnFilter.between !== undefined
               ? between(column, ...columnFilter.between)
               : undefined,
+            columnFilter.null !== undefined
+              ? columnFilter.null
+                ? isNull(column)
+                : not(isNull(column))
+              : undefined,
           );
         } else if (column.dataType === "boolean") {
           const columnFilter = filter[key] as z.infer<
@@ -293,6 +322,11 @@ export const datatable = <T extends Table>(
             columnFilter.neq !== undefined
               ? not(eq(column, columnFilter.neq))
               : undefined,
+            columnFilter.null !== undefined
+              ? columnFilter.null
+                ? isNull(column)
+                : not(isNull(column))
+              : undefined,
           );
         }
       }
@@ -303,6 +337,8 @@ export const datatable = <T extends Table>(
         ? asc(columns[field as ColumnKey<T>] as AnyColumn)
         : desc(columns[field as ColumnKey<T>] as AnyColumn),
     );
+
+    console.log(where);
 
     const total = await db
       .select({ count: count() })
