@@ -98,6 +98,7 @@ export const Input = ({ className, ...props }: InputProps) => {
             isNumeric: props.type === "number",
           }),
         )}
+        step={props.type === "number" ? "any" : undefined}
       />
       {props.type === "number" && (
         <>
@@ -105,7 +106,7 @@ export const Input = ({ className, ...props }: InputProps) => {
             type="button"
             className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
             onClick={() => {
-              ref.current?.stepUp();
+              ref.current?.stepUp(1);
               ref.current?.dispatchEvent(new Event("input", { bubbles: true }));
             }}
             aria-label="Increment"
@@ -116,7 +117,7 @@ export const Input = ({ className, ...props }: InputProps) => {
             type="button"
             className="absolute right-0 top-0 aspect-square h-full"
             onClick={() => {
-              ref.current?.stepDown();
+              ref.current?.stepDown(1);
               ref.current?.dispatchEvent(new Event("input", { bubbles: true }));
             }}
             aria-label="Increment"
