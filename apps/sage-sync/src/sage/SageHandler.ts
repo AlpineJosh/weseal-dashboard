@@ -1,6 +1,9 @@
-import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { Job, scheduleJob } from "node-schedule";
-import { Pool, pool } from "odbc";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { Job } from "node-schedule";
+import type { Pool } from "odbc";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { scheduleJob } from "node-schedule";
+import { pool } from "odbc";
 import postgres from "postgres";
 
 import { sageSchema } from "@repo/db/sage";
@@ -43,10 +46,10 @@ export class SageHandler {
       ["TRAN_NUMBER"],
     );
     this.jobs.push(
-      scheduleJob(config.syncSchedules.components, () => {
+      scheduleJob(config.syncSchedules.components, async () => {
         const date = new Date();
-        components.sync(date);
-        stockTrans.sync(date);
+        await components.sync(date);
+        await stockTrans.sync(date);
       }),
     );
 
@@ -75,12 +78,12 @@ export class SageHandler {
       ["GRN_NUMBER", "ITEM_NUMBER", "ORDER_NUMBER"],
     );
     this.jobs.push(
-      scheduleJob(config.syncSchedules.receiving, () => {
+      scheduleJob(config.syncSchedules.receiving, async () => {
         const date = new Date();
-        purchaseLedger.sync(date);
-        purchaseOrders.sync(date);
-        popItems.sync(date);
-        grnItems.sync(date);
+        await purchaseLedger.sync(date);
+        await purchaseOrders.sync(date);
+        await popItems.sync(date);
+        await grnItems.sync(date);
       }),
     );
 
@@ -109,12 +112,12 @@ export class SageHandler {
       ["GDN_NUMBER", "ITEM_NUMBER", "ORDER_NUMBER"],
     );
     this.jobs.push(
-      scheduleJob(config.syncSchedules.despatching, () => {
+      scheduleJob(config.syncSchedules.despatching, async () => {
         const date = new Date();
-        salesLedger.sync(date);
-        salesOrders.sync(date);
-        sopItems.sync(date);
-        gdnItems.sync(date);
+        await salesLedger.sync(date);
+        await salesOrders.sync(date);
+        await sopItems.sync(date);
+        await gdnItems.sync(date);
       }),
     );
 
@@ -132,10 +135,10 @@ export class SageHandler {
     );
 
     this.jobs.push(
-      scheduleJob(config.syncSchedules.misc, () => {
+      scheduleJob(config.syncSchedules.misc, async () => {
         const date = new Date();
-        departments.sync(date);
-        stockCategories.sync(date);
+        await departments.sync(date);
+        await stockCategories.sync(date);
       }),
     );
   }

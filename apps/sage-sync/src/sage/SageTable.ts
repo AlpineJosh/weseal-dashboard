@@ -1,14 +1,15 @@
-import {
-  getTableConfig,
+import type {
   IndexColumn,
   PgTable,
   PgUpdateSetSource,
 } from "drizzle-orm/pg-core";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { Pool } from "odbc";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { Pool } from "odbc";
+import { getTableConfig } from "drizzle-orm/pg-core";
 
-import { AnyColumn, desc, isNotNull } from "@repo/db";
-import { sageSchema } from "@repo/db/sage";
+import type { AnyColumn } from "@repo/db";
+import type { sageSchema } from "@repo/db/sage";
+import { desc, isNotNull } from "@repo/db";
 
 import {
   asyncBatch,
@@ -66,13 +67,15 @@ export class SageTable<T extends PgTable> {
       .orderBy(desc(this.lastModifiedColumn))
       .limit(1);
 
-    return new Date((latest[0]?.RECORD_MODIFY_DATE as string) ?? "2000-01-01");
+    const result = latest[0]?.RECORD_MODIFY_DATE as string;
+
+    return result ? new Date(result) : undefined;
   }
 
   async sync(endDate: Date) {
     const latestDate = await this.getLatestDate();
 
-    if (latestDate >= endDate) {
+    if (latestDate && latestDate >= endDate) {
       return;
     }
 
@@ -85,8 +88,8 @@ export class SageTable<T extends PgTable> {
       .query<T["$inferInsert"]>(query)
       .then((data) =>
         data.map((row) => {
-          const insert = { ...row } as T["$inferInsert"];
-          for (let column of this.columns) {
+          const insert = { ...row };
+          for (const column of this.columns) {
             if (column.isDate && insert[column.name]) {
               insert[column.name] = new Date(
                 row[column.name] as string,

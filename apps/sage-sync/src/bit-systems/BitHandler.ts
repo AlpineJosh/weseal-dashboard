@@ -1,7 +1,10 @@
-import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { Job, scheduleJob } from "node-schedule";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { Job } from "node-schedule";
+import type { Database } from "sqlite";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { scheduleJob } from "node-schedule";
 import postgres from "postgres";
-import { Database, open } from "sqlite";
+import { open } from "sqlite";
 import sqlite3 from "sqlite3";
 
 import { bitSystemsSchema } from "@repo/db/bit-systems";
@@ -65,21 +68,28 @@ export class BitHandler {
       ["pk_TraceableBinItem_ID"],
     );
 
+    const sync = async () => {
+      await stockItems.sync();
+      await binItems.sync();
+      await bins.sync();
+      await warehouses.sync();
+      await traceableItems.sync();
+      await traceableBinItems.sync();
+    };
+
     this.jobs.push(
-      scheduleJob("0 0 * * *", () => {
-        stockItems.sync();
-        binItems.sync();
-        bins.sync();
-        warehouses.sync();
-        traceableItems.sync();
-        traceableBinItems.sync();
+      scheduleJob("0 0 * * *", async () => {
+        await sync();
       }),
     );
+
+    await sync();
   }
 
   stop() {
-    for (let job of this.jobs) {
+    for (const job of this.jobs) {
       job.cancel();
     }
+    this.jobs = [];
   }
 }
