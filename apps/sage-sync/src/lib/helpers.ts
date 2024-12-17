@@ -29,7 +29,7 @@ export function conflictUpdateAllExcept<
   return updateColumns.reduce(
     (acc, [colName, table]) => ({
       ...acc,
-      [colName]: sql.raw(`excluded.${table.name}`),
+      [colName]: sql.raw(`excluded."${colName}"`),
     }),
     {},
   ) as Omit<Record<keyof typeof table.$inferInsert, SQL>, E[number]>;

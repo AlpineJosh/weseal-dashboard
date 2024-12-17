@@ -1,0 +1,21 @@
+{
+  "connectors": {
+    "sage": {
+      "file": "path/to/sage/accdata",
+      "user": "user",
+      "password": "password"
+    },
+    "bit-systems": {
+      "file": "path/to/bit/systems/database.sqlite"
+    }
+  },
+  "target": {
+    "url": "destination/database/url"
+  },
+  "syncSchedules": {
+    "components": "0 0 * * *",
+    "despatching": "0 0 * * *",
+    "receiving": "0 0 * * *",
+    "misc": "0 0 * * *"
+  }
+}

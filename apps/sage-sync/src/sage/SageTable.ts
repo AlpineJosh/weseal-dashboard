@@ -3,19 +3,18 @@ import type {
   PgTable,
   PgUpdateSetSource,
 } from "drizzle-orm/pg-core";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { Pool } from "odbc";
 import { getTableConfig } from "drizzle-orm/pg-core";
 
-import type { AnyColumn } from "@repo/db";
-import type { sageSchema } from "@repo/db/sage";
-import { desc, isNotNull } from "@repo/db";
+import { Pool } from "odbc";
+
+import { AnyColumn, desc, isNotNull } from "@repo/db";
 
 import {
   asyncBatch,
   conflictUpdateAllExcept,
   formatDate,
 } from "../lib/helpers";
+import { target } from "../lib/target";
 
 export class SageTable<T extends PgTable> {
   name: string;
@@ -31,7 +30,6 @@ export class SageTable<T extends PgTable> {
 
   constructor(
     private source: Pool,
-    private target: PostgresJsDatabase<typeof sageSchema>,
     private table: T,
     private indicies: (keyof T["$inferInsert"])[],
   ) {
@@ -60,19 +58,26 @@ export class SageTable<T extends PgTable> {
   }
 
   private async getLatestDate() {
-    const latest = await this.target
+    let latest: Date = new Date("2000-01-01");
+
+    if (this.lastModifiedColumn) {
+      const latestDates = await target
       .select()
       .from(this.table)
       .where(isNotNull(this.lastModifiedColumn))
       .orderBy(desc(this.lastModifiedColumn))
       .limit(1);
+      
+      if (latestDates[0]?.RECORD_MODIFY_DATE) {
+        latest = new Date(latestDates[0]?.RECORD_MODIFY_DATE as string);
+      }
+    }
 
-    const result = latest[0]?.RECORD_MODIFY_DATE as string;
-
-    return result ? new Date(result) : undefined;
+    return latest;
   }
 
   async sync(endDate: Date) {
+    
     const latestDate = await this.getLatestDate();
 
     if (latestDate && latestDate >= endDate) {
@@ -103,7 +108,7 @@ export class SageTable<T extends PgTable> {
     await asyncBatch(
       results,
       async (batch) => {
-        await this.target
+        await target
           .insert(this.table)
           .values(batch)
           .onConflictDoUpdate({

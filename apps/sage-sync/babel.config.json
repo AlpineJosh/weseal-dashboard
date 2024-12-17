@@ -1,0 +1,17 @@
+{
+    "presets": [
+        ["@babel/preset-env", {
+          "targets": {
+            "node": "18"
+          }
+        }],
+        "@babel/preset-typescript"
+      ],
+      "plugins": [
+    ["transform-imports", {
+            "@repo/db": {
+                "transform": "./node_modules/@repo/db/dist/${member}",
+                "preventFullImport": true
+            }}]
+  ]
+}

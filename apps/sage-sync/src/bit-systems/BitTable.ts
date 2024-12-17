@@ -3,13 +3,12 @@ import {
   IndexColumn,
   PgUpdateSetSource,
 } from "drizzle-orm/pg-core";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { Database } from "sqlite";
+import type { Database } from "better-sqlite3";
 
 import { Table } from "@repo/db";
-import { bitSystemsSchema } from "@repo/db/bit-systems";
 
 import { conflictUpdateAllExcept } from "../lib/helpers";
+import { target } from "../lib/target";
 
 export class BitTable<T extends Table> {
   private name: string;
@@ -21,7 +20,6 @@ export class BitTable<T extends Table> {
   private batchSize: number;
   constructor(
     private source: Database,
-    private target: PostgresJsDatabase<typeof bitSystemsSchema>,
     private table: T,
     private indicies: (keyof T["$inferInsert"])[],
   ) {
@@ -45,12 +43,15 @@ export class BitTable<T extends Table> {
   }
 
   async sync() {
-    const results = await this.source
-      .all<T["$inferInsert"][]>(`SELECT * FROM ${this.name}`)
-      .then((data) =>
-        data.map((row) => {
-          const insert = { ...row } as T["$inferInsert"];
-          for (let column of this.columns) {
+    const stmt = this.source
+      .prepare<T["$inferInsert"]>(`SELECT * FROM ${this.name}`)
+
+
+    const results = stmt 
+    .all([])
+    .map((row: any) => {
+      const insert = { ...row } as T["$inferInsert"];
+      for (let column of this.columns) {
             if (column.isDate && row[column.name]) {
               (insert[column.name] as any) = new Date(
                 row[column.name],
@@ -59,13 +60,13 @@ export class BitTable<T extends Table> {
           }
 
           return insert;
-        }),
-      );
+        })
+      
 
     for (let i = 0; i < results.length; i += this.batchSize) {
       const batch = results.slice(i, i + this.batchSize);
 
-      await this.target
+      await target
         .insert(this.table)
         .values(batch)
         .onConflictDoUpdate({

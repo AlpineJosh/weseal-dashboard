@@ -2,7 +2,7 @@ import { BitHandler } from "./bit-systems/BitHandler.js";
 import { logger } from "./lib/logger.js";
 import { SageHandler } from "./sage/SageHandler.js";
 
-async function main() {
+export async function sync() {
   const sageSync = new SageHandler();
   const bitSync = new BitHandler();
 
@@ -14,8 +14,3 @@ async function main() {
     process.exit(0);
   });
 }
-
-main().catch((error) => {
-  logger.error("Fatal error:", error);
-  process.exit(1);
-});

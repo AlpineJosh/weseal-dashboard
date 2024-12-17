@@ -1,6 +1,9 @@
 import fs from "fs";
+import path from "path";
 
-export const config = JSON.parse(fs.readFileSync("./config.json", "utf8")) as {
+const execDir = path.dirname(process.execPath);
+const configPath = path.join(execDir, "config.json");
+export const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as {
   connectors: {
     sage: {
       file: string;

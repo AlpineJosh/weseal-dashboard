@@ -1,32 +1,38 @@
 {
+  "type": "module",
   "name": "sage-sync",
   "version": "1.0.0",
   "description": "",
-  "main": "src/sync.ts",
+  "main": "dist/sync.js",
   "bin": "dist/install-service.js",
-  "type": "module",
   "scripts": {
     "clean": "rimraf dist node_modules/.cache/tsbuildinfo.json",
-    "build": "pnpm clean && tsc",
+    "build": "pnpm clean && rollup -c",
     "package": "pkg . --targets node18-win-x64 --output dist/sage-sync.exe",
-    "create-deployment": "tsx src/create-deployment.ts"
+    "create-deployment": "node --loader ts-node/esm src/create-deployment.ts",
+    "make": "pnpm build && pnpm package && pnpm create-deployment"
   },
   "pkg": {
     "scripts": "dist/**/*.js",
     "assets": [
       "config.json",
-      "node_modules/@repo/**/*"
+      "../../node_modules/node-windows/**/*",
+      "../../node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+      "../../node_modules/odbc/build/Release/odbc.node"
     ],
     "outputPath": "dist",
-    "options": [
-      "experimental-modules"
-    ]
+    "targets": [
+      "node18-win-x64"
+    ],
+    "compress": "GZip"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@types/better-sqlite3": "^7.6.11",
+    "better-sqlite3": "^11.5.0",
     "drizzle-orm": "^0.32.0",
     "fs-extra": "^11.2.0",
     "node-gyp": "^10.2.0",
@@ -35,24 +41,39 @@
     "odbc": "^2.4.9",
     "postgres": "^3.4.4",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
     "winston": "^3.16.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.18.10",
+    "@babel/preset-env": "^7.18.10",
+    "@babel/preset-typescript": "^7.24.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.1",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.14.10",
     "@types/node-schedule": "^2.1.7",
     "@types/node-windows": "^0.1.6",
     "@types/sqlite3": "^3.1.11",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "babel-plugin-transform-imports": "^2.0.0",
     "eslint": "catalog:",
     "pkg": "^5.8.1",
     "prettier": "catalog:",
     "rimraf": "^6.0.1",
-    "tsx": "^4.17.0",
+    "rollup": "^4.25.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "catalog:"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": [
+      "node-windows"
+    ]
   },
   "prettier": "@repo/prettier-config"
 }

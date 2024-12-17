@@ -1,26 +1,21 @@
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { Job } from "node-schedule";
-import type { Database } from "sqlite";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { scheduleJob } from "node-schedule";
-import postgres from "postgres";
-import { open } from "sqlite";
-import sqlite3 from "sqlite3";
 
-import { bitSystemsSchema } from "@repo/db/bit-systems";
+import { Job, scheduleJob } from "node-schedule";
+
+import  sqlite3 from "better-sqlite3";
+import type { Database } from "better-sqlite3";
+
+
+import { schema } from "@repo/db";
 
 import { config } from "../lib/config";
 import { BitTable } from "./BitTable";
 
 export class BitHandler {
   private source: Database | undefined = undefined;
-  private target: PostgresJsDatabase<typeof bitSystemsSchema>;
 
   private jobs: Job[] = [];
 
   constructor() {
-    const client = postgres(config.target.url);
-    this.target = drizzle(client, { schema: bitSystemsSchema });
   }
 
   async start() {
@@ -28,43 +23,38 @@ export class BitHandler {
       return;
     }
 
-    this.source = await open({
-      filename: config.connectors.bitSystems.file,
-      driver: sqlite3.Database,
-    });
+    this.source = new sqlite3(config.connectors.bitSystems.file);
+
+    if (!this.source) throw new Error("Error setting up sqlite connection")
+
 
     const stockItems = new BitTable(
       this.source,
-      this.target,
-      bitSystemsSchema.stockItem,
+      schema.bitSystems.stockItem,
       ["pk_StockItem_ID"],
     );
     const binItems = new BitTable(
       this.source,
-      this.target,
-      bitSystemsSchema.binItem,
+      schema.bitSystems.binItem,
       ["pk_BinItem_ID"],
     );
-    const bins = new BitTable(this.source, this.target, bitSystemsSchema.bin, [
+    const bins = new BitTable(this.source,  schema.bitSystems.bin, [
       "pk_Bin_ID",
     ]);
     const warehouses = new BitTable(
       this.source,
-      this.target,
-      bitSystemsSchema.warehouse,
+      schema.bitSystems.warehouse,
       ["pk_Warehouse_ID"],
     );
     const traceableItems = new BitTable(
       this.source,
-      this.target,
-      bitSystemsSchema.traceableItem,
+      schema.bitSystems.traceableItem,
       ["pk_TraceableItem_ID"],
     );
 
     const traceableBinItems = new BitTable(
       this.source,
-      this.target,
-      bitSystemsSchema.traceableBinItem,
+      schema.bitSystems.traceableBinItem,
       ["pk_TraceableBinItem_ID"],
     );
 
@@ -87,7 +77,11 @@ export class BitHandler {
   }
 
   stop() {
-    for (const job of this.jobs) {
+    if (this.source) {
+      this.source.close();
+    }
+    
+    for (let job of this.jobs) {
       job.cancel();
     }
     this.jobs = [];
