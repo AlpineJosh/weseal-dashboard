@@ -7,7 +7,7 @@
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "incremental": true,
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",
     "target": "es2022",
     "strictNullChecks": true,
     "resolveJsonModule": true,

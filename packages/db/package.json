@@ -3,30 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./client": {
-      "types": "./dist/client.d.ts",
-      "default": "./src/client.ts"
-    },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "default": "./src/server.ts"
-    },
-    "./schema": {
-      "types": "./dist/schema.d.ts",
-      "default": "./src/schema.ts"
-    },
-    "./sage": {
-      "types": "./dist/sage.d.ts",
-      "default": "./src/sage.ts"
-    },
-    "./bit-systems": {
-      "types": "./dist/bit-systems.d.ts",
-      "default": "./src/bit-systems.ts"
+      "default": "./dist/index.js"
     }
   },
   "license": "MIT",

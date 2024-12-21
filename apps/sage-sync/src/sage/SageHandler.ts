@@ -1,12 +1,7 @@
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { Job } from "node-schedule";
-import type { Pool } from "odbc";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { scheduleJob } from "node-schedule";
-import { pool } from "odbc";
-import postgres from "postgres";
+import { Job, scheduleJob } from "node-schedule";
+import { Pool, pool } from "odbc";
 
-import { sageSchema } from "@repo/db/sage";
+import { schema } from "@repo/db";
 
 import { config } from "../lib/config";
 import { SageTable } from "./SageTable";
@@ -17,12 +12,8 @@ export class SageHandler {
   private jobs: Job[] = [];
 
   private source: Pool | undefined = undefined;
-  private target: PostgresJsDatabase<typeof sageSchema>;
 
   constructor() {
-    const client = postgres(config.target.url);
-
-    this.target = drizzle(client, { schema: sageSchema });
   }
 
   async start() {
@@ -35,14 +26,12 @@ export class SageHandler {
 
     const components = new SageTable(
       this.source,
-      this.target,
-      sageSchema.STOCK,
+      schema.sage.STOCK,
       ["STOCK_CODE"],
     );
     const stockTrans = new SageTable(
       this.source,
-      this.target,
-      sageSchema.STOCK_TRAN,
+      schema.sage.STOCK_TRAN,
       ["TRAN_NUMBER"],
     );
     this.jobs.push(
@@ -55,26 +44,22 @@ export class SageHandler {
 
     const purchaseLedger = new SageTable(
       this.source,
-      this.target,
-      sageSchema.PURCHASE_LEDGER,
+      schema.sage.PURCHASE_LEDGER,
       ["ACCOUNT_REF"],
     );
     const purchaseOrders = new SageTable(
       this.source,
-      this.target,
-      sageSchema.PURCHASE_ORDER,
+      schema.sage.PURCHASE_ORDER,
       ["ORDER_NUMBER"],
     );
     const popItems = new SageTable(
       this.source,
-      this.target,
-      sageSchema.POP_ITEM,
+      schema.sage.POP_ITEM,
       ["ITEMID"],
     );
     const grnItems = new SageTable(
       this.source,
-      this.target,
-      sageSchema.GRN_ITEM,
+      schema.sage.GRN_ITEM,
       ["GRN_NUMBER", "ITEM_NUMBER", "ORDER_NUMBER"],
     );
     this.jobs.push(
@@ -89,26 +74,22 @@ export class SageHandler {
 
     const salesLedger = new SageTable(
       this.source,
-      this.target,
-      sageSchema.SALES_LEDGER,
+      schema.sage.SALES_LEDGER,
       ["ACCOUNT_REF"],
     );
     const salesOrders = new SageTable(
       this.source,
-      this.target,
-      sageSchema.SALES_ORDER,
+      schema.sage.SALES_ORDER,
       ["ORDER_NUMBER"],
     );
     const sopItems = new SageTable(
       this.source,
-      this.target,
-      sageSchema.SOP_ITEM,
+      schema.sage.SOP_ITEM,
       ["ITEMID"],
     );
     const gdnItems = new SageTable(
       this.source,
-      this.target,
-      sageSchema.GDN_ITEM,
+      schema.sage.GDN_ITEM,
       ["GDN_NUMBER", "ITEM_NUMBER", "ORDER_NUMBER"],
     );
     this.jobs.push(
@@ -123,14 +104,12 @@ export class SageHandler {
 
     const departments = new SageTable(
       this.source,
-      this.target,
-      sageSchema.DEPARTMENT,
+      schema.sage.DEPARTMENT,
       ["NUMBER"],
     );
     const stockCategories = new SageTable(
       this.source,
-      this.target,
-      sageSchema.STOCK_CAT,
+      schema.sage.STOCK_CAT,
       ["NUMBER"],
     );
 
