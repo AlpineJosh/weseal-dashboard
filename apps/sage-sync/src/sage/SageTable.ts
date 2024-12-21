@@ -81,7 +81,7 @@ export class SageTable<T extends PgTable> {
 
     let query = `SELECT * FROM "${this.name}" `;
     if (latestDate) {
-      query += `WHERE "RECORD_MODIFY_DATE" > '${formatDate(latestDate)}'`;
+      query += `WHERE "RECORD_MODIFY_DATE" > '${formatDate(latestDate)}' OR "RECORD_MODIFY_DATE" IS NULL`;
     }
 
     const results = await this.source

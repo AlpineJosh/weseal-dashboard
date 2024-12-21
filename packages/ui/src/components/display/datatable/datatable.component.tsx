@@ -1,5 +1,7 @@
 "use client";
 
+import { format } from "date-fns";
+
 import { faFilter } from "@repo/pro-light-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
 
@@ -159,6 +161,17 @@ const NumberCell = ({
   );
 };
 
+export type DateTimeCellProps = CellProps & {
+  value: Date;
+  includeTime?: boolean;
+};
+
+const DateTimeCell = ({ value, includeTime, ...props }: DateTimeCellProps) => {
+  const dateFormat = includeTime ? "yy/MM/dd h:mm a" : "yy-MM-dd";
+  const date = format(value, dateFormat);
+  return <Table.Cell {...props}>{date}</Table.Cell>;
+};
+
 export const Datatable = Object.assign(Root, {
   Head: Table.Head,
   Body: Table.Body,
@@ -166,4 +179,5 @@ export const Datatable = Object.assign(Root, {
   Row: Table.Row,
   Cell: Table.Cell,
   NumberCell,
+  DateTimeCell,
 });

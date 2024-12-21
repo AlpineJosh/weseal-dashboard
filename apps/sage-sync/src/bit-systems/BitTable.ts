@@ -1,13 +1,10 @@
-import {
-  getTableConfig,
-  IndexColumn,
-  PgUpdateSetSource,
-} from "drizzle-orm/pg-core";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { Database } from "sqlite";
+import type { IndexColumn, PgUpdateSetSource } from "drizzle-orm/pg-core";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { Database } from "sqlite";
+import { getTableConfig } from "drizzle-orm/pg-core";
 
-import { Table } from "@repo/db";
-import { bitSystemsSchema } from "@repo/db/bit-systems";
+import type { Table } from "@repo/db";
+import type { bitSystemsSchema } from "@repo/db/bit-systems";
 
 import { conflictUpdateAllExcept } from "../lib/helpers";
 
@@ -49,10 +46,10 @@ export class BitTable<T extends Table> {
       .all<T["$inferInsert"][]>(`SELECT * FROM ${this.name}`)
       .then((data) =>
         data.map((row) => {
-          const insert = { ...row } as T["$inferInsert"];
-          for (let column of this.columns) {
+          const insert = { ...row };
+          for (const column of this.columns) {
             if (column.isDate && row[column.name]) {
-              (insert[column.name] as any) = new Date(
+              insert[column.name] = new Date(
                 row[column.name],
               ) as T["$inferInsert"][typeof column.name];
             }

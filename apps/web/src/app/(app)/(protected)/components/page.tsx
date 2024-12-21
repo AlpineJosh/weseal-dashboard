@@ -1,5 +1,6 @@
 "use client";
 
+import { component } from "@/models/component";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
@@ -43,7 +44,9 @@ export default function ComponentsPage() {
               {({ data }) => (
                 <Datatable.Row key={data.id}>
                   <Datatable.Cell id="id">
-                    <TextLink href={`/components/${data.id}`}>
+                    <TextLink
+                      href={`/components/${component.encodeURLId(data.id)}`}
+                    >
                       {data.id}
                     </TextLink>
                   </Datatable.Cell>
