@@ -5,9 +5,10 @@ import React from "react";
 import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
 
+import type { LinkProps } from "../link";
 import { cn } from "../../../lib/class-merge";
 import { colorVariants } from "../../../lib/colors";
-import { Link, LinkProps } from "../link";
+import { Link } from "../link";
 
 const variants = cva(
   [
@@ -63,7 +64,7 @@ const variants = cva(
           // Dark mode
           "dark:text-white dark:data-[active]:bg-white/10 dark:data-[hovered]:bg-white/10",
           // Icon
-          "[--btn-icon:--text-muted] data-[active]:[--btn-icon:--color-text] data-[hover]:[--btn-icon:theme(--color-text)]",
+          "[--btn-icon:--text-muted] data-[active]:[--btn-icon:--color-text] data-[hover]:[--btn-icon:--color-text]",
         ],
         input: [
           // Optical border, implemented as the button background to avoid corner artifacts

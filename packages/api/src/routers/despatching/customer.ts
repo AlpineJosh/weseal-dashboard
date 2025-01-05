@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, count, eq, sum } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../db";
 import { datatable } from "../../lib/datatable";
 import { publicProcedure } from "../../trpc";
 
@@ -12,7 +11,7 @@ const uniqueCustomerInput = z.object({
   id: z.string(),
 });
 
-const customerOverview = datatable(schema.customer);
+const customerOverview = datatable(schema.base.customer);
 
 export const customerRouter = {
   list: publicProcedure
@@ -21,8 +20,8 @@ export const customerRouter = {
       return await customerOverview.query(input);
     }),
   get: publicProcedure.input(uniqueCustomerInput).query(async ({ input }) => {
-    return db.query.customer.findFirst({
-      where: eq(schema.customer.id, input.id),
+    return await db.query.customer.findFirst({
+      where: eq(schema.base.customer.id, input.id),
     });
   }),
 } satisfies TRPCRouterRecord;

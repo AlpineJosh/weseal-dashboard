@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../db";
 import { datatable } from "../lib/datatable";
 import { publicProcedure } from "../trpc";
 
@@ -12,7 +11,7 @@ export const uniqueComponentSchema = z.object({
   id: z.string(),
 });
 
-export const componentOverview = datatable(schema.componentOverview);
+export const componentOverview = datatable(schema.base.componentOverview);
 
 export const updateComponentSchema = z.object({
   id: z.string(),
@@ -24,7 +23,7 @@ export const updateComponentSchema = z.object({
 export const componentRouter = {
   get: publicProcedure.input(uniqueComponentSchema).query(async ({ input }) => {
     return await db.query.componentOverview.findFirst({
-      where: eq(schema.componentOverview.id, input.id),
+      where: eq(schema.base.componentOverview.id, input.id),
     });
   }),
   list: publicProcedure
@@ -41,7 +40,7 @@ export const componentRouter = {
     .input(z.object({ componentId: z.string() }))
     .query(async ({ input }) => {
       return await db.query.subcomponent.findMany({
-        where: eq(schema.subcomponent.componentId, input.componentId),
+        where: eq(schema.base.subcomponent.componentId, input.componentId),
         with: {
           subcomponent: true,
         },
@@ -51,9 +50,9 @@ export const componentRouter = {
     .input(updateComponentSchema)
     .mutation(async ({ input }) => {
       return await db
-        .update(schema.component)
+        .update(schema.base.component)
         .set(input.data)
-        .where(eq(schema.component.id, input.id))
+        .where(eq(schema.base.component.id, input.id))
         .returning();
     }),
 } satisfies TRPCRouterRecord;

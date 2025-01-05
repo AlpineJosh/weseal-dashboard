@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../db";
 import { datatable } from "../../lib/datatable";
 import { publicProcedure } from "../../trpc";
 import { productionJobInputRouter } from "./input";
@@ -32,14 +31,14 @@ export const jobOutputInput = z.object({
   quantity: z.number(),
 });
 
-const listProductionJobInput = datatable(schema.productionJobOverview);
+const listProductionJobInput = datatable(schema.base.productionJobOverview);
 
 export const productionRouter = {
   get: publicProcedure
     .input(uniqueProductionJobInput)
     .query(async ({ input }) => {
       return await db.query.productionJob.findFirst({
-        where: eq(schema.productionJob.id, input.id),
+        where: eq(schema.base.productionJob.id, input.id),
         with: {
           inputs: {
             with: {
@@ -71,42 +70,45 @@ export const productionRouter = {
   create: publicProcedure
     .input(createProductionJobInput)
     .mutation(async ({ input }) => {
-      return await db.insert(schema.productionJob).values(input).returning();
+      return await db
+        .insert(schema.base.productionJob)
+        .values(input)
+        .returning();
     }),
   update: publicProcedure
     .input(updateProductionJobInput)
     .mutation(async ({ input }) => {
       return await db
-        .update(schema.productionJob)
+        .update(schema.base.productionJob)
         .set(input)
-        .where(eq(schema.productionJob.id, input.id))
+        .where(eq(schema.base.productionJob.id, input.id))
         .returning();
     }),
   complete: publicProcedure
     .input(uniqueProductionJobInput)
     .mutation(async ({ input }) => {
       return await db
-        .update(schema.productionJob)
+        .update(schema.base.productionJob)
         .set({
           isActive: false,
         })
-        .where(eq(schema.productionJob.id, input.id))
+        .where(eq(schema.base.productionJob.id, input.id))
         .returning();
     }),
   process: publicProcedure.input(jobOutputInput).mutation(async ({ input }) => {
     const job = await db.query.productionJob.findFirst({
-      where: eq(schema.productionJob.id, input.id),
+      where: eq(schema.base.productionJob.id, input.id),
     });
     if (!job) {
       throw new Error("Job not found");
     }
 
     const subcomponents = await db.query.subcomponent.findMany({
-      where: eq(schema.subcomponent.componentId, job.outputComponentId),
+      where: eq(schema.base.subcomponent.componentId, job.outputComponentId),
     });
 
     const batchInputs = await db.query.productionBatchInput.findMany({
-      where: eq(schema.productionBatchInput.jobId, job.id),
+      where: eq(schema.base.productionBatchInput.jobId, job.id),
       with: {
         batch: true,
       },
@@ -127,12 +129,12 @@ export const productionRouter = {
         );
 
         await db
-          .update(schema.productionBatchInput)
+          .update(schema.base.productionBatchInput)
           .set({
             quantityUsed: input.quantityUsed + quantityUsed,
           })
-          .where(eq(schema.batch.id, input.batch.id));
-        await db.insert(schema.batchMovement).values({
+          .where(eq(schema.base.batch.id, input.batch.id));
+        await db.insert(schema.base.batchMovement).values({
           batchId: input.batch.id,
           quantity: -quantityUsed,
           date: new Date(),
@@ -151,7 +153,7 @@ export const productionRouter = {
     }
 
     const outputBatches = await db
-      .insert(schema.batch)
+      .insert(schema.base.batch)
       .values({
         componentId: job.outputComponentId,
         batchReference: job.batchNumber,
@@ -167,7 +169,7 @@ export const productionRouter = {
     }
 
     const batchOutput = await db
-      .insert(schema.productionBatchOutput)
+      .insert(schema.base.productionBatchOutput)
       .values({
         jobId: job.id,
         batchId: outputBatch.id,
@@ -176,7 +178,7 @@ export const productionRouter = {
       })
       .returning();
 
-    await db.insert(schema.batchMovement).values({
+    await db.insert(schema.base.batchMovement).values({
       batchId: outputBatch.id,
       quantity: input.quantity,
       date: new Date(),

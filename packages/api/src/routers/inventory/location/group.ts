@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { count, eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
 import { publicProcedure } from "../../../trpc";
 
@@ -21,14 +20,14 @@ const updateLocationGroupInput = uniqueLocationGroupInput.merge(
   createLocationGroupInput,
 );
 
-const locationGroupOverview = datatable(schema.locationGroup);
+const locationGroupOverview = datatable(schema.base.locationGroup);
 
 export const locationGroupRouter = {
   get: publicProcedure
     .input(uniqueLocationGroupInput)
     .query(async ({ input }) => {
       return await db.query.locationGroup.findFirst({
-        where: eq(schema.locationGroup.id, input.id),
+        where: eq(schema.base.locationGroup.id, input.id),
         with: {
           parentGroup: true,
           locations: true,
@@ -44,7 +43,7 @@ export const locationGroupRouter = {
     .input(createLocationGroupInput)
     .mutation(async ({ input }) => {
       return await db
-        .insert(schema.locationGroup)
+        .insert(schema.base.locationGroup)
         .values({
           ...input,
         })
@@ -54,19 +53,19 @@ export const locationGroupRouter = {
     .input(updateLocationGroupInput)
     .mutation(async ({ input: { id, ...input } }) => {
       return await db
-        .update(schema.locationGroup)
+        .update(schema.base.locationGroup)
         .set({
           ...input,
         })
-        .where(eq(schema.locationGroup.id, id))
+        .where(eq(schema.base.locationGroup.id, id))
         .returning();
     }),
   delete: publicProcedure
     .input(uniqueLocationGroupInput)
     .mutation(async ({ input }) => {
       return await db
-        .delete(schema.locationGroup)
-        .where(eq(schema.locationGroup.id, input.id))
+        .delete(schema.base.locationGroup)
+        .where(eq(schema.base.locationGroup.id, input.id))
         .returning();
     }),
 } satisfies TRPCRouterRecord;

@@ -26,7 +26,8 @@ import {
   or,
   sql,
 } from "@repo/db";
-import { db } from "@repo/db/client";
+
+import { db } from "../db";
 
 const numberFilterSchema = z.object({
   lt: z.number().optional(),
@@ -83,7 +84,7 @@ type ColumnFilterSchema<TColumn extends Column> =
 type FilterSchema<TTable extends Table> = Simplify<
   TableColumns<TTable> extends infer TColumns extends Record<
     string,
-    Column<any>
+    Column<never>
   >
     ? {
         [K in keyof TColumns & string]: z.ZodOptional<
@@ -207,10 +208,7 @@ export const datatable = <T extends Table>(
       parts.forEach((part) => {
         const partWhere: SQLWrapper[] = [];
         Object.entries(columns).forEach(([key, column]) => {
-          if (
-            search &&
-            (search.fields === undefined || search.fields.includes(key))
-          ) {
+          if (search.fields === undefined || search.fields.includes(key)) {
             partWhere.push(sql<boolean>`${column}::text ILIKE ${`%${part}%`}`);
           }
           console.log(partWhere);

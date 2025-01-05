@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../db";
 import { datatable } from "../../lib/datatable";
 import { publicProcedure } from "../../trpc";
 
@@ -12,12 +11,12 @@ const uniqueMovementInput = z.object({
   id: z.number(),
 });
 
-const movementOverview = datatable(schema.batchMovementOverview);
+const movementOverview = datatable(schema.base.batchMovementOverview);
 
 export const movementsRouter = {
   get: publicProcedure.input(uniqueMovementInput).query(async ({ input }) => {
     return await db.query.batchMovementOverview.findFirst({
-      where: eq(schema.batchMovementOverview.id, input.id),
+      where: eq(schema.base.batchMovementOverview.id, input.id),
     });
   }),
   list: publicProcedure

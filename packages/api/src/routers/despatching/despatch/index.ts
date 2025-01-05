@@ -1,10 +1,9 @@
-import { TRPCRouterRecord } from "@trpc/server";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
 import { publicProcedure } from "../../../trpc";
 import { salesDespatchItemRouter } from "./item";
@@ -13,12 +12,12 @@ const uniqueDespatchInput = z.object({
   id: z.number(),
 });
 
-const despatchOverview = datatable(schema.salesDespatchOverview);
+const despatchOverview = datatable(schema.base.salesDespatchOverview);
 
 export const salesDespatchRouter = {
   get: publicProcedure.input(uniqueDespatchInput).query(async ({ input }) => {
-    return db.query.salesDespatchOverview.findFirst({
-      where: eq(schema.salesDespatchOverview.id, input.id),
+    return await db.query.salesDespatchOverview.findFirst({
+      where: eq(schema.base.salesDespatchOverview.id, input.id),
     });
   }),
   list: publicProcedure

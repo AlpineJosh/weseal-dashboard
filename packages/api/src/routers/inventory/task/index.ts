@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { count, eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
 import { publicProcedure } from "../../../trpc";
 import { taskItemRouter } from "./item";
@@ -29,12 +28,12 @@ const createTaskInput = z.object({
   ),
 });
 
-const taskOverview = datatable(schema.taskOverview);
+const taskOverview = datatable(schema.base.taskOverview);
 
 export const taskRouter = {
   get: publicProcedure.input(uniqueTaskInput).query(async ({ input }) => {
     return await db.query.taskOverview.findFirst({
-      where: eq(schema.taskOverview.id, input.id),
+      where: eq(schema.base.taskOverview.id, input.id),
     });
   }),
   list: publicProcedure
@@ -46,13 +45,13 @@ export const taskRouter = {
     console.log(input);
     const taskId = await db.transaction(async (tx) => {
       const result = await tx
-        .insert(schema.task)
+        .insert(schema.base.task)
         .values({
           ...input,
           createdById: input.assignedToId,
         })
         .returning({
-          id: schema.task.id,
+          id: schema.base.task.id,
         });
       const task = result[0];
 
@@ -60,7 +59,7 @@ export const taskRouter = {
         throw new Error("Failed to create task");
       }
 
-      await tx.insert(schema.taskItem).values(
+      await tx.insert(schema.base.taskItem).values(
         input.items.map((item) => ({
           ...item,
           taskId: task.id,
@@ -74,15 +73,15 @@ export const taskRouter = {
   }),
   cancel: publicProcedure.input(uniqueTaskInput).mutation(async ({ input }) => {
     return await db
-      .update(schema.task)
+      .update(schema.base.task)
       .set({ isCancelled: true })
-      .where(eq(schema.task.id, input.id))
+      .where(eq(schema.base.task.id, input.id))
       .returning();
   }),
   delete: publicProcedure.input(uniqueTaskInput).mutation(async ({ input }) => {
     return await db
-      .delete(schema.task)
-      .where(eq(schema.task.id, input.id))
+      .delete(schema.base.task)
+      .where(eq(schema.base.task.id, input.id))
       .returning();
   }),
   items: taskItemRouter,

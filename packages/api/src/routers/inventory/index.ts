@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 
-import schema from "@repo/db/schema";
+import { schema } from "@repo/db";
 
 import { datatable } from "../../lib/datatable";
 import { publicProcedure } from "../../trpc";
@@ -10,7 +10,7 @@ import { movementsRouter } from "./movement";
 import { ResetHandler } from "./reset/ResetHandler";
 import { taskRouter } from "./task";
 
-const quantityOverview = datatable(schema.batchLocationQuantity);
+const quantityOverview = datatable(schema.base.batchLocationQuantity);
 
 export const inventoryRouter = {
   resetInventory: publicProcedure.mutation(async () => {

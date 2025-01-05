@@ -1,12 +1,9 @@
 import Decimal from "decimal.js";
 
-import { sql } from "@repo/db";
-import { bitSystemsDb } from "@repo/db/bit-systems";
-import { db } from "@repo/db/client";
-import { sageDb } from "@repo/db/sage";
-import schema from "@repo/db/schema";
+import { schema, sql } from "@repo/db";
 
 import type { ResetData } from "./ResetComponent";
+import { db } from "../../../db";
 import { ResetComponent } from "./ResetComponent";
 
 // const STOCK_CODES = [
@@ -27,7 +24,7 @@ export class ResetHandler implements ResetData {
   purchaseOrders = new Set<number>();
 
   components = new Map<string, ResetComponent>();
-  movements: (typeof schema.batchMovement.$inferInsert)[] = [];
+  movements: (typeof schema.base.batchMovement.$inferInsert)[] = [];
 
   private resetComponents: ResetComponent[] = [];
 
@@ -90,12 +87,12 @@ export class ResetHandler implements ResetData {
     }
 
     const receipt = db
-      .insert(schema.purchaseReceipt)
+      .insert(schema.base.purchaseReceipt)
       .values({
         orderId,
         receiptDate,
       })
-      .returning({ id: schema.purchaseReceipt.id })
+      .returning({ id: schema.base.purchaseReceipt.id })
       .then((ids) => ids[0]?.id)
       .then((id) => {
         if (!id) {
@@ -125,12 +122,12 @@ export class ResetHandler implements ResetData {
     }
 
     const despatch = db
-      .insert(schema.salesDespatch)
+      .insert(schema.base.salesDespatch)
       .values({
         orderId,
         despatchDate,
       })
-      .returning({ id: schema.salesDespatch.id })
+      .returning({ id: schema.base.salesDespatch.id })
       .then((ids) => ids[0]?.id)
       .then((id) => {
         if (!id) {
@@ -165,14 +162,14 @@ export class ResetHandler implements ResetData {
     }
 
     const job = db
-      .insert(schema.productionJob)
+      .insert(schema.base.productionJob)
       .values({
         outputComponentId: componentId,
         outputLocationId: 1,
         batchNumber: reference,
         isActive: false,
       })
-      .returning({ id: schema.productionJob.id })
+      .returning({ id: schema.base.productionJob.id })
       .then((ids) => ids[0]?.id)
       .then((id) => {
         if (!id) {
@@ -206,7 +203,7 @@ export class ResetHandler implements ResetData {
   }
 
   private async fetchStockTransactions() {
-    const transactions = await sageDb.query.STOCK_TRAN.findMany();
+    const transactions = await db.query.STOCK_TRAN.findMany();
     transactions.forEach((t) => {
       if (
         !t.STOCK_CODE ||
@@ -247,7 +244,7 @@ export class ResetHandler implements ResetData {
   }
 
   private async fetchGrnItems() {
-    const grnItems = await sageDb.query.GRN_ITEM.findMany();
+    const grnItems = await db.query.GRN_ITEM.findMany();
     grnItems.forEach((item) => {
       if (
         !item.STOCK_CODE ||
@@ -270,7 +267,7 @@ export class ResetHandler implements ResetData {
   }
 
   private async fetchGdnItems() {
-    const gdnItems = await sageDb.query.GDN_ITEM.findMany();
+    const gdnItems = await db.query.GDN_ITEM.findMany();
     gdnItems.forEach((item) => {
       if (
         !item.STOCK_CODE ||
@@ -296,14 +293,14 @@ export class ResetHandler implements ResetData {
     const componentMap = new Map<number, string>();
     const batchMap = new Map<number, string>();
 
-    const stockItems = await bitSystemsDb.query.stockItem.findMany();
+    const stockItems = await db.query.stockItem.findMany();
     stockItems.forEach((item) => {
       if (!item.Code) return;
 
       componentMap.set(item.pk_StockItem_ID, item.Code);
     });
 
-    const binIds = await bitSystemsDb.query.bin
+    const binIds = await db.query.bin
       .findMany()
       .then((locations) =>
         locations
@@ -311,7 +308,7 @@ export class ResetHandler implements ResetData {
           .map((l) => l.pk_Bin_ID),
       );
 
-    const batches = await bitSystemsDb.query.traceableItem.findMany();
+    const batches = await db.query.traceableItem.findMany();
     batches.forEach((batch) => {
       if (
         !batch.fk_StockItem_ID ||
@@ -333,7 +330,7 @@ export class ResetHandler implements ResetData {
       batchMap.set(batch.pk_TraceableItem_ID, componentId);
     });
 
-    const locations = await bitSystemsDb.query.binItem.findMany();
+    const locations = await db.query.binItem.findMany();
     locations.forEach((location) => {
       if (
         !location.fk_StockItem_ID ||
@@ -354,8 +351,7 @@ export class ResetHandler implements ResetData {
       });
     });
 
-    const traceableLocations =
-      await bitSystemsDb.query.traceableBinItem.findMany();
+    const traceableLocations = await db.query.traceableBinItem.findMany();
     traceableLocations.forEach((location) => {
       if (
         !location.fk_BinItem_ID ||
@@ -408,7 +404,7 @@ export class ResetHandler implements ResetData {
       console.log(`Inserted ${i} movements.`);
       const chunk = movements.slice(i, i + chunkSize);
       await db
-        .insert(schema.batchMovement)
+        .insert(schema.base.batchMovement)
         .values(chunk)
         .catch((e) => {
           console.error(e);

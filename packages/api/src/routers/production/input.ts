@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { schema } from "@repo/db";
 
+import { db } from "../../db";
 import { publicProcedure } from "../../trpc";
 
 const addProductionJobInput = z.array(
@@ -21,7 +20,7 @@ export const productionJobInputRouter = {
     .input(addProductionJobInput)
     .mutation(async ({ input }) => {
       return await db
-        .insert(schema.productionBatchInput)
+        .insert(schema.base.productionBatchInput)
         .values(input)
         .returning();
     }),

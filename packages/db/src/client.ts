@@ -1,29 +1,24 @@
-import { drizzle as drizzleServerless, NeonDatabase } from "drizzle-orm/neon-serverless";
-import { drizzle as drizzleServer, PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { NeonDatabase } from "drizzle-orm/neon-serverless";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { Pool } from "@neondatabase/serverless";
+import { drizzle as drizzleServerless } from "drizzle-orm/neon-serverless";
+import { drizzle as drizzleServer } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { UnifiedSchema, unifiedSchema } from "./schema"
-import { DrizzleConfig } from "drizzle-orm";
 
-export type ServerlessClient<TSchema extends Partial<UnifiedSchema> = UnifiedSchema> = NeonDatabase<TSchema>
-export function createServerlessClient<TSchema extends Partial<UnifiedSchema> = UnifiedSchema>
-  (connectionString: string, config?: Partial<DrizzleConfig<TSchema>>): ServerlessClient<TSchema> {
-    config = {
-        schema: unifiedSchema as TSchema,
-        ...config
-    }
+import type { UnifiedSchema } from "./schema";
+import { unifiedSchema } from "./schema";
+
+export type ServerlessClient = NeonDatabase<UnifiedSchema>;
+export function createServerlessClient(
+  connectionString: string,
+): ServerlessClient {
   const pool = new Pool({ connectionString });
-  return drizzleServerless(pool, config);
+  return drizzleServerless(pool, { schema: unifiedSchema });
 }
 
-export type ServerClient<TSchema extends Partial<UnifiedSchema> = UnifiedSchema> = PostgresJsDatabase<TSchema>
+export type ServerClient = PostgresJsDatabase<UnifiedSchema>;
 
-export function createServerClient<TSchema extends Partial<UnifiedSchema> = UnifiedSchema>
-(connectionString: string, config?: Partial<DrizzleConfig<TSchema>>): ServerClient<TSchema> {
-    config = {
-        schema: unifiedSchema as TSchema,
-        ...config
-    }
+export function createServerClient(connectionString: string): ServerClient {
   const client = postgres(connectionString);
-  return drizzleServer(client, config);
+  return drizzleServer(client, { schema: unifiedSchema });
 }

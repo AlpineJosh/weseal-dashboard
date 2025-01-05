@@ -1,9 +1,10 @@
-import { Decimal } from "decimal.js";
+import Decimal from "decimal.js";
 
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { schema } from "@repo/db";
 
-type BatchMovement = typeof schema.batchMovement.$inferInsert;
+import { db } from "../../../db";
+
+type BatchMovement = typeof schema.base.batchMovement.$inferInsert;
 
 export interface Transaction {
   id: number;
@@ -80,7 +81,7 @@ export class ResetComponent {
 
   private bitSystemsTraceableItems: BitSystemsTraceableItem[] = [];
 
-  public movements: (typeof schema.batchMovement.$inferInsert)[] = [];
+  public movements: (typeof schema.base.batchMovement.$inferInsert)[] = [];
 
   constructor(
     public id: string,
@@ -181,14 +182,14 @@ export class ResetComponent {
 
   private async createBatch(transaction: Transaction): Promise<BatchMovement> {
     const batches = await db
-      .insert(schema.batch)
+      .insert(schema.base.batch)
       .values({
         componentId: transaction.component_id,
         entryDate: transaction.date,
         createdAt: transaction.created_at,
         lastModified: transaction.last_modified,
       })
-      .returning({ id: schema.batch.id });
+      .returning({ id: schema.base.batch.id });
 
     const batch = batches[0];
 
@@ -400,13 +401,13 @@ export class ResetComponent {
     const movement = await this.createBatch(transaction);
 
     const purchaseReceiptItem = await db
-      .insert(schema.purchaseReceiptItem)
+      .insert(schema.base.purchaseReceiptItem)
       .values({
         receiptId,
         batchId: movement.batchId,
         quantity: transaction.quantity.toNumber(),
       })
-      .returning({ id: schema.purchaseReceiptItem.id });
+      .returning({ id: schema.base.purchaseReceiptItem.id });
 
     this.movements.push({
       ...movement,
@@ -436,14 +437,14 @@ export class ResetComponent {
     const movement = await this.createBatch(transaction);
 
     const productionJobItem = await db
-      .insert(schema.productionBatchOutput)
+      .insert(schema.base.productionBatchOutput)
       .values({
         jobId: productionJobId,
         batchId: movement.batchId,
         productionQuantity: transaction.quantity.toNumber(),
         productionDate: transaction.date,
       })
-      .returning({ id: schema.productionBatchOutput.id });
+      .returning({ id: schema.base.productionBatchOutput.id });
 
     const productionBatchOutputId = productionJobItem[0]?.id;
 
@@ -475,7 +476,7 @@ export class ResetComponent {
     const movements = await this.allocateBatches(transaction);
 
     const despatchItems = await db
-      .insert(schema.salesDespatchItem)
+      .insert(schema.base.salesDespatchItem)
       .values(
         movements.map((m) => ({
           batchId: m.batchId,
@@ -484,9 +485,9 @@ export class ResetComponent {
         })),
       )
       .returning({
-        id: schema.salesDespatchItem.id,
-        batchId: schema.salesDespatchItem.batchId,
-        quantity: schema.salesDespatchItem.quantity,
+        id: schema.base.salesDespatchItem.id,
+        batchId: schema.base.salesDespatchItem.batchId,
+        quantity: schema.base.salesDespatchItem.quantity,
       });
 
     if (despatchItems.length === 0) {
@@ -525,7 +526,7 @@ export class ResetComponent {
     }
 
     const productionInputs = await db
-      .insert(schema.productionBatchInput)
+      .insert(schema.base.productionBatchInput)
       .values(
         movements.map((m) => ({
           jobId,
@@ -536,9 +537,9 @@ export class ResetComponent {
         })),
       )
       .returning({
-        id: schema.productionBatchInput.id,
-        batchId: schema.productionBatchInput.batchId,
-        quantityUsed: schema.productionBatchInput.quantityUsed,
+        id: schema.base.productionBatchInput.id,
+        batchId: schema.base.productionBatchInput.batchId,
+        quantityUsed: schema.base.productionBatchInput.quantityUsed,
       });
 
     this.movements.push(

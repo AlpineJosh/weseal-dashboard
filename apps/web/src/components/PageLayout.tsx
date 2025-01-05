@@ -9,7 +9,6 @@ import {
   faBars,
   faFluxCapacitor,
   faPlus,
-  faShelves,
   faSlidersSimple,
   faTruckRampBox,
   faXmark,

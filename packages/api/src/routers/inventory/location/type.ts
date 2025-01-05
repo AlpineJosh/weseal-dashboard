@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { count, eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
 import { publicProcedure } from "../../../trpc";
 
@@ -22,14 +21,14 @@ const updateLocationTypeInput = uniqueLocationTypeInput.merge(
   createLocationTypeInput,
 );
 
-const locationTypeOverview = datatable(schema.locationType);
+const locationTypeOverview = datatable(schema.base.locationType);
 
 export const locationTypeRouter = {
   get: publicProcedure
     .input(uniqueLocationTypeInput)
     .query(async ({ input }) => {
       return await db.query.locationType.findFirst({
-        where: eq(schema.locationType.id, input.id),
+        where: eq(schema.base.locationType.id, input.id),
         with: {
           parentGroup: true,
           locations: true,
@@ -45,7 +44,7 @@ export const locationTypeRouter = {
     .input(createLocationTypeInput)
     .mutation(async ({ input }) => {
       return await db
-        .insert(schema.locationType)
+        .insert(schema.base.locationType)
         .values({
           ...input,
         })
@@ -56,19 +55,19 @@ export const locationTypeRouter = {
     .input(updateLocationTypeInput)
     .mutation(async ({ input: { id, ...input } }) => {
       return await db
-        .update(schema.locationType)
+        .update(schema.base.locationType)
         .set({
           ...input,
         })
-        .where(eq(schema.locationType.id, id))
+        .where(eq(schema.base.locationType.id, id))
         .returning();
     }),
   delete: publicProcedure
     .input(uniqueLocationTypeInput)
     .mutation(async ({ input }) => {
       return await db
-        .delete(schema.locationType)
-        .where(eq(schema.locationType.id, input.id))
+        .delete(schema.base.locationType)
+        .where(eq(schema.base.locationType.id, input.id))
         .returning();
     }),
 } satisfies TRPCRouterRecord;

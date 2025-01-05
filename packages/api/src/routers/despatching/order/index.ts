@@ -1,10 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { eq } from "@repo/db";
-import { db } from "@repo/db/client";
-import schema from "@repo/db/schema";
+import { eq, schema } from "@repo/db";
 
+import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
 import { publicProcedure } from "../../../trpc";
 import { salesOrderItemRouter } from "./item";
@@ -13,7 +12,7 @@ const uniqueOrderInput = z.object({
   id: z.number(),
 });
 
-const orderOverview = datatable(schema.salesOrderOverview);
+const orderOverview = datatable(schema.base.salesOrderOverview);
 
 const despatchOrderInput = z.object({
   id: z.number(),
@@ -29,8 +28,8 @@ const despatchOrderInput = z.object({
 
 export const salesOrderRouter = {
   get: publicProcedure.input(uniqueOrderInput).query(async ({ input }) => {
-    return db.query.salesOrderOverview.findFirst({
-      where: eq(schema.salesOrderOverview.id, input.id),
+    return await db.query.salesOrderOverview.findFirst({
+      where: eq(schema.base.salesOrderOverview.id, input.id),
     });
   }),
   list: publicProcedure
@@ -43,36 +42,48 @@ export const salesOrderRouter = {
     .input(despatchOrderInput)
     .mutation(async ({ input }) => {
       return await db.transaction(async (tx) => {
-        const despatch = await tx
-          .insert(schema.salesDespatch)
+        const despatches = await tx
+          .insert(schema.base.salesDespatch)
           .values({
             orderId: input.id,
             despatchDate: input.despatchDate,
             isDespatched: true,
           })
-          .returning({ id: schema.salesDespatch.id });
+          .returning({ id: schema.base.salesDespatch.id });
+
+        if (!despatches[0]) {
+          throw new Error("Failed to create despatch");
+        }
+
+        const despatch = despatches[0];
 
         for (const item of input.items) {
-          const despatchItem = await tx
-            .insert(schema.salesDespatchItem)
+          const despatchItems = await tx
+            .insert(schema.base.salesDespatchItem)
             .values({
-              despatchId: despatch[0]!.id,
+              despatchId: despatch.id,
               batchId: item.batchId,
               quantity: item.quantity,
             })
-            .returning({ id: schema.salesDespatchItem.id });
+            .returning({ id: schema.base.salesDespatchItem.id });
 
-          await tx.insert(schema.batchMovement).values({
+          if (!despatchItems[0]) {
+            throw new Error("Failed to create despatch item");
+          }
+
+          const despatchItem = despatchItems[0];
+
+          await tx.insert(schema.base.batchMovement).values({
             batchId: item.batchId,
             quantity: -item.quantity,
             userId: "",
             type: "despatch",
             locationId: item.pickLocationId,
             date: input.despatchDate,
-            salesDespatchItemId: despatchItem[0]!.id,
+            salesDespatchItemId: despatchItem.id,
           });
 
-          return despatch[0];
+          return despatch;
         }
       });
     }),
