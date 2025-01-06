@@ -4,13 +4,19 @@ import { ZodError } from "zod";
 
 import { db } from "./db";
 
-export const createTRPCContext = () => {
+export interface TRPCContext {
+  db: typeof db;
+  user: { id: string };
+}
+
+export const createTRPCContext = (user: { id: string }): TRPCContext => {
   return {
     db,
+    user,
   };
 };
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
   errorFormatter: ({ shape, error }) => ({
     ...shape,

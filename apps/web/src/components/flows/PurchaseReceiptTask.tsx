@@ -75,7 +75,6 @@ export function PurchaseReceiptTaskForm({
   });
 
   const handleSubmit = (values: z.infer<typeof taskSchema>) => {
-    console.log(values);
     receiveOrder({
       id: values.purchaseOrderId,
       putLocationId: values.putLocationId,
@@ -152,7 +151,7 @@ export function PurchaseReceiptTaskForm({
                 {(location) => {
                   return (
                     <Combobox.Option id={location.id} textValue={location.name}>
-                      {location.name} - {location.groupName}
+                      {location.name}
                     </Combobox.Option>
                   );
                 }}

@@ -88,6 +88,7 @@ export function Option<T extends object>({
   return (
     <Aria.ListBoxItem
       {...props}
+      aria-label={textValue}
       textValue={textValue}
       className={({ isSelected }) =>
         cn(

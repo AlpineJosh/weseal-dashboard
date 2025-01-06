@@ -83,9 +83,10 @@ const variants = {
 
 export type InputProps = {
   type: InputType;
-} & Omit<ComponentPropsWithRef<"input">, "type">;
+  step?: number;
+} & Omit<ComponentPropsWithRef<"input">, "type" | "step">;
 
-export const Input = ({ className, ...props }: InputProps) => {
+export const Input = ({ className, step = 1, ...props }: InputProps) => {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <span data-slot="control" className={cn([variants.control(), className])}>
@@ -98,7 +99,7 @@ export const Input = ({ className, ...props }: InputProps) => {
             isNumeric: props.type === "number",
           }),
         )}
-        step={props.type === "number" ? "any" : undefined}
+        step={props.type === "number" ? step : undefined}
       />
       {props.type === "number" && (
         <>
@@ -106,8 +107,12 @@ export const Input = ({ className, ...props }: InputProps) => {
             type="button"
             className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
             onClick={() => {
-              ref.current?.stepUp(1);
-              ref.current?.dispatchEvent(new Event("input", { bubbles: true }));
+              if (ref.current) {
+                ref.current.stepUp();
+                ref.current.dispatchEvent(
+                  new Event("input", { bubbles: true }),
+                );
+              }
             }}
             aria-label="Increment"
           >
@@ -117,8 +122,12 @@ export const Input = ({ className, ...props }: InputProps) => {
             type="button"
             className="absolute right-0 top-0 aspect-square h-full"
             onClick={() => {
-              ref.current?.stepDown(1);
-              ref.current?.dispatchEvent(new Event("input", { bubbles: true }));
+              if (ref.current) {
+                ref.current.stepDown();
+                ref.current.dispatchEvent(
+                  new Event("input", { bubbles: true }),
+                );
+              }
             }}
             aria-label="Increment"
           >

@@ -4,7 +4,6 @@ import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { Controller, useForm } from "react-hook-form";
-import { useImmer } from "use-immer";
 import { z } from "zod";
 
 import { faPlus } from "@repo/pro-solid-svg-icons";
@@ -18,66 +17,56 @@ interface ProductionTaskFormProps {
   onSave: () => void;
 }
 
-const taskSchema = z.object({
+const taskItemInput = z.object({
   componentId: z.string(),
-  putLocationId: z.number(),
-  assignedToId: z.string(),
+  batchId: z.number(),
+  pickLocationId: z.number(),
   quantity: z.coerce.number(),
-  items: z
-    .array(
-      z.object({
-        componentId: z.string(),
-        batchId: z.number(),
-        pickLocationId: z.number(),
-        quantity: z.number(),
-      }),
-    )
-    .and(
-      z.union([
-        z.object({
-          productionJobId: z.number(),
-        }),
-        z.object({
-          batchReference: z.string(),
-          putLocationId: z.number(),
-        }),
-      ]),
-    ),
 });
 
-interface CreateType {
-  componentId: string;
-  putLocationId?: number;
-  productionJobId?: number;
-  batchReference?: string;
-  assignedToId: string;
-  quantity: number;
-  items: {
-    componentId: string;
-    batchId: number;
-    pickLocationId: number;
-    quantity: number;
-  }[];
-}
+const taskInput = z.object({
+  assignedToId: z.string(),
+  items: z.array(taskItemInput),
+  quantity: z.coerce.number(),
+  putLocationId: z.number(),
+});
+
+const newProductionTaskInput = taskInput.extend({
+  type: z.literal("production-new"),
+  outputComponentId: z.string(),
+  batchReference: z.string(),
+  outputLocationId: z.number(),
+});
+
+const existingProductionTaskInput = taskInput.extend({
+  type: z.literal("production-existing"),
+  productionJobId: z.number(),
+});
+
+const productionTaskInput = z.discriminatedUnion("type", [
+  newProductionTaskInput,
+  existingProductionTaskInput,
+]);
 
 export const ProductionTaskForm = ({
   onExit,
   onSave,
 }: ProductionTaskFormProps) => {
-  const [newJob, setNewJob] = useImmer(false);
   const utils = api.useUtils();
 
-  const form = useForm<CreateType>({
-    resolver: zodResolver(taskSchema),
+  const form = useForm<z.infer<typeof productionTaskInput>>({
+    resolver: zodResolver(productionTaskInput),
     defaultValues: {
-      componentId: "",
+      type: "production-existing",
       assignedToId: "",
       quantity: 1,
       items: [],
     },
   });
 
-  const componentId = form.watch("componentId");
+  const type = form.watch("type");
+
+  const componentId = form.watch("outputComponentId");
   const quantity = form.watch("quantity");
   const productionJobId = form.watch("productionJobId");
   const batchReference = form.watch("batchReference");
@@ -99,11 +88,13 @@ export const ProductionTaskForm = ({
     { enabled: !!componentId },
   );
 
+  console.log(form.getValues());
+
   useEffect(() => {
     if (componentId && productionJobs && productionJobs.rows.length === 0) {
-      setNewJob(true);
+      form.setValue("type", "production-new");
     }
-  }, [componentId, productionJobs, setNewJob]);
+  }, [componentId, productionJobs, form]);
 
   const { mutate: createTask } = api.inventory.tasks.create.useMutation({
     onSuccess: async () => {
@@ -111,17 +102,8 @@ export const ProductionTaskForm = ({
     },
   });
 
-  const handleSubmit = ({ putLocationId, assignedToId, items }: CreateType) => {
-    createTask({
-      type: "production",
-      assignedToId: assignedToId,
-      items: items.map(({ batchId, quantity, pickLocationId }) => ({
-        batchId,
-        quantity,
-        pickLocationId,
-        putLocationId,
-      })),
-    });
+  const handleSubmit = (input: z.infer<typeof productionTaskInput>) => {
+    createTask(input);
     onSave();
   };
 
@@ -129,12 +111,15 @@ export const ProductionTaskForm = ({
     <Form
       className="flex flex-col space-x-4"
       onSubmit={handleSubmit}
+      onInvalid={(details) => {
+        console.log(details);
+      }}
       form={form}
     >
       <div className="flex flex-col items-stretch gap-4 [--grid-cols:200px_1fr]">
         <Heading>Create Production Task</Heading>
         <Divider />
-        <Field name="componentId" layout="row">
+        <Field name="outputComponentId" layout="row">
           <Field.Label>Component</Field.Label>
           <Field.Control>
             <AsyncCombobox
@@ -147,6 +132,7 @@ export const ProductionTaskForm = ({
                   },
                   search: { query },
                 });
+
                 return {
                   isLoading: isLoading,
                   items: data?.rows ?? [],
@@ -163,124 +149,156 @@ export const ProductionTaskForm = ({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        {productionJobs && productionJobs.rows.length > 0 && (
+        {productionJobs && (
           <>
+            {productionJobs.rows.length > 0 && (
+              <>
+                <Divider />
+                <Field name="productionJobId" layout="row">
+                  <Field.Label>Production Job</Field.Label>
+                  <span className="flex flex-row gap-2">
+                    <Field.Control>
+                      <Select
+                        aria-label="Production Job"
+                        className="flex-1"
+                        items={productionJobs.rows}
+                        onChange={() => {
+                          form.setValue("type", "production-existing");
+                        }}
+                      >
+                        {(job) => {
+                          return (
+                            <Select.Option
+                              id={job.id}
+                              textValue={String(job.batchNumber ?? job.id)}
+                            >
+                              {job.batchNumber ?? job.id}
+                            </Select.Option>
+                          );
+                        }}
+                      </Select>
+                    </Field.Control>
+                    <Button
+                      color="primary"
+                      variant="solid"
+                      onPress={() => {
+                        form.setValue("type", "production-new");
+                      }}
+                    >
+                      <Icon icon={faPlus} />
+                      New Job
+                    </Button>
+                  </span>
+                </Field>
+              </>
+            )}
+            {type === "production-new" && (
+              <>
+                <Field name="batchReference" layout="row">
+                  <Field.Label>Batch Reference</Field.Label>
+                  <Field.Control>
+                    <Input type="text" />
+                  </Field.Control>
+                </Field>
+                <Field name="outputLocationId" layout="row">
+                  <Field.Label>Job Output Location</Field.Label>
+                  <Field.Control>
+                    <AsyncCombobox
+                      data={(query) => {
+                        const { data, isLoading } =
+                          api.inventory.locations.list.useQuery({
+                            search: { query },
+                          });
+                        return {
+                          isLoading: isLoading,
+                          items: data?.rows ?? [],
+                        };
+                      }}
+                      keyAccessor={(location) => location.id}
+                      textValueAccessor={(location) => location.name}
+                    >
+                      {(location) => {
+                        return (
+                          <Combobox.Option
+                            id={location.id}
+                            textValue={location.name}
+                          >
+                            {location.name}
+                          </Combobox.Option>
+                        );
+                      }}
+                    </AsyncCombobox>
+                  </Field.Control>
+                </Field>
+              </>
+            )}
             <Divider />
-            <Field name="productionJobId" layout="row">
-              <Field.Label>Production Job</Field.Label>
+
+            <Field name="putLocationId" layout="row">
+              <Field.Label>Input Location</Field.Label>
               <Field.Control>
-                <span className="flex flex-row gap-2">
-                  <Select
-                    className="flex-1"
-                    items={productionJobs.rows}
-                    onChange={() => {
-                      setNewJob(false);
-                    }}
-                  >
-                    {(job) => {
-                      return (
-                        <Select.Option id={job.id}>
-                          {job.batchNumber ?? job.id}
-                        </Select.Option>
-                      );
-                    }}
-                  </Select>
-                  <Button
-                    color="primary"
-                    variant="solid"
-                    onPress={() => {
-                      setNewJob(true);
-                    }}
-                  >
-                    <Icon icon={faPlus} />
-                    Create Job
-                  </Button>
-                </span>
+                <AsyncCombobox
+                  data={(query) => {
+                    const { data, isLoading } =
+                      api.inventory.locations.list.useQuery({
+                        search: { query },
+                      });
+                    return {
+                      isLoading: isLoading,
+                      items: data?.rows ?? [],
+                    };
+                  }}
+                  keyAccessor={(location) => location.id}
+                  textValueAccessor={(location) => location.name}
+                >
+                  {(location) => {
+                    return (
+                      <Combobox.Option
+                        id={location.id}
+                        textValue={location.name}
+                      >
+                        {location.name}
+                      </Combobox.Option>
+                    );
+                  }}
+                </AsyncCombobox>
+              </Field.Control>
+            </Field>
+            <Field name="quantity" layout="row" valueAsNumber>
+              <Field.Label>
+                {type === "production-new" ? "Quantity" : "Additional Quantity"}
+              </Field.Label>
+              <Field.Control>
+                <Input type="number" />
+              </Field.Control>
+            </Field>
+
+            <Field name="assignedToId" layout="row">
+              <Field.Label>Assigned To</Field.Label>
+              <Field.Control>
+                <AsyncCombobox
+                  data={(query) => {
+                    const { data, isLoading } = api.profile.list.useQuery({
+                      search: { query },
+                    });
+
+                    return { items: data?.rows ?? [], isLoading };
+                  }}
+                  keyAccessor={(profile) => profile.id}
+                  textValueAccessor={(profile) => profile.name ?? ""}
+                >
+                  {(profile) => {
+                    return (
+                      <Combobox.Option id={profile.id}>
+                        {profile.name}
+                      </Combobox.Option>
+                    );
+                  }}
+                </AsyncCombobox>
               </Field.Control>
             </Field>
           </>
         )}
-        {newJob && (
-          <Field name="batchReference" layout="row">
-            <Field.Label>Batch Reference</Field.Label>
-            <Field.Control>
-              <Input type="text" />
-            </Field.Control>
-          </Field>
-        )}
-        {newJob && (
-          <Field name="putLocationId" layout="row">
-            <Field.Label>Production Location</Field.Label>
-            <Field.Control>
-              <AsyncCombobox
-                data={(query) => {
-                  const { data, isLoading } =
-                    api.inventory.locations.list.useQuery({
-                      search: { query },
-                    });
-                  return {
-                    isLoading: isLoading,
-                    items: data?.rows ?? [],
-                  };
-                }}
-                keyAccessor={(location) => location.id}
-                textValueAccessor={(location) => location.name}
-              >
-                {(location) => {
-                  return (
-                    <Combobox.Option id={location.id} textValue={location.name}>
-                      {location.name} - {location.groupName}
-                    </Combobox.Option>
-                  );
-                }}
-              </AsyncCombobox>
-            </Field.Control>
-          </Field>
-        )}
-
-        {productionJobs && (
-          <Field name="quantity" layout="row">
-            <Field.Label>
-              {newJob ? "Quantity" : "Additional Quantity"}
-            </Field.Label>
-            <Field.Control>
-              <Input type="number" />
-            </Field.Control>
-          </Field>
-        )}
-        {productionJobs && (
-          <Field name="assignedToId" layout="row">
-            <Field.Label>Assigned To</Field.Label>
-            <Field.Control>
-              <AsyncCombobox
-                data={(query) => {
-                  const { data, isLoading } = api.profile.list.useQuery({
-                    search: { query },
-                  });
-
-                  return { items: data?.rows ?? [], isLoading };
-                }}
-                keyAccessor={(profile) => profile.id}
-                textValueAccessor={(profile) => profile.name ?? ""}
-              >
-                {(profile) => {
-                  return (
-                    <Combobox.Option id={profile.id}>
-                      {profile.name}
-                    </Combobox.Option>
-                  );
-                }}
-              </AsyncCombobox>
-            </Field.Control>
-          </Field>
-        )}
-        {/* <Field name="batchReference">
-            <Field.Label>Batch Reference</Field.Label>
-            <Field.Description>Input the batch reference</Field.Description>
-            <Field.Control>
-              <Input type="text" />
-            </Field.Control>
-          </Field> */}
         <div className="-mx-8 flex max-h-[400px] flex-col overflow-y-auto border-b border-t border-content/10 bg-background-muted px-8">
           {jobReady ? (
             <Controller

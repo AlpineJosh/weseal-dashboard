@@ -52,12 +52,13 @@ export function StockTransferTaskForm({
     createTask({
       type: "transfer",
       assignedToId,
+      putLocationId,
       items: [
         {
+          componentId,
           quantity,
           pickLocationId: Number(pick[0]),
           batchId: Number(pick[1]),
-          putLocationId,
         },
       ],
     });
@@ -152,7 +153,7 @@ export function StockTransferTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Field name="quantity" layout="row">
+        <Field name="quantity" layout="row" valueAsNumber>
           <Field.Label>Quantity</Field.Label>
           <Field.Control>
             <Input type="number" />
@@ -179,7 +180,7 @@ export function StockTransferTaskForm({
                 {(location) => {
                   return (
                     <Combobox.Option id={location.id} textValue={location.name}>
-                      {location.name} - {location.groupName}
+                      {location.name}
                     </Combobox.Option>
                   );
                 }}

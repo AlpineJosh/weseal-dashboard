@@ -11,6 +11,12 @@ const uniqueMovementInput = z.object({
   id: z.number(),
 });
 
+const createMovementInput = z.object({
+  batchId: z.number(),
+  locationId: z.number(),
+  quantity: z.number(),
+});
+
 const movementOverview = datatable(schema.base.batchMovementOverview);
 
 export const movementsRouter = {
@@ -23,5 +29,15 @@ export const movementsRouter = {
     .input(movementOverview.inputSchema)
     .query(async ({ input }) => {
       return await movementOverview.query(input);
+    }),
+  create: publicProcedure
+    .input(createMovementInput)
+    .mutation(async ({ input, ctx }) => {
+      return await db.insert(schema.base.batchMovement).values({
+        ...input,
+        type: "correction",
+        userId: ctx.user.id,
+        date: new Date(),
+      });
     }),
 } satisfies TRPCRouterRecord;

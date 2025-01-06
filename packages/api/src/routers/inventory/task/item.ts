@@ -27,7 +27,7 @@ export const taskItemRouter = {
     }),
   complete: publicProcedure
     .input(uniqueTaskItemInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await db.transaction(async (tx) => {
         const taskItem = await tx.query.taskItem.findFirst({
           where: eq(schema.base.taskItem.id, input.id),
@@ -55,7 +55,7 @@ export const taskItemRouter = {
             batchId: taskItem.batchId,
             locationId: taskItem.pickLocationId,
             quantity: -taskItem.quantity,
-            userId: taskItem.task.assignedToId,
+            userId: ctx.user.id,
             type: taskItem.task.type,
             salesDespatchItemId: taskItem.task.salesDespatchId,
             productionBatchInputId: taskItem.task.productionJobId,
@@ -67,7 +67,7 @@ export const taskItemRouter = {
             batchId: taskItem.batchId,
             locationId: taskItem.putLocationId,
             quantity: taskItem.quantity,
-            userId: taskItem.task.assignedToId,
+            userId: ctx.user.id,
             type: taskItem.task.type,
             salesDespatchItemId: taskItem.task.salesDespatchId,
             productionBatchOutputId: taskItem.task.productionJobId,

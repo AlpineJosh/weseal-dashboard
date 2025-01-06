@@ -66,11 +66,7 @@ export function SalesDespatchTaskForm({
       type: "despatch",
       assignedToId,
       salesOrderId,
-      items: items.map(({ quantity, pickLocationId, batchId }) => ({
-        quantity,
-        pickLocationId,
-        batchId,
-      })),
+      items,
     });
     onSave();
   };

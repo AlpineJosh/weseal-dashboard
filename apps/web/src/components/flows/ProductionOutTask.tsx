@@ -12,13 +12,7 @@ const taskSchema = z.object({
   componentId: z.string(),
   productionJobId: z.coerce.number(),
   putLocationId: z.coerce.number(),
-  items: z.array(
-    z.object({
-      componentId: z.string(),
-      quantity: z.coerce.number(),
-      putLocationId: z.number().optional(),
-    }),
-  ),
+  quantity: z.coerce.number(),
 });
 
 export function ProductionOutTaskForm({
@@ -34,58 +28,28 @@ export function ProductionOutTaskForm({
       componentId: undefined,
       productionJobId: undefined,
       putLocationId: undefined,
-      items: [],
+      quantity: 1,
     },
   });
 
   const componentId = form.watch("componentId");
 
-  // const { data: order } = api.receiving.orders.get.useQuery(
-  //   {
-  //     id: values.orderId as number,
-  //   },
-  //   { enabled: !!values.orderId },
-  // );
+  const { mutate: processProduction } = api.production.process.useMutation();
 
-  // const { data: orderItems } = api.production.jobs.get.useQuery(
-  //   {
-  //     id: productionJobId,
-  //   },
-  //   { enabled: !!productionJobId },
-  // );
-
-  // const [items, setItems] = useImmer<
-  //   {
-  //     componentId: string;
-  //     locationId: number;
-  //     batchId: number;
-  //     quantity: number;
-  //   }[]
-  // >([]);
-
-  // const { mutate: receiveOrder } = api.receiving.orders.receive.useMutation({
-  //   onSuccess: async () => {
-  //     await utils.inventory.tasks.list.invalidate();
-  //   },
-  // });
-
-  const handleSubmit = (values: z.infer<typeof taskSchema>) => {
-    console.log(values);
-    // receiveOrder({
-    //   id: values.purchaseOrderId,
-    //   putLocationId: values.putLocationId,
-    //   receiptDate: new Date(),
-    //   items: values.items.map((item) => ({
-    //     componentId: item.componentId,
-    //     quantity: item.quantity,
-    //   })),
-    // });
+  const handleSubmit = ({
+    productionJobId,
+    quantity,
+  }: z.infer<typeof taskSchema>) => {
+    processProduction({
+      id: productionJobId,
+      quantity,
+    });
     onSave();
   };
 
   return (
     <div className="flex flex-col gap-4 self-stretch">
-      <h1 className="text-2xl font-semibold">Receive Purchase Order</h1>
+      <h1 className="text-2xl font-semibold">Log Production Out</h1>
       <Divider />
       <Form
         className="flex flex-col space-y-4 [--grid-cols:200px_1fr]"
@@ -186,14 +150,14 @@ export function ProductionOutTaskForm({
                 {(location) => {
                   return (
                     <Combobox.Option id={location.id} textValue={location.name}>
-                      {location.name} - {location.groupName}
+                      {location.name}
                     </Combobox.Option>
                   );
                 }}
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          <Field name="quantity" layout="row">
+          <Field name="quantity" layout="row" valueAsNumber>
             <Field.Label>Quantity</Field.Label>
             <Field.Control>
               <Input type="number" />
@@ -212,7 +176,7 @@ export function ProductionOutTaskForm({
             color="primary"
             type="submit"
           >
-            Receive Goods
+            Log Production Out
           </Button>
         </div>
       </Form>

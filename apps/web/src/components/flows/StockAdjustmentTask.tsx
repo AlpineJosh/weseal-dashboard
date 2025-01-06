@@ -10,8 +10,8 @@ import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
   componentId: z.string(),
-  locationId: z.number(),
-  quantity: z.number(),
+  locationId: z.string(),
+  quantity: z.any(),
 });
 
 export function StockAdjustmentTaskForm({
@@ -21,7 +21,6 @@ export function StockAdjustmentTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
-  const utils = api.useUtils();
   const form = useForm<z.infer<typeof taskSchema>>({
     defaultValues: {
       quantity: 1,
@@ -30,37 +29,29 @@ export function StockAdjustmentTaskForm({
     },
     resolver: zodResolver(taskSchema),
   });
+
   const componentId = form.watch("componentId");
 
-  // const { mutate: createTask } = api.inventory.tasks.create.useMutation({
-  //   onSuccess: async () => {
-  //     await utils.inventory.tasks.list.invalidate();
-  //   },
-  // });
+  const { mutate: createMovement } = api.inventory.movements.create.useMutation(
+    {},
+  );
 
   const handleSubmit = ({
-    componentId,
     locationId,
     quantity,
   }: z.infer<typeof taskSchema>) => {
-    // createTask({
-    // createTask({
-    //   type: "transfer",
-    //   assignedToId,
-    //   items: [
-    //     {
-    //       quantity,
-    //       pickLocationId: Number(pick[0]),
-    //       batchId: Number(pick[1]),
-    //       putLocationId,
-    //     },
-    //   ],
-    // });
+    const [locId, batchId] = locationId.split("-").map(Number) as [
+      number,
+      number,
+    ];
+    console.log(locId, batchId, quantity);
+    createMovement({
+      batchId,
+      locationId: locId,
+      quantity: Number(quantity),
+    });
     onSave();
   };
-
-  const state = form.watch();
-  console.log(state);
 
   return (
     <div className="flex flex-col gap-4 self-stretch">
@@ -100,6 +91,7 @@ export function StockAdjustmentTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
+
         <Field name="locationId" layout="row">
           <Field.Label>Stock Location</Field.Label>
           <Field.Control>
@@ -147,8 +139,9 @@ export function StockAdjustmentTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Field name="quantity" layout="row">
-          <Field.Label>Adjusted Quantity</Field.Label>
+
+        <Field name="quantity" layout="row" valueAsNumber>
+          <Field.Label>Adjust By (+/-)</Field.Label>
           <Field.Control>
             <Input type="number" />
           </Field.Control>
@@ -160,7 +153,7 @@ export function StockAdjustmentTaskForm({
             Cancel
           </Button>
           <Button color="primary" type="submit">
-            Create Task
+            Log Adjustment
           </Button>
         </div>
       </Form>

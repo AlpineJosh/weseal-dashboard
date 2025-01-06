@@ -82,10 +82,7 @@ type ColumnFilterSchema<TColumn extends Column> =
     : never;
 
 type FilterSchema<TTable extends Table> = Simplify<
-  TableColumns<TTable> extends infer TColumns extends Record<
-    string,
-    Column<never>
-  >
+  TableColumns<TTable> extends infer TColumns extends Record<string, Column>
     ? {
         [K in keyof TColumns & string]: z.ZodOptional<
           ColumnFilterSchema<TColumns[K]>
@@ -192,7 +189,6 @@ export const datatable = <T extends Table>(
   const query = async (
     input: z.infer<InputSchema<T>>,
   ): Promise<DatatableOutput<T>> => {
-    console.log(input);
     const {
       pagination = { page: 1, size: 10 },
       sort = [],
@@ -219,23 +215,23 @@ export const datatable = <T extends Table>(
     }
 
     for (const [key, column] of Object.entries(columns)) {
-      if (!!filter && filter[key]) {
+      if (filter && filter[key]) {
         if (column.dataType === "string") {
           const columnFilter = filter[key] as z.infer<
             typeof stringFilterSchema
           >;
           where.push(
             columnFilter.startWith !== undefined
-              ? ilike(column, `${columnFilter.startWith}%`)
+              ? ilike(column as AnyColumn, `${columnFilter.startWith}%`)
               : undefined,
             columnFilter.endsWith !== undefined
-              ? ilike(column, `%${columnFilter.endsWith}`)
+              ? ilike(column as AnyColumn, `%${columnFilter.endsWith}`)
               : undefined,
             columnFilter.contains !== undefined
-              ? ilike(column, `%${columnFilter.contains}%`)
+              ? ilike(column as AnyColumn, `%${columnFilter.contains}%`)
               : undefined,
             columnFilter.notContains !== undefined
-              ? not(ilike(column, `%${columnFilter.notContains}%`))
+              ? not(ilike(column as AnyColumn, `%${columnFilter.notContains}%`))
               : undefined,
             columnFilter.eq !== undefined
               ? eq(column, columnFilter.eq)
