@@ -43,22 +43,28 @@ export default function ReceivingPage({
         <h3 className="text-muted-foreground font-semibold">
           Purchase Order Components
         </h3>
-        <Table className="border-b">
-          <Table.Head>
-            <Table.Column id="componentId">Component</Table.Column>
-            <Table.Column id="quantityOrdered">Ordered</Table.Column>
-            <Table.Column id="sageQuantityReceived">Received</Table.Column>
-          </Table.Head>
-          <Table.Body items={items?.rows ?? []}>
-            {({ data: item }) => (
-              <Table.Row key={item.id}>
-                <Table.Cell id="componentId">{item.componentId}</Table.Cell>
-                <Table.Cell id="quantityOrdered">{item.quantityOrdered}</Table.Cell>
-                <Table.Cell id="sageQuantityReceived">{item.sageQuantityReceived}</Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+        {items && (
+          <Table className="border-b">
+            <Table.Head>
+              <Table.Column id="componentId">Component</Table.Column>
+              <Table.Column id="quantityOrdered">Ordered</Table.Column>
+              <Table.Column id="sageQuantityReceived">Received</Table.Column>
+            </Table.Head>
+            <Table.Body data={items.rows}>
+              {({ data: item }) => (
+                <Table.Row key={item.id}>
+                  <Table.Cell id="componentId">{item.componentId}</Table.Cell>
+                  <Table.Cell id="quantityOrdered">
+                    {item.quantityOrdered}
+                  </Table.Cell>
+                  <Table.Cell id="sageQuantityReceived">
+                    {item.sageQuantityReceived}
+                  </Table.Cell>
+                </Table.Row>
+              )}
+            </Table.Body>
+          </Table>
+        )}
         <div className="w-full border-b" />
         <div className="flex flex-row items-center justify-between">
           <h3 className="text-muted-foreground font-semibold">Deliveries</h3>
@@ -77,6 +83,8 @@ export default function ReceivingPage({
             {() => (
               <Table.Row id="noDeliveriesPlanned">
                 <Table.Cell id="dueDate">No deliveries planned</Table.Cell>
+                <Table.Cell id="receiptDate" />
+                <Table.Cell id="status" />
               </Table.Row>
             )}
           </Table.Body>
