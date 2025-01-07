@@ -44,17 +44,17 @@ export default function ReceivingPage({
           Purchase Order Components
         </h3>
         <Table className="border-b">
-          <Table.Header>
-            <Table.Column>Component</Table.Column>
-            <Table.Column>Ordered</Table.Column>
-            <Table.Column>Received</Table.Column>
-          </Table.Header>
-          <Table.Body>
-            {items?.rows.map((item, index) => (
-              <Table.Row key={index}>
-                <Table.Cell>{item.componentId}</Table.Cell>
-                <Table.Cell>{item.quantityOrdered}</Table.Cell>
-                <Table.Cell>{item.sageQuantityReceived}</Table.Cell>
+          <Table.Head>
+            <Table.Column id="componentId">Component</Table.Column>
+            <Table.Column id="quantityOrdered">Ordered</Table.Column>
+            <Table.Column id="sageQuantityReceived">Received</Table.Column>
+          </Table.Head>
+          <Table.Body items={items?.rows ?? []}>
+            {({ data: item }) => (
+              <Table.Row key={item.id}>
+                <Table.Cell id="componentId">{item.componentId}</Table.Cell>
+                <Table.Cell id="quantityOrdered">{item.quantityOrdered}</Table.Cell>
+                <Table.Cell id="sageQuantityReceived">{item.sageQuantityReceived}</Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>
@@ -68,17 +68,17 @@ export default function ReceivingPage({
           </Button>
         </div>
         <Table className="border-b">
-          <Table.Header>
-            <Table.Column>Due Date</Table.Column>
-            <Table.Column>Receipt Date</Table.Column>
-            <Table.Column>Status</Table.Column>
-          </Table.Header>
+          <Table.Head>
+            <Table.Column id="dueDate">Due Date</Table.Column>
+            <Table.Column id="receiptDate">Receipt Date</Table.Column>
+            <Table.Column id="status">Status</Table.Column>
+          </Table.Head>
           <Table.Body>
-            <Table.Row>
-              <Table.Cell className="col-span-3">
-                No deliveries planned
-              </Table.Cell>
-            </Table.Row>
+            {() => (
+              <Table.Row id="noDeliveriesPlanned">
+                <Table.Cell id="dueDate">No deliveries planned</Table.Cell>
+              </Table.Row>
+            )}
           </Table.Body>
         </Table>
       </div>
