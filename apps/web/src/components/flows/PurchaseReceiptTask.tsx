@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { useForm } from "react-hook-form";
+import { useImmer } from "use-immer";
 import { z } from "zod";
 
 import { Combobox, Input } from "@repo/ui/components/control";
@@ -12,13 +14,6 @@ import { Field, Form } from "@repo/ui/components/form";
 const taskSchema = z.object({
   purchaseOrderId: z.coerce.number(),
   putLocationId: z.coerce.number(),
-  items: z.array(
-    z.object({
-      componentId: z.string(),
-      quantity: z.coerce.number(),
-      putLocationId: z.number().optional(),
-    }),
-  ),
 });
 
 export function PurchaseReceiptTaskForm({
@@ -35,18 +30,10 @@ export function PurchaseReceiptTaskForm({
     defaultValues: {
       purchaseOrderId: undefined,
       putLocationId: undefined,
-      items: [],
     },
   });
 
   const purchaseOrderId = form.watch("purchaseOrderId");
-
-  // const { data: order } = api.receiving.orders.get.useQuery(
-  //   {
-  //     id: values.orderId as number,
-  //   },
-  //   { enabled: !!values.orderId },
-  // );
 
   const { data: orderItems } = api.receiving.orders.items.list.useQuery(
     {
@@ -59,14 +46,29 @@ export function PurchaseReceiptTaskForm({
     { enabled: !!purchaseOrderId },
   );
 
-  // const [items, setItems] = useImmer<
-  //   {
-  //     componentId: string;
-  //     locationId: number;
-  //     batchId: number;
-  //     quantity: number;
-  //   }[]
-  // >([]);
+  const [items, setItems] = useImmer<
+    {
+      componentId: string;
+      componentDescription: string;
+      quantityOrdered: number;
+      quantityReceived: number | null;
+      quantity: number;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    if (orderItems) {
+      setItems(
+        orderItems.rows.map((item) => ({
+          componentId: item.componentId,
+          componentDescription: item.componentDescription,
+          quantityOrdered: item.quantityOrdered,
+          quantityReceived: item.sageQuantityReceived,
+          quantity: item.quantityOrdered - (item.quantityReceived ?? 0),
+        })),
+      );
+    }
+  }, [orderItems, setItems]);
 
   const { mutate: receiveOrder } = api.receiving.orders.receive.useMutation({
     onSuccess: async () => {
@@ -78,10 +80,9 @@ export function PurchaseReceiptTaskForm({
     receiveOrder({
       id: values.purchaseOrderId,
       putLocationId: values.putLocationId,
-      receiptDate: new Date(),
-      items: values.items.map((item) => ({
+      items: items.map((item) => ({
         componentId: item.componentId,
-        quantity: item.quantity,
+        quantity: item.quantityReceived ?? 0,
       })),
     });
     onSave();
@@ -171,9 +172,9 @@ export function PurchaseReceiptTaskForm({
                 Quantity Received
               </Table.Column>
             </Table.Head>
-            <Table.Body data={orderItems?.rows ?? []}>
+            <Table.Body data={items}>
               {({ data }) => (
-                <Table.Row key={data.id}>
+                <Table.Row key={data.componentId}>
                   <Table.Cell id="componentId">{data.componentId}</Table.Cell>
                   <Table.Cell id="componentDescription">
                     {data.componentDescription}
@@ -182,7 +183,20 @@ export function PurchaseReceiptTaskForm({
                     {data.quantityOrdered}
                   </Table.Cell>
                   <Table.Cell id="quantityReceived">
-                    <Input type="number" defaultValue={data.quantityOrdered} />
+                    <Input
+                      type="number"
+                      defaultValue={data.quantity}
+                      onChange={(e) => {
+                        setItems((draft) => {
+                          const item = draft.find(
+                            (i) => i.componentId === data.componentId,
+                          );
+                          if (item) {
+                            item.quantityReceived = Number(e.target.value);
+                          }
+                        });
+                      }}
+                    />
                   </Table.Cell>
                 </Table.Row>
               )}

@@ -16,7 +16,6 @@ const orderOverview = datatable(schema.base.purchaseOrderOverview);
 
 const receiveOrderInput = z.object({
   id: z.number(),
-  receiptDate: z.date(),
   putLocationId: z.number(),
   items: z.array(
     z.object({
@@ -40,40 +39,47 @@ export const purchaseOrderRouter = {
   items: purchaseOrderItemRouter,
   receive: publicProcedure
     .input(receiveOrderInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       return await db.transaction(async (tx) => {
-        const receipt = await tx
+        const receiptDate = new Date();
+
+        const receipts = await tx
           .insert(schema.base.purchaseReceipt)
           .values({
             orderId: input.id,
-            receiptDate: input.receiptDate,
             isReceived: true,
+            receiptDate,
           })
-          .returning({ id: schema.base.purchaseReceipt.id });
+          .returning({
+            id: schema.base.purchaseReceipt.id,
+          });
 
-        if (!receipt[0]) {
+        const receipt = receipts[0];
+        if (!receipt) {
           throw new Error("Receipt not created");
         }
 
         for (const item of input.items) {
-          const batch = await tx
+          const batches = await tx
             .insert(schema.base.batch)
             .values({
               componentId: item.componentId,
-              entryDate: input.receiptDate,
+              entryDate: receiptDate,
             })
             .onConflictDoNothing()
             .returning({ id: schema.base.batch.id });
 
-          if (!batch[0]) {
+          const batch = batches[0];
+
+          if (!batch) {
             throw new Error("Batch not created");
           }
 
           const receiptItem = await tx
             .insert(schema.base.purchaseReceiptItem)
             .values({
-              receiptId: receipt[0].id,
-              batchId: batch[0].id,
+              receiptId: receipt.id,
+              batchId: batch.id,
               quantity: item.quantity,
             })
             .returning({ id: schema.base.purchaseReceiptItem.id });
@@ -83,17 +89,17 @@ export const purchaseOrderRouter = {
           }
 
           await tx.insert(schema.base.batchMovement).values({
-            batchId: batch[0].id,
+            batchId: batch.id,
             quantity: item.quantity,
-            userId: "",
+            userId: ctx.user.id,
             type: "receipt",
             locationId: input.putLocationId,
-            date: input.receiptDate,
+            date: receiptDate,
             purchaseReceiptItemId: receiptItem[0].id,
           });
-
-          return receipt[0];
         }
+
+        return receipt;
       });
     }),
 } satisfies TRPCRouterRecord;
