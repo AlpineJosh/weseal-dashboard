@@ -98,6 +98,10 @@ const LocationPickerItem = ({
         order: "asc",
       },
     ],
+    pagination: {
+      page: 1,
+      size: 100,
+    },
   });
 
   useEffect(() => {
