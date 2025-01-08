@@ -1,9 +1,7 @@
-
-import { Job, scheduleJob } from "node-schedule";
-
-import  sqlite3 from "better-sqlite3";
 import type { Database } from "better-sqlite3";
-
+import type { Job } from "node-schedule";
+import sqlite3 from "better-sqlite3";
+import { scheduleJob } from "node-schedule";
 
 import { schema } from "@repo/db";
 
@@ -15,8 +13,7 @@ export class BitHandler {
 
   private jobs: Job[] = [];
 
-  constructor() {
-  }
+  constructor() {}
 
   async start() {
     if (!config.connectors.bitSystems) {
@@ -25,27 +22,20 @@ export class BitHandler {
 
     this.source = new sqlite3(config.connectors.bitSystems.file);
 
-    if (!this.source) throw new Error("Error setting up sqlite connection")
+    if (!this.source) throw new Error("Error setting up sqlite connection");
 
-
-    const stockItems = new BitTable(
-      this.source,
-      schema.bitSystems.stockItem,
-      ["pk_StockItem_ID"],
-    );
-    const binItems = new BitTable(
-      this.source,
-      schema.bitSystems.binItem,
-      ["pk_BinItem_ID"],
-    );
-    const bins = new BitTable(this.source,  schema.bitSystems.bin, [
+    const stockItems = new BitTable(this.source, schema.bitSystems.stockItem, [
+      "pk_StockItem_ID",
+    ]);
+    const binItems = new BitTable(this.source, schema.bitSystems.binItem, [
+      "pk_BinItem_ID",
+    ]);
+    const bins = new BitTable(this.source, schema.bitSystems.bin, [
       "pk_Bin_ID",
     ]);
-    const warehouses = new BitTable(
-      this.source,
-      schema.bitSystems.warehouse,
-      ["pk_Warehouse_ID"],
-    );
+    const warehouses = new BitTable(this.source, schema.bitSystems.warehouse, [
+      "pk_Warehouse_ID",
+    ]);
     const traceableItems = new BitTable(
       this.source,
       schema.bitSystems.traceableItem,
@@ -80,8 +70,8 @@ export class BitHandler {
     if (this.source) {
       this.source.close();
     }
-    
-    for (let job of this.jobs) {
+
+    for (const job of this.jobs) {
       job.cancel();
     }
     this.jobs = [];

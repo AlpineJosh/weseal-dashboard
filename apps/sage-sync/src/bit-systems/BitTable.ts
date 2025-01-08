@@ -1,21 +1,8 @@
-<<<<<<< HEAD
+import type { Database } from "better-sqlite3";
 import type { IndexColumn, PgUpdateSetSource } from "drizzle-orm/pg-core";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { Database } from "sqlite";
 import { getTableConfig } from "drizzle-orm/pg-core";
 
 import type { Table } from "@repo/db";
-import type { bitSystemsSchema } from "@repo/db/bit-systems";
-=======
-import {
-  getTableConfig,
-  IndexColumn,
-  PgUpdateSetSource,
-} from "drizzle-orm/pg-core";
-import type { Database } from "better-sqlite3";
-
-import { Table } from "@repo/db";
->>>>>>> 588f396c57c1fcf58fd36ac99c570aabebe80c29
 
 import { conflictUpdateAllExcept } from "../lib/helpers";
 import { target } from "../lib/target";
@@ -53,34 +40,20 @@ export class BitTable<T extends Table> {
   }
 
   async sync() {
-<<<<<<< HEAD
-    const results = await this.source
-      .all<T["$inferInsert"][]>(`SELECT * FROM ${this.name}`)
-      .then((data) =>
-        data.map((row) => {
-          const insert = { ...row };
-          for (const column of this.columns) {
-=======
-    const stmt = this.source
-      .prepare<T["$inferInsert"]>(`SELECT * FROM ${this.name}`)
+    const stmt = this.source.prepare<T["$inferInsert"]>(
+      `SELECT * FROM ${this.name}`,
+    );
 
-
-    const results = stmt 
-    .all([])
-    .map((row: any) => {
+    const results = stmt.all([]).map((row: any) => {
       const insert = { ...row } as T["$inferInsert"];
-      for (let column of this.columns) {
->>>>>>> 588f396c57c1fcf58fd36ac99c570aabebe80c29
-            if (column.isDate && row[column.name]) {
-              insert[column.name] = new Date(
-                row[column.name],
-              ) as T["$inferInsert"][typeof column.name];
-            }
-          }
+      for (const column of this.columns) {
+        if (column.isDate && row[column.name]) {
+          (insert as any)[column.name] = new Date(row[column.name]);
+        }
+      }
 
-          return insert;
-        })
-      
+      return insert;
+    });
 
     for (let i = 0; i < results.length; i += this.batchSize) {
       const batch = results.slice(i, i + this.batchSize);
