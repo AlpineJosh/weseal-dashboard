@@ -82,7 +82,7 @@ export function PurchaseReceiptTaskForm({
       putLocationId: values.putLocationId,
       items: items.map((item) => ({
         componentId: item.componentId,
-        quantity: item.quantityReceived ?? 0,
+        quantity: item.quantity,
       })),
     });
     onSave();
