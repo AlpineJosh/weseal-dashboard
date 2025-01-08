@@ -217,7 +217,6 @@ const LocationPickerItem = ({
           <Text>Required:</Text>
           <Input
             type="number"
-            step={1}
             className="w-24"
             value={quantity}
             min={0}
@@ -263,7 +262,6 @@ const LocationPickerItem = ({
               <Input
                 type="number"
                 className="flex-1"
-                step={1}
                 min={0}
                 max={location.free}
                 value={getUsing(location)}

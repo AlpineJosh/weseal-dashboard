@@ -83,10 +83,10 @@ const variants = {
 
 export type InputProps = {
   type: InputType;
-  step?: number;
+  step?: number | "any";
 } & Omit<ComponentPropsWithRef<"input">, "type" | "step">;
 
-export const Input = ({ className, step = 1, ...props }: InputProps) => {
+export const Input = ({ className, step = "any", ...props }: InputProps) => {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <span data-slot="control" className={cn([variants.control(), className])}>
@@ -108,7 +108,9 @@ export const Input = ({ className, step = 1, ...props }: InputProps) => {
             className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
             onClick={() => {
               if (ref.current) {
-                ref.current.stepUp();
+                const value = ref.current.valueAsNumber;
+                const increment = step === "any" ? 1 : step;
+                ref.current.valueAsNumber = value + increment;
                 ref.current.dispatchEvent(
                   new Event("input", { bubbles: true }),
                 );
@@ -123,7 +125,9 @@ export const Input = ({ className, step = 1, ...props }: InputProps) => {
             className="absolute right-0 top-0 aspect-square h-full"
             onClick={() => {
               if (ref.current) {
-                ref.current.stepDown();
+                const value = ref.current.valueAsNumber;
+                const increment = step === "any" ? 1 : step;
+                ref.current.valueAsNumber = value - increment;
                 ref.current.dispatchEvent(
                   new Event("input", { bubbles: true }),
                 );
