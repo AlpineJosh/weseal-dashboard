@@ -112,11 +112,9 @@ export const batchOverview = pgTable("batch_overview", {
   entryDate: date("entry_date", { mode: "date" }),
   totalQuantity: numericDecimal("total_quantity"),
   freeQuantity: numericDecimal("free_quantity"),
-  unit: varchar("unit"),
-  categoryId: integer("category_id"),
-  departmentId: integer("department_id"),
-  isTraceable: boolean("traceable"),
-  isTracked: boolean("tracked"),
+  unit: varchar("component_unit"),
+  // isTraceable: boolean("traceable"),
+  // isTracked: boolean("tracked"),
 });
 
 export const batchOverviewRelations = relations(
@@ -228,13 +226,13 @@ export const taskOverview = pgTable("task_overview", {
 });
 
 export const taskItemOverview = pgTable("task_item_overview", {
-  id: integer("id"),
-  taskId: integer("task_id"),
+  id: integer("id").notNull(),
+  taskId: integer("task_id").notNull(),
   batchId: integer("batch_id"),
   batchReference: varchar("batch_reference"),
-  componentId: varchar("component_id"),
-  componentDescription: varchar("component_description"),
-  componentUnit: varchar("component_unit"),
+  componentId: varchar("component_id").notNull(),
+  componentDescription: varchar("component_description").notNull(),
+  componentUnit: varchar("component_unit").notNull(),
   pickLocationId: integer("pick_location_id"),
   pickLocationName: varchar("pick_location_name"),
   pickLocationGroupId: integer("pick_location_group_id"),
@@ -243,7 +241,7 @@ export const taskItemOverview = pgTable("task_item_overview", {
   putLocationName: varchar("put_location_name"),
   putLocationGroupId: integer("put_location_group_id"),
   putLocationGroupName: varchar("put_location_group_name"),
-  quantity: numericDecimal("quantity"),
+  quantity: numericDecimal("quantity").notNull(),
   isComplete: boolean("is_complete"),
 });
 

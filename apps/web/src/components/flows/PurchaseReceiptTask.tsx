@@ -56,6 +56,9 @@ export function PurchaseReceiptTaskForm({
     }[]
   >([]);
 
+  const state = form.watch();
+  console.log(state);
+
   useEffect(() => {
     if (orderItems) {
       setItems(
