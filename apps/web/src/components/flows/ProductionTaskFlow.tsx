@@ -27,7 +27,7 @@ const taskItemInput = z.object({
 const taskInput = z.object({
   assignedToId: z.string(),
   items: z.array(taskItemInput),
-  quantity: z.coerce.number(),
+  quantity: z.coerce.number().min(1),
   putLocationId: z.number(),
 });
 

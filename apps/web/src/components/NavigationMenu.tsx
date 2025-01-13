@@ -61,7 +61,7 @@ export const NavigationMenu = () => {
         <SidebarMenu.SubItems>
           <SidebarMenu.Item href="/receiving/orders">
             <Icon icon={faFileInvoice} />
-            <SidebarMenu.Label>PurchaseOrders</SidebarMenu.Label>
+            <SidebarMenu.Label>Purchase Orders</SidebarMenu.Label>
           </SidebarMenu.Item>
           <SidebarMenu.Item href="/receiving/receipts">
             <Icon icon={faBox} />
