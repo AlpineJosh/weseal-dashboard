@@ -48,33 +48,73 @@ export const taskItemRouter = {
           throw new Error("Task item already cancelled");
         }
 
-        const values: InferInsertModel<typeof schema.base.batchMovement>[] = [];
+        const movement: InferInsertModel<typeof schema.base.batchMovement> = {
+          date: new Date(),
+          batchId: taskItem.batchId,
+          userId: ctx.user.id,
+          type: taskItem.task.type,
+          quantity: 0,
+          locationId: 0,
+        };
+
+        if (
+          taskItem.task.type === "production" &&
+          taskItem.task.productionJobId &&
+          taskItem.pickLocationId
+        ) {
+          const productionJobItems = await tx
+            .insert(schema.base.productionBatchInput)
+            .values({
+              jobId: taskItem.task.productionJobId,
+              batchId: taskItem.batchId,
+              quantityAllocated: taskItem.quantity,
+              quantityUsed: 0,
+              locationId: taskItem.pickLocationId,
+            })
+            .returning({ id: schema.base.productionBatchInput.id });
+
+          const productionJobItem = productionJobItems[0];
+          if (!productionJobItem) {
+            throw new Error("Failed to create production job item");
+          }
+
+          movement.productionBatchInputId = productionJobItem.id;
+        }
+
+        if (
+          taskItem.task.type === "despatch" &&
+          taskItem.task.salesDespatchId
+        ) {
+          const salesDespatchItems = await tx
+            .insert(schema.base.salesDespatchItem)
+            .values({
+              despatchId: taskItem.task.salesDespatchId,
+              batchId: taskItem.batchId,
+              quantity: taskItem.quantity,
+            })
+            .returning({ id: schema.base.salesDespatchItem.id });
+
+          const salesDespatchItem = salesDespatchItems[0];
+          if (!salesDespatchItem) {
+            throw new Error("Failed to create sales despatch item");
+          }
+        }
+
         if (taskItem.pickLocationId) {
-          values.push({
-            date: new Date(),
-            batchId: taskItem.batchId,
+          await tx.insert(schema.base.batchMovement).values({
+            ...movement,
             locationId: taskItem.pickLocationId,
             quantity: -taskItem.quantity,
-            userId: ctx.user.id,
-            type: taskItem.task.type,
-            salesDespatchItemId: taskItem.task.salesDespatchId,
-            productionBatchInputId: taskItem.task.productionJobId,
-          });
-        }
-        if (taskItem.putLocationId) {
-          values.push({
-            date: new Date(),
-            batchId: taskItem.batchId,
-            locationId: taskItem.putLocationId,
-            quantity: taskItem.quantity,
-            userId: ctx.user.id,
-            type: taskItem.task.type,
-            salesDespatchItemId: taskItem.task.salesDespatchId,
-            productionBatchOutputId: taskItem.task.productionJobId,
           });
         }
 
-        await tx.insert(schema.base.batchMovement).values(values);
+        if (taskItem.putLocationId) {
+          await tx.insert(schema.base.batchMovement).values({
+            ...movement,
+            locationId: taskItem.putLocationId,
+            quantity: taskItem.quantity,
+          });
+        }
 
         await tx
           .update(schema.base.taskItem)
