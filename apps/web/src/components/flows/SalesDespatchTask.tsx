@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Combobox } from "@repo/ui/components/control";
+import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
@@ -40,6 +41,8 @@ export function SalesDespatchTaskForm({
     },
   });
 
+  const { addToast } = useToast();
+
   const salesOrderId = form.watch("salesOrderId");
 
   const { data: orderItems } = api.despatching.order.items.list.useQuery(
@@ -68,6 +71,9 @@ export function SalesDespatchTaskForm({
       salesOrderId,
       items,
     });
+
+    addToast({ message: "Despatch task created", type: "success" });
+
     onSave();
   };
 
