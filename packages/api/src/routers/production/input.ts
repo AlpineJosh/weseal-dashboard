@@ -4,13 +4,14 @@ import { z } from "zod";
 import { schema } from "@repo/db";
 
 import { db } from "../../db";
+import { decimal } from "../../lib/decimal";
 import { publicProcedure } from "../../trpc";
 
 const addProductionJobInput = z.array(
   z.object({
     jobId: z.number(),
     batchId: z.number(),
-    quantityAllocated: z.number(),
+    quantityAllocated: decimal(),
     locationId: z.number(),
   }),
 );

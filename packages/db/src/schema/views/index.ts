@@ -4,7 +4,6 @@ import {
   date,
   integer,
   pgTable,
-  real,
   serial,
   smallint,
   timestamp,
@@ -284,7 +283,7 @@ export const salesOrderItemOverview = pgTable("sales_order_item_overview", {
   orderId: integer("order_id").notNull(),
   componentId: varchar("component_id").notNull(),
   componentDescription: varchar("component_description").notNull(),
-  quantityOrdered: real("quantity_ordered").notNull(),
+  quantityOrdered: numericDecimal("quantity_ordered").notNull(),
   quantityDespatched: numericDecimal("quantity_despatched"),
   quantityInStock: numericDecimal("quantity_in_stock"),
   sageQuantityDespatched: numericDecimal("sage_quantity_despatched"),
@@ -310,7 +309,7 @@ export const salesDespatchItemOverview = pgTable(
     batchReference: varchar("batch_reference"),
     componentId: varchar("component_id").notNull(),
     componentDescription: varchar("component_description").notNull(),
-    quantity: real("quantity"),
+    quantity: numericDecimal("quantity"),
   },
 );
 
@@ -322,7 +321,7 @@ export const productionJobOverview = pgTable("production_job_overview", {
   outputLocationId: integer("output_location_id").notNull(),
   outputLocationName: varchar("output_location_name").notNull(),
   targetQuantity: integer("target_quantity").notNull(),
-  outputQuantity: real("output_quantity").notNull(),
+  outputQuantity: numericDecimal("output_quantity").notNull(),
   remainingInputTasks: integer("remaining_input_tasks").notNull(),
 });
 
@@ -335,8 +334,8 @@ export const productionBatchInputOverview = pgTable(
     batchReference: varchar("batch_reference"),
     componentId: varchar("component_id"),
     componentDescription: varchar("component_description"),
-    quantityAllocated: real("quantity_allocated"),
-    quantityUsed: real("quantity_used"),
+    quantityAllocated: numericDecimal("quantity_allocated"),
+    quantityUsed: numericDecimal("quantity_used"),
     locationId: integer("location_id"),
     locationName: varchar("location_name"),
   },
@@ -351,7 +350,7 @@ export const productionBatchOutputOverview = pgTable(
     batchReference: varchar("batch_reference"),
     componentId: varchar("component_id"),
     componentDescription: varchar("component_description"),
-    productionQuantity: real("production_quantity"),
+    productionQuantity: numericDecimal("production_quantity"),
     productionDate: timestamp("production_date"),
   },
 );
@@ -385,9 +384,9 @@ export const purchaseOrderItemOverview = pgTable(
     orderId: integer("order_id").notNull(),
     componentId: varchar("component_id").notNull(),
     componentDescription: varchar("component_description").notNull(),
-    quantityOrdered: real("quantity_ordered").notNull(),
-    quantityReceived: real("quantity_received"),
-    sageQuantityReceived: real("sage_quantity_received"),
+    quantityOrdered: numericDecimal("quantity_ordered").notNull(),
+    quantityReceived: numericDecimal("quantity_received"),
+    sageQuantityReceived: numericDecimal("sage_quantity_received"),
   },
 );
 
@@ -411,6 +410,6 @@ export const purchaseReceiptItemOverview = pgTable(
     batchReference: varchar("batch_reference"),
     componentId: varchar("component_id").notNull(),
     componentDescription: varchar("component_description").notNull(),
-    quantity: real("quantity").notNull(),
+    quantity: numericDecimal("quantity").notNull(),
   },
 );

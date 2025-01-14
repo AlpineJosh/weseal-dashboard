@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
+import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
@@ -21,13 +22,13 @@ const taskItemInput = z.object({
   componentId: z.string(),
   batchId: z.number(),
   pickLocationId: z.number(),
-  quantity: z.coerce.number(),
+  quantity: decimal(),
 });
 
 const taskInput = z.object({
   assignedToId: z.string(),
   items: z.array(taskItemInput),
-  quantity: z.coerce.number().min(1),
+  quantity: decimal(),
   putLocationId: z.number(),
 });
 
@@ -87,8 +88,6 @@ export const ProductionTaskForm = ({
     },
     { enabled: !!componentId },
   );
-
-  console.log(form.getValues());
 
   useEffect(() => {
     if (componentId && productionJobs && productionJobs.rows.length === 0) {
@@ -310,7 +309,7 @@ export const ProductionTaskForm = ({
                     subcomponents?.map((subcomponent) => {
                       return {
                         id: subcomponent.subcomponentId,
-                        quantity: subcomponent.quantity * quantity,
+                        quantity: subcomponent.quantity.mul(quantity),
                       };
                     }) ?? []
                   }
@@ -318,10 +317,7 @@ export const ProductionTaskForm = ({
                   onChange={(items) => {
                     onChange({
                       target: {
-                        value: items.map((item) => ({
-                          ...item,
-                          quantity: Number(item.quantity),
-                        })),
+                        value: items,
                       },
                     });
                   }}

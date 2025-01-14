@@ -7,13 +7,16 @@ import { db } from "../../../db";
 import { ResetComponent } from "./ResetComponent";
 
 // const STOCK_CODES = [
-// "BOPZ056WH0280SQM", // component, no batch number
-// "WS051OR2800SQMEB090", // printed material, must have batch number, is BOMd into other products.
-// "WS051OR012003000EB090", // finished product, must have batch number, is not BOMd again.
-// "OL175GR006000050B", // Finished product, no batch number
-// "CARRIAGECHARGE", // Non-physical item, no batch number
-// "BOP020CL4950SQM", // Biggest discrepancy
+//   // "BOPZ056WH0280SQM", // component, no batch number
+//   // "WS051OR2800SQMEB090", // printed material, must have batch number, is BOMd into other products.
+//   // "WS051OR012003000EB090", // finished product, must have batch number, is not BOMd again.
+//   // "OL175GR006000050B", // Finished product, no batch number
+//   // "CARRIAGECHARGE", // Non-physical item, no batch number
+//   // "BOP020CL4950SQM", // Biggest discrepancy
+//   "SV055DGN071SQM",
 // ];
+
+const DECIMAL_PLACES = 6;
 
 export class ResetHandler implements ResetData {
   salesDespatchIds = new Map<number, Map<Date, Promise<number>>>();
@@ -230,7 +233,7 @@ export class ResetHandler implements ResetData {
       component.addTransaction({
         id: t.TRAN_NUMBER,
         component_id: t.STOCK_CODE,
-        quantity: new Decimal(t.QUANTITY).toDP(6),
+        quantity: new Decimal(t.QUANTITY).toDP(DECIMAL_PLACES),
         date: t.DATE,
         reference: t.REFERENCE,
         reference_numeric: t.REFERENCE_NUMERIC,
@@ -259,7 +262,7 @@ export class ResetHandler implements ResetData {
 
       component.addGrn({
         orderId: item.ORDER_NUMBER,
-        quantity: new Decimal(item.QTY_RECEIVED).toDP(6),
+        quantity: new Decimal(item.QTY_RECEIVED).toDP(DECIMAL_PLACES),
         date: item.DATE,
       });
     });
@@ -282,7 +285,7 @@ export class ResetHandler implements ResetData {
 
       component.addGdn({
         orderId: item.ORDER_NUMBER,
-        quantity: new Decimal(item.QTY_DESPATCHED).toDP(6),
+        quantity: new Decimal(item.QTY_DESPATCHED).toDP(DECIMAL_PLACES),
         date: item.DATE,
       });
     });
@@ -347,7 +350,7 @@ export class ResetHandler implements ResetData {
       component.addBitSystemsItem({
         id: location.pk_BinItem_ID,
         locationId: location.fk_Bin_ID,
-        quantity: new Decimal(location.QuantityInStock).toDP(6),
+        quantity: new Decimal(location.QuantityInStock).toDP(DECIMAL_PLACES),
       });
     });
 
@@ -368,7 +371,7 @@ export class ResetHandler implements ResetData {
         id: location.pk_TraceableBinItem_ID,
         itemId: location.fk_BinItem_ID,
         batchId: location.fk_TraceableItem_ID,
-        quantity: new Decimal(location.QuantityInStock).toDP(6),
+        quantity: new Decimal(location.QuantityInStock).toDP(DECIMAL_PLACES),
       });
     });
   }

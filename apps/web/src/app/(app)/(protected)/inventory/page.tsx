@@ -68,14 +68,14 @@ export default function InventoryOverview() {
                       {data.locationName}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="quantity"
                     value={data.total}
                     unit={data.componentUnit}
                     precision={6}
                     className="flex flex-row items-baseline space-x-1"
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="allocated"
                     value={data.allocated}
                     unit={data.componentUnit}

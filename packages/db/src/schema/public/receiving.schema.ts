@@ -3,12 +3,12 @@ import {
   boolean,
   integer,
   pgTable,
-  real,
   serial,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { numericDecimal } from "../../lib/numeric";
 import { component } from "./component.schema";
 import { batch } from "./inventory.schema";
 
@@ -68,8 +68,8 @@ export const purchaseOrderItem = pgTable("purchase_order_item", {
   componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
-  quantityOrdered: real("quantity_ordered"),
-  sageQuantityReceived: real("sage_quantity_received"),
+  quantityOrdered: numericDecimal("quantity_ordered"),
+  sageQuantityReceived: numericDecimal("sage_quantity_received"),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -130,7 +130,7 @@ export const purchaseReceiptItem = pgTable("purchase_receipt_item", {
   batchId: integer("batch_id")
     .notNull()
     .references(() => batch.id),
-  quantity: real("quantity"),
+  quantity: numericDecimal("quantity"),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),

@@ -5,6 +5,7 @@ import { eq, schema } from "@repo/db";
 
 import { db } from "../../db";
 import { datatable } from "../../lib/datatable";
+import { decimal } from "../../lib/decimal";
 import { publicProcedure } from "../../trpc";
 
 const uniqueMovementInput = z.object({
@@ -14,7 +15,7 @@ const uniqueMovementInput = z.object({
 const createMovementInput = z.object({
   batchId: z.number(),
   locationId: z.number(),
-  quantity: z.number(),
+  quantity: decimal(),
 });
 
 const movementOverview = datatable(schema.base.batchMovementOverview);

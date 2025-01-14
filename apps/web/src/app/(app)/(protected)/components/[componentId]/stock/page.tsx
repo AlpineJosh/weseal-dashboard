@@ -46,7 +46,7 @@ export default function StockPage({
                 <Datatable.Cell id="locationName">
                   {data.locationName}
                 </Datatable.Cell>
-                <Datatable.NumberCell
+                <Datatable.DecimalCell
                   id="total"
                   value={data.total}
                   unit={data.componentUnit}

@@ -40,7 +40,7 @@ export default function BatchesPage({
                 <Datatable.Cell id="batchReference">
                   {batch.getDisplayId(data.batchReference, data.entryDate)}
                 </Datatable.Cell>
-                <Datatable.NumberCell
+                <Datatable.DecimalCell
                   id="totalQuantity"
                   value={data.totalQuantity ?? 0}
                   unit={data.componentUnit}

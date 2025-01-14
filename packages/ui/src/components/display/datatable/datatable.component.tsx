@@ -1,5 +1,6 @@
 "use client";
 
+import type Decimal from "decimal.js";
 import { format } from "date-fns";
 
 import { faFilter } from "@repo/pro-light-svg-icons";
@@ -129,28 +130,26 @@ const Root = <TData extends object>({
   );
 };
 
-export type NumberCellProps = CellProps & {
-  value: number;
+export type DecimalCellProps = CellProps & {
+  value: Decimal;
   precision?: number;
   unit?: string | null;
 };
 
-const NumberCell = ({
-  precision,
+const DecimalCell = ({
+  precision = 2,
   unit,
   value,
   className,
   ...props
-}: NumberCellProps) => {
+}: DecimalCellProps) => {
   return (
     <Table.Cell
       {...props}
       className={cn("flex flex-row items-baseline space-x-1", className)}
     >
       <span className="grow text-right tabular-nums">
-        {value.toLocaleString("en-GB", {
-          maximumFractionDigits: precision,
-        })}
+        {value.toFixed(precision)}
       </span>
       {unit !== undefined && (
         <span className="flex-0 w-12 truncate text-left text-xs text-content-muted">
@@ -178,6 +177,6 @@ export const Datatable = Object.assign(Root, {
   Column: Table.Column,
   Row: Table.Row,
   Cell: Table.Cell,
-  NumberCell,
+  DecimalCell,
   DateTimeCell,
 });

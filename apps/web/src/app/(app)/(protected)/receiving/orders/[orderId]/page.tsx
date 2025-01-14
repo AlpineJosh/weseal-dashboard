@@ -48,15 +48,15 @@ export default function ReceivingPage({
                       {item.componentId}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="quantityOrdered"
                     value={item.quantityOrdered}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="quantityReceived"
                     value={item.quantityReceived ?? 0}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="sageQuantityReceived"
                     value={item.sageQuantityReceived ?? 0}
                   />

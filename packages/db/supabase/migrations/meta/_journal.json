@@ -64,6 +64,13 @@
       "when": 1733161044009,
       "tag": "0010_familiar_echo",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1736779013144,
+      "tag": "0011_shiny_warstar",
+      "breakpoints": true
     }
   ]
 }

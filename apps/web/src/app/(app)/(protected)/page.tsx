@@ -7,7 +7,7 @@ import { StockTransferTaskForm } from "@/components/flows/StockTransferTask";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
-import { Datatable, Modal, useToast } from "@repo/ui/components/display";
+import { Datatable, Modal } from "@repo/ui/components/display";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Heading, Subheading, TextLink } from "@repo/ui/components/typography";
 
@@ -118,16 +118,18 @@ export default function DashboardPage() {
               {({ data }) => (
                 <Datatable.Row key={data.id}>
                   <Datatable.Cell id="componentId">
-                    <TextLink
-                      href={`/inventory/components/${data.componentId}`}
-                    >
+                    <TextLink href={`/components/${data.componentId}`}>
                       {data.componentId}
                     </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="batchReference">
                     {data.batchReference}
                   </Datatable.Cell>
-                  <Datatable.Cell id="quantity">{data.quantity}</Datatable.Cell>
+                  <Datatable.DecimalCell
+                    id="quantity"
+                    value={data.quantity}
+                    unit={data.componentUnit}
+                  />
                   <Datatable.Cell id="pickLocationName">
                     {data.pickLocationName}
                   </Datatable.Cell>
@@ -135,9 +137,7 @@ export default function DashboardPage() {
                     {data.putLocationName}
                   </Datatable.Cell>
                   <Datatable.Cell id="actions">
-                    <Button
-                      onPress={() => completeTaskItem({ id: data.id ?? 0 })}
-                    >
+                    <Button onPress={() => completeTaskItem({ id: data.id })}>
                       Mark Complete
                     </Button>
                   </Datatable.Cell>
@@ -187,27 +187,21 @@ export default function DashboardPage() {
                   <Datatable.Cell id="description">
                     {data.description}
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="totalQuantity"
                     value={data.totalQuantity}
                     unit={data.unit}
-                  >
-                    {data.totalQuantity}
-                  </Datatable.NumberCell>
-                  <Datatable.NumberCell
+                  />
+                  <Datatable.DecimalCell
                     id="sageQuantity"
                     value={data.sageQuantity}
                     unit={data.unit}
-                  >
-                    {data.sageQuantity}
-                  </Datatable.NumberCell>
-                  <Datatable.NumberCell
+                  />
+                  <Datatable.DecimalCell
                     id="sageDiscrepancy"
                     value={data.sageDiscrepancy}
                     unit={data.unit}
-                  >
-                    {data.sageDiscrepancy}
-                  </Datatable.NumberCell>
+                  />
                 </Datatable.Row>
               )}
             </Datatable.Body>

@@ -3,13 +3,13 @@ import {
   boolean,
   integer,
   pgTable,
-  real,
   serial,
   smallint,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { numericDecimal } from "../../lib/numeric";
 import { batch, location } from "./inventory.schema";
 
 export const department = pgTable("department", {
@@ -53,7 +53,7 @@ export const component = pgTable("component", {
   id: varchar("id").primaryKey(),
   description: varchar("description"),
   hasSubcomponents: boolean("has_subcomponents").notNull().default(false),
-  sageQuantity: real("sage_quantity").notNull(),
+  sageQuantity: numericDecimal("sage_quantity").notNull(),
   unit: varchar("unit"),
   categoryId: smallint("category_id").references(() => componentCategory.id),
   departmentId: integer("department_id").references(() => department.id),
@@ -101,7 +101,7 @@ export const subcomponent = pgTable("subcomponent", {
     .notNull()
     .references(() => component.id),
   level: smallint("level"),
-  quantity: real("quantity").notNull(),
+  quantity: numericDecimal("quantity").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),

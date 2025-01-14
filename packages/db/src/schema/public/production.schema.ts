@@ -1,14 +1,15 @@
+import Decimal from "decimal.js";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   integer,
   pgTable,
-  real,
   serial,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { numericDecimal } from "../../lib/numeric";
 import { component } from "./component.schema";
 import { batch, location } from "./inventory.schema";
 
@@ -56,11 +57,15 @@ export const productionBatchInput = pgTable("production_batch_input", {
   batchId: integer("batch_id")
     .notNull()
     .references(() => batch.id),
-  quantityAllocated: real("quantity_allocated").notNull().default(0),
+  quantityAllocated: numericDecimal("quantity_allocated")
+    .notNull()
+    .default(new Decimal(0)),
   locationId: integer("location_id")
     .notNull()
     .references(() => location.id),
-  quantityUsed: real("quantity_used").notNull().default(0),
+  quantityUsed: numericDecimal("quantity_used")
+    .notNull()
+    .default(new Decimal(0)),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -96,7 +101,9 @@ export const productionBatchOutput = pgTable("production_batch_output", {
   batchId: integer("batch_id")
     .notNull()
     .references(() => batch.id),
-  productionQuantity: real("production_quantity").notNull().default(0),
+  productionQuantity: numericDecimal("production_quantity")
+    .notNull()
+    .default(new Decimal(0)),
   productionDate: timestamp("production_date")
     .notNull()
     .default(sql`now()`),

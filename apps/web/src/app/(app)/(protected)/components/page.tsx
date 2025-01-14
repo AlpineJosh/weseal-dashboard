@@ -59,24 +59,24 @@ export default function ComponentsPage() {
                   <Datatable.Cell id="categoryName">
                     {data.categoryName}
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="totalQuantity"
                     value={data.totalQuantity}
                     unit={data.unit}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="allocatedQuantity"
                     value={data.allocatedQuantity}
                     unit={data.unit}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="sageQuantity"
                     value={data.sageQuantity}
                     unit={data.unit}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     className={cn(
-                      data.sageDiscrepancy !== 0 && "text-destructive",
+                      !data.sageDiscrepancy.isZero() && "text-destructive",
                     )}
                     id="sageDiscrepancy"
                     value={data.sageDiscrepancy}

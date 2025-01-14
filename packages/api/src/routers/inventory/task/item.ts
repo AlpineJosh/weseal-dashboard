@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { Decimal } from "decimal.js";
 import { z } from "zod";
 
 import type { InferInsertModel } from "@repo/db";
@@ -23,6 +24,7 @@ export const taskItemRouter = {
   list: publicProcedure
     .input(taskItemOverview.inputSchema)
     .query(async ({ input }) => {
+      console.log(input);
       return await taskItemOverview.query(input);
     }),
   complete: publicProcedure
@@ -53,7 +55,7 @@ export const taskItemRouter = {
           batchId: taskItem.batchId,
           userId: ctx.user.id,
           type: taskItem.task.type,
-          quantity: 0,
+          quantity: new Decimal(0),
           locationId: 0,
         };
 
@@ -68,7 +70,7 @@ export const taskItemRouter = {
               jobId: taskItem.task.productionJobId,
               batchId: taskItem.batchId,
               quantityAllocated: taskItem.quantity,
-              quantityUsed: 0,
+              quantityUsed: new Decimal(0),
               locationId: taskItem.pickLocationId,
             })
             .returning({ id: schema.base.productionBatchInput.id });
@@ -104,7 +106,7 @@ export const taskItemRouter = {
           await tx.insert(schema.base.batchMovement).values({
             ...movement,
             locationId: taskItem.pickLocationId,
-            quantity: -taskItem.quantity,
+            quantity: taskItem.quantity.neg(),
           });
         }
 

@@ -204,6 +204,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.4.3
       immer:
         specifier: ^10.1.1
         version: 10.1.1

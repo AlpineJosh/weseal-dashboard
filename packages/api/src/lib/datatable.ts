@@ -207,7 +207,6 @@ export const datatable = <T extends Table>(
           if (search.fields === undefined || search.fields.includes(key)) {
             partWhere.push(sql<boolean>`${column}::text ILIKE ${`%${part}%`}`);
           }
-          console.log(partWhere);
         });
         searchWhere.push(or(...partWhere));
       });
@@ -331,8 +330,6 @@ export const datatable = <T extends Table>(
         ? asc(columns[field as ColumnKey<T>] as AnyColumn)
         : desc(columns[field as ColumnKey<T>] as AnyColumn),
     );
-
-    console.log(where);
 
     const total = await db
       .select({ count: count() })

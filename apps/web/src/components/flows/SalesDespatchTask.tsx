@@ -1,6 +1,8 @@
 import { LocationPicker } from "@/components/LocationPicker";
+import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +19,7 @@ const taskSchema = z.object({
     z.object({
       componentId: z.string(),
       batchId: z.number(),
-      quantity: z.coerce.number(),
+      quantity: decimal(),
       pickLocationId: z.number(),
     }),
   ),
@@ -146,8 +148,9 @@ export function SalesDespatchTaskForm({
                   orderItems?.rows.map((item) => {
                     return {
                       id: item.componentId,
-                      quantity:
-                        item.quantityOrdered - (item.quantityDespatched ?? 0),
+                      quantity: item.quantityOrdered.sub(
+                        item.quantityDespatched ?? new Decimal(0),
+                      ),
                     };
                   }) ?? []
                 }

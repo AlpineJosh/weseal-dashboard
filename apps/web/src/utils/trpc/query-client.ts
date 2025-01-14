@@ -2,14 +2,22 @@ import {
   defaultShouldDehydrateQuery,
   QueryClient,
 } from "@tanstack/react-query";
+import Decimal from "decimal.js";
 import SuperJSON from "superjson";
+
+SuperJSON.registerCustom<Decimal, string>(
+  {
+    isApplicable: (v): v is Decimal => v instanceof Decimal,
+    serialize: (v) => v.toString(),
+    deserialize: (v) => new Decimal(v),
+  },
+  "decimal",
+);
 
 export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: {
-        // With SSR, we usually want to set some default staleTime
-        // above 0 to avoid refetching immediately on the client
         staleTime: 30 * 1000,
       },
       dehydrate: {

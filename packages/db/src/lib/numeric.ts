@@ -1,7 +1,8 @@
+import Decimal from "decimal.js";
 import { customType } from "drizzle-orm/pg-core";
 
 export const numericDecimal = customType<{
-  data: number;
+  data: Decimal;
   driverData: string;
 
   config?: {
@@ -9,16 +10,25 @@ export const numericDecimal = customType<{
     scale?: number;
   };
 
-  dataType: "number";
+  dataType: "decimal";
   columnType: "PgNumeric";
 }>({
   dataType(config = { precision: 15, scale: 6 }) {
     return `decimal(${config.precision},${config.scale})`;
   },
-  toDriver(value: number): string {
+  toDriver(value: Decimal | number | string | null): string {
+    if (value === null) {
+      return "NULL";
+    }
+    if (typeof value === "number") {
+      return value.toString();
+    }
+    if (typeof value === "string") {
+      return value;
+    }
     return value.toString();
   },
-  fromDriver(value: string): number {
-    return Number(value);
+  fromDriver(value: string): Decimal {
+    return new Decimal(value);
   },
 });

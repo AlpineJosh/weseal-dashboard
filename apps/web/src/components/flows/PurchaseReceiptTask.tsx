@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { useForm } from "react-hook-form";
 import { useImmer } from "use-immer";
@@ -50,9 +51,9 @@ export function PurchaseReceiptTaskForm({
     {
       componentId: string;
       componentDescription: string;
-      quantityOrdered: number;
-      quantityReceived: number | null;
-      quantity: number;
+      quantityOrdered: Decimal;
+      quantityReceived: Decimal | null;
+      quantity: Decimal;
     }[]
   >([]);
 
@@ -67,7 +68,9 @@ export function PurchaseReceiptTaskForm({
           componentDescription: item.componentDescription,
           quantityOrdered: item.quantityOrdered,
           quantityReceived: item.sageQuantityReceived,
-          quantity: item.quantityOrdered - (item.quantityReceived ?? 0),
+          quantity: item.quantityOrdered.sub(
+            item.quantityReceived ?? new Decimal(0),
+          ),
         })),
       );
     }
@@ -183,19 +186,19 @@ export function PurchaseReceiptTaskForm({
                     {data.componentDescription}
                   </Table.Cell>
                   <Table.Cell id="quantityOrdered">
-                    {data.quantityOrdered}
+                    {data.quantityOrdered.toFixed(6)}
                   </Table.Cell>
                   <Table.Cell id="quantityReceived">
                     <Input
                       type="number"
-                      defaultValue={data.quantity}
+                      defaultValue={data.quantity.toFixed(6)}
                       onChange={(e) => {
                         setItems((draft) => {
                           const item = draft.find(
                             (i) => i.componentId === data.componentId,
                           );
                           if (item) {
-                            item.quantityReceived = Number(e.target.value);
+                            item.quantityReceived = new Decimal(e.target.value);
                           }
                         });
                       }}

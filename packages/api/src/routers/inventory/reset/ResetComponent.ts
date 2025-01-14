@@ -121,9 +121,10 @@ export class ResetComponent {
 
     let remainingQuantity = new Decimal(transaction.quantity).negated();
 
-    const sortedBatches = this.batches.sort(
-      (a, b) => a.entryDate.getTime() - b.entryDate.getTime(),
-    );
+    const sortedBatches = this.batches
+      .sort((a, b) => a.entryDate.getTime() - b.entryDate.getTime())
+      .filter((batch) => batch.remainingQuantity.gt(0)); // Only consider batches with positive quantity
+
     if (sortedBatches.length === 0) {
       const movement = await this.createBatch(transaction);
       movements.push(movement);
@@ -131,25 +132,20 @@ export class ResetComponent {
       for (const batch of sortedBatches) {
         if (remainingQuantity.isZero()) break;
 
-        if (batch.remainingQuantity.lte(0)) continue;
-
-        let qtyToUse = new Decimal(0);
-
-        if (batch.remainingQuantity.lte(remainingQuantity)) {
-          qtyToUse = batch.remainingQuantity;
-          batch.remainingQuantity = new Decimal(0);
-          remainingQuantity = remainingQuantity.minus(qtyToUse);
-        } else {
-          qtyToUse = remainingQuantity;
-          batch.remainingQuantity = batch.remainingQuantity.minus(qtyToUse);
-          remainingQuantity = new Decimal(0);
-        }
+        const qtyToUse = Decimal.min(
+          batch.remainingQuantity,
+          remainingQuantity,
+        );
 
         if (qtyToUse.isZero()) continue;
 
+        batch.remainingQuantity = batch.remainingQuantity.minus(qtyToUse);
+
+        remainingQuantity = remainingQuantity.minus(qtyToUse);
+
         movements.push({
           batchId: batch.id,
-          quantity: qtyToUse.negated().toNumber(),
+          quantity: qtyToUse.negated(),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
@@ -157,23 +153,27 @@ export class ResetComponent {
       }
 
       if (remainingQuantity.gt(0)) {
+        // If we still have quantity to allocate, create a new batch or use oldest batch
         const batch = sortedBatches[0];
 
         if (!batch) {
-          console.error("No batch found to allocate to.");
-          throw new Error("No batch found to allocate to.");
+          const movement = await this.createBatch({
+            ...transaction,
+            quantity: remainingQuantity.negated(),
+          });
+          movements.push(movement);
+        } else {
+          batch.remainingQuantity =
+            batch.remainingQuantity.minus(remainingQuantity);
+
+          movements.push({
+            batchId: batch.id,
+            quantity: remainingQuantity.negated(),
+            date: transaction.date,
+            locationId: this.defaultLocationId,
+            type: transaction.type,
+          });
         }
-
-        batch.remainingQuantity =
-          batch.remainingQuantity.minus(remainingQuantity);
-
-        movements.push({
-          batchId: batch.id,
-          quantity: remainingQuantity.negated().toNumber(),
-          date: transaction.date,
-          locationId: this.defaultLocationId,
-          type: transaction.type,
-        });
       }
     }
 
@@ -206,7 +206,7 @@ export class ResetComponent {
 
     const movement = {
       batchId: batch.id,
-      quantity: transaction.quantity.toNumber(),
+      quantity: transaction.quantity,
       date: transaction.date,
       locationId: this.defaultLocationId,
       type: transaction.type,
@@ -247,7 +247,7 @@ export class ResetComponent {
 
         movements.push({
           batchId: batch.id,
-          quantity: qtyToAdd.toNumber(),
+          quantity: new Decimal(qtyToAdd),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
@@ -267,7 +267,7 @@ export class ResetComponent {
 
         movements.push({
           batchId: batch.id,
-          quantity: remainingQuantity.toNumber(),
+          quantity: new Decimal(remainingQuantity),
           date: transaction.date,
           locationId: this.defaultLocationId,
           type: transaction.type,
@@ -328,9 +328,11 @@ export class ResetComponent {
   async process() {
     console.log(`Processing component ${this.id}`);
 
-    const trans = this.transactions.sort(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
+    const trans = this.transactions.sort((a, b) => {
+      const dateComparison = a.date.getTime() - b.date.getTime();
+      if (dateComparison !== 0) return dateComparison;
+      return b.quantity.minus(a.quantity).toNumber();
+    });
 
     for (const transaction of trans) {
       if (transaction.quantity.gt(0)) {
@@ -405,7 +407,7 @@ export class ResetComponent {
       .values({
         receiptId,
         batchId: movement.batchId,
-        quantity: transaction.quantity.toNumber(),
+        quantity: transaction.quantity,
       })
       .returning({ id: schema.base.purchaseReceiptItem.id });
 
@@ -441,7 +443,7 @@ export class ResetComponent {
       .values({
         jobId: productionJobId,
         batchId: movement.batchId,
-        productionQuantity: transaction.quantity.toNumber(),
+        productionQuantity: transaction.quantity,
         productionDate: transaction.date,
       })
       .returning({ id: schema.base.productionBatchOutput.id });
@@ -500,7 +502,7 @@ export class ResetComponent {
         (item) =>
           ({
             batchId: item.batchId,
-            quantity: item.quantity,
+            quantity: new Decimal(item.quantity),
             date: transaction.date,
             locationId: this.defaultLocationId,
             type: "despatch",
@@ -531,8 +533,8 @@ export class ResetComponent {
         movements.map((m) => ({
           jobId,
           batchId: m.batchId,
-          quantityUsed: -m.quantity,
-          quantityAllocated: 0,
+          quantityUsed: m.quantity.negated(),
+          quantityAllocated: new Decimal(0),
           locationId: this.defaultLocationId,
         })),
       )
@@ -547,7 +549,7 @@ export class ResetComponent {
         (item) =>
           ({
             batchId: item.batchId,
-            quantity: -item.quantityUsed,
+            quantity: item.quantityUsed.negated(),
             date: transaction.date,
             locationId: this.defaultLocationId,
             type: "production",
@@ -567,14 +569,30 @@ export class ResetComponent {
 
     // Calculate current batch quantities per location
     const currentBatchLocations = new Map<number, Map<number, Decimal>>();
+    const batchTotalQuantities = new Map<number, Decimal>();
 
+    // Initialize batch quantities
+    for (const batch of sortedBatches) {
+      batchTotalQuantities.set(batch.id, new Decimal(0));
+    }
+
+    // Calculate current quantities from existing movements
     for (const movement of this.movements) {
+      // Update location quantities
       const locationMap =
         currentBatchLocations.get(movement.batchId) ??
         new Map<number, Decimal>();
       const currentQty = locationMap.get(movement.locationId) ?? new Decimal(0);
       locationMap.set(movement.locationId, currentQty.plus(movement.quantity));
       currentBatchLocations.set(movement.batchId, locationMap);
+
+      // Update total quantities
+      const totalQty =
+        batchTotalQuantities.get(movement.batchId) ?? new Decimal(0);
+      batchTotalQuantities.set(
+        movement.batchId,
+        totalQty.plus(movement.quantity),
+      );
     }
 
     if (this.bitSystemsTraceableItems.length > 0) {
@@ -621,9 +639,7 @@ export class ResetComponent {
 
       this.createBalancingMovements(currentBatchLocations, desiredLocations);
     } else {
-      // Handle non-traceable case
       const desiredTotalsByLocation = new Map<number, Decimal>();
-      const currentTotalsByLocation = new Map<number, Decimal>();
 
       // Calculate desired totals per location
       for (const item of this.bitSystemsItems) {
@@ -635,86 +651,75 @@ export class ResetComponent {
         );
       }
 
-      // Calculate current totals per location
-      for (const movement of this.movements) {
-        const currentQty =
-          currentTotalsByLocation.get(movement.locationId) ?? new Decimal(0);
-        currentTotalsByLocation.set(
-          movement.locationId,
-          currentQty.plus(movement.quantity),
-        );
-      }
+      // Filter and sort available batches
+      const availableBatches = sortedBatches
+        .filter((batch) => {
+          const totalQty = batchTotalQuantities.get(batch.id) ?? new Decimal(0);
+          return batch.remainingQuantity.minus(totalQty).gt(0);
+        })
+        .sort((a, b) => a.entryDate.getTime() - b.entryDate.getTime());
 
-      // Balance each location - use sortedBatches instead of this.batches
+      // Balance each location using available batches
       for (const [locationId, desiredQty] of desiredTotalsByLocation) {
-        const currentQty =
-          currentTotalsByLocation.get(locationId) ?? new Decimal(0);
+        if (locationId === this.defaultLocationId) continue;
+
+        const currentQty = Array.from(currentBatchLocations.values()).reduce(
+          (sum, locations) =>
+            sum.plus(locations.get(locationId) ?? new Decimal(0)),
+          new Decimal(0),
+        );
+
         const difference = desiredQty.minus(currentQty);
 
         if (!difference.isZero()) {
           let remainingDifference = difference;
 
-          for (const batch of sortedBatches) {
+          for (const batch of availableBatches) {
             if (remainingDifference.isZero()) break;
 
-            // Need to check batch's available quantity
-            const batchCurrentLocations =
+            const batchLocations =
               currentBatchLocations.get(batch.id) ?? new Map<number, Decimal>();
-            const batchTotalQty = Array.from(
-              batchCurrentLocations.values(),
-            ).reduce((sum, qty) => sum.plus(qty), new Decimal(0));
+            const batchLocationQty =
+              batchLocations.get(locationId) ?? new Decimal(0);
+            const totalBatchQty =
+              batchTotalQuantities.get(batch.id) ?? new Decimal(0);
 
-            // Calculate how much we can move from this batch
+            // Calculate available quantity considering both remaining and current quantities
+            const availableQty = batch.remainingQuantity.minus(totalBatchQty);
+
+            if (availableQty.lte(0)) continue;
+
+            // Calculate how much we can move
             const qtyToMove = Decimal.min(
               remainingDifference.abs(),
-              difference.gt(0) ? batch.remainingQuantity : batchTotalQty,
+              availableQty,
             );
 
             if (qtyToMove.isZero()) continue;
 
-            // Create dual-entry movements
-            if (difference.gt(0)) {
-              // Moving stock in from system
-              this.movements.push(
-                {
-                  batchId: batch.id,
-                  quantity: -qtyToMove.toNumber(),
-                  date: today,
-                  locationId: this.defaultLocationId,
-                  type: "correction",
-                },
-                {
-                  batchId: batch.id,
-                  quantity: qtyToMove.toNumber(),
-                  date: today,
-                  locationId,
-                  type: "correction",
-                },
-              );
-            } else {
-              // Moving stock out to system
-              this.movements.push(
-                {
-                  batchId: batch.id,
-                  quantity: -qtyToMove.toNumber(),
-                  date: today,
-                  locationId,
-                  type: "correction",
-                },
-                {
-                  batchId: batch.id,
-                  quantity: qtyToMove.toNumber(),
-                  date: today,
-                  locationId: this.defaultLocationId,
-                  type: "correction",
-                },
-              );
-            }
+            const quantity = remainingDifference.gt(0)
+              ? qtyToMove
+              : qtyToMove.negated();
 
-            remainingDifference = remainingDifference.minus(qtyToMove);
+            this.movements.push({
+              batchId: batch.id,
+              quantity: new Decimal(quantity),
+              date: today,
+              locationId,
+              type: "correction",
+            });
+
+            // Update tracking maps
+            batchLocations.set(locationId, batchLocationQty.plus(quantity));
+            currentBatchLocations.set(batch.id, batchLocations);
+
+            batchTotalQuantities.set(batch.id, totalBatchQty.plus(quantity));
+
+            remainingDifference = remainingDifference.minus(
+              remainingDifference.gt(0) ? qtyToMove : qtyToMove.negated(),
+            );
           }
 
-          // Add warning if we couldn't balance completely
           if (!remainingDifference.isZero()) {
             console.warn(
               `Unable to fully balance location ${locationId}. Remaining difference: ${remainingDifference.toString()}`,
@@ -778,14 +783,14 @@ export class ResetComponent {
             this.movements.push(
               {
                 batchId,
-                quantity: -qty.toNumber(),
+                quantity: qty.negated(),
                 date: today,
                 locationId,
                 type: "correction",
               },
               {
                 batchId,
-                quantity: qty.toNumber(),
+                quantity: new Decimal(qty),
                 date: today,
                 locationId: this.defaultLocationId,
                 type: "correction",
@@ -820,14 +825,14 @@ export class ResetComponent {
             this.movements.push(
               {
                 batchId,
-                quantity: -difference.toNumber(),
+                quantity: difference.negated(),
                 date: today,
                 locationId: this.defaultLocationId,
                 type: "correction",
               },
               {
                 batchId,
-                quantity: difference.toNumber(),
+                quantity: new Decimal(difference),
                 date: today,
                 locationId,
                 type: "correction",
@@ -838,14 +843,14 @@ export class ResetComponent {
             this.movements.push(
               {
                 batchId,
-                quantity: difference.toNumber(),
+                quantity: new Decimal(difference),
                 date: today,
                 locationId,
                 type: "correction",
               },
               {
                 batchId,
-                quantity: -difference.toNumber(),
+                quantity: difference.negated(),
                 date: today,
                 locationId: this.defaultLocationId,
                 type: "correction",
@@ -861,14 +866,14 @@ export class ResetComponent {
           this.movements.push(
             {
               batchId,
-              quantity: -desiredQty.toNumber(),
+              quantity: desiredQty.negated(),
               date: today,
               locationId: this.defaultLocationId,
               type: "correction",
             },
             {
               batchId,
-              quantity: desiredQty.toNumber(),
+              quantity: new Decimal(desiredQty),
               date: today,
               locationId,
               type: "correction",

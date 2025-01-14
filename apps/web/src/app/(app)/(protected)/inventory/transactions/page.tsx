@@ -87,7 +87,7 @@ export default function InventoryOverview() {
                   <Datatable.Cell id="location">
                     {data.locationName}
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="quantity"
                     value={data.quantity ?? 0}
                     unit={data.componentUnit}

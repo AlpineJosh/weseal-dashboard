@@ -60,17 +60,17 @@ export default function LocationPage({ params }: LocationPageProps) {
                   <Datatable.Cell id="batchReference">
                     {data.batchReference}
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="total"
                     value={data.total}
                     unit={data.componentUnit}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="free"
                     value={data.free}
                     unit={data.componentUnit}
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="allocated"
                     value={data.allocated}
                     unit={data.componentUnit}

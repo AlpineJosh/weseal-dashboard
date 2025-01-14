@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { api } from "@/utils/trpc/react";
+import { Decimal } from "decimal.js";
 import { useImmer } from "use-immer";
 
 import type { RouterInputs, RouterOutputs } from "@repo/api";
@@ -16,7 +17,7 @@ type TaskItem =
 
 export interface LocationPickerItemProps {
   id: string;
-  quantity: number;
+  quantity: Decimal;
   value: TaskItem[];
   onChange: (items: TaskItem[]) => void;
 }
@@ -24,7 +25,7 @@ export interface LocationPickerItemProps {
 export interface LocationPickerProps {
   components: {
     id: string;
-    quantity: number;
+    quantity: Decimal;
   }[];
   value: TaskItem[];
   onChange: (items: TaskItem[]) => void;
@@ -48,7 +49,7 @@ export const LocationPicker = ({
         <LocationPickerItem
           key={component.id}
           id={component.id}
-          quantity={+component.quantity.toFixed(6)}
+          quantity={component.quantity}
           value={value.filter((item) => item.componentId === component.id)}
           onChange={(items) => handleItemChange(items, component.id)}
         />
@@ -61,7 +62,7 @@ type LocationsType = NonNullable<
   RouterOutputs["inventory"]["quantity"]["rows"][number]
 > & {
   blocked: boolean;
-  using: number;
+  using: Decimal;
   overridden: boolean;
 };
 
@@ -79,7 +80,10 @@ const LocationPickerItem = ({
   });
 
   const totalAvailable = useMemo(() => {
-    return locations.reduce((acc, location) => acc + location.free, 0);
+    return locations.reduce(
+      (acc, location) => location.free.add(acc),
+      new Decimal(0),
+    );
   }, [locations]);
 
   const { data: quantities } = api.inventory.quantity.useQuery({
@@ -111,7 +115,7 @@ const LocationPickerItem = ({
         locs.push({
           ...quantity,
           blocked: false,
-          using: 0,
+          using: new Decimal(0),
           overridden: false,
         });
       }
@@ -132,24 +136,24 @@ const LocationPickerItem = ({
         if (location.blocked) {
           continue;
         }
-        remaining -= location.using;
+        remaining = remaining.sub(location.using);
         batches.push({
           pickLocationId: location.locationId,
           batchId: location.batchId,
-          quantity: +location.using.toFixed(6),
+          quantity: location.using,
           componentId: id,
         });
       }
     }
 
     for (const location of locations) {
-      if (!location.blocked && !location.overridden && remaining > 0) {
-        const use = Math.min(location.total, remaining);
-        remaining -= use;
+      if (!location.blocked && !location.overridden && remaining.gt(0)) {
+        const use = Decimal.min(location.total, remaining);
+        remaining = remaining.sub(use);
         batches.push({
           pickLocationId: location.locationId,
           batchId: location.batchId,
-          quantity: +use.toFixed(6),
+          quantity: use,
           componentId: id,
         });
       }
@@ -180,7 +184,7 @@ const LocationPickerItem = ({
     return existing?.quantity ?? 0;
   };
 
-  const updateUsing = (location: LocationsType, quantity: number) => {
+  const updateUsing = (location: LocationsType, quantity: Decimal) => {
     setLocations((draft) => {
       const loc = draft.find(
         (l) =>
@@ -210,7 +214,7 @@ const LocationPickerItem = ({
           <Strong
             className={cn(totalAvailable < quantity && "text-destructive")}
           >
-            {totalAvailable}
+            {totalAvailable.toFixed(6)}
           </Strong>
         </Text>
         <span className="flex flex-row items-baseline space-x-2">
@@ -218,9 +222,9 @@ const LocationPickerItem = ({
           <Input
             type="number"
             className="w-24"
-            value={quantity}
+            value={quantity.toFixed(6)}
             min={0}
-            onChange={(e) => setQuantity(e.target.valueAsNumber)}
+            onChange={(e) => setQuantity(new Decimal(e.target.valueAsNumber))}
           />
         </span>
       </div>
@@ -236,7 +240,7 @@ const LocationPickerItem = ({
                   if (loc) {
                     loc.blocked = !loc.blocked;
                     loc.overridden = false;
-                    loc.using = 0;
+                    loc.using = new Decimal(0);
                   }
                 });
               }}
@@ -255,7 +259,7 @@ const LocationPickerItem = ({
               </Text>
             </span>
             <Text>
-              Available: <Strong>{location.free}</Strong>
+              Available: <Strong>{location.free.toFixed(6)}</Strong>
             </Text>
             <span className="flex flex-row items-center justify-end space-x-2 text-content-muted">
               <Text>Using:</Text>
@@ -263,10 +267,10 @@ const LocationPickerItem = ({
                 type="number"
                 className="flex-1"
                 min={0}
-                max={location.free}
-                value={getUsing(location)}
+                max={location.free.toFixed(6)}
+                value={getUsing(location).toFixed(6)}
                 onChange={(e) => {
-                  updateUsing(location, e.target.valueAsNumber);
+                  updateUsing(location, new Decimal(e.target.valueAsNumber));
                 }}
               />
             </span>

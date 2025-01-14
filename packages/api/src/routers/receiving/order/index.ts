@@ -5,6 +5,7 @@ import { eq, schema } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
+import { decimal } from "../../../lib/decimal";
 import { publicProcedure } from "../../../trpc";
 import { purchaseOrderItemRouter } from "./item";
 
@@ -20,7 +21,7 @@ const receiveOrderInput = z.object({
   items: z.array(
     z.object({
       componentId: z.string(),
-      quantity: z.number(),
+      quantity: decimal(),
     }),
   ),
 });

@@ -37,7 +37,7 @@ export default function SubcomponentsPage({
             <Datatable.Cell id="description">
               {data.subcomponent.description}
             </Datatable.Cell>
-            <Datatable.NumberCell
+            <Datatable.DecimalCell
               id="total"
               value={data.quantity}
               unit={data.subcomponent.unit}

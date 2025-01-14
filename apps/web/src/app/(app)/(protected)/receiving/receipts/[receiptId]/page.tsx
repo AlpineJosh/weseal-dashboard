@@ -54,7 +54,7 @@ export default function ReceiptsOverview({
                   <Datatable.Cell id="componentDescription">
                     {data.componentDescription}
                   </Datatable.Cell>
-                  <Datatable.NumberCell id="quantity" value={data.quantity} />
+                  <Datatable.DecimalCell id="quantity" value={data.quantity} />
                 </Datatable.Row>
               )}
             </Datatable.Body>

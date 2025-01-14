@@ -1,8 +1,18 @@
 import { initTRPC } from "@trpc/server";
-import superjson from "superjson";
+import Decimal from "decimal.js";
+import SuperJSON from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "./db";
+
+SuperJSON.registerCustom<Decimal, string>(
+  {
+    isApplicable: (v): v is Decimal => v instanceof Decimal,
+    serialize: (v) => v.toString(),
+    deserialize: (v) => new Decimal(v),
+  },
+  "decimal",
+);
 
 export interface TRPCContext {
   db: typeof db;
@@ -17,7 +27,7 @@ export const createTRPCContext = (user: { id: string }): TRPCContext => {
 };
 
 const t = initTRPC.context<TRPCContext>().create({
-  transformer: superjson,
+  transformer: SuperJSON,
   errorFormatter: ({ shape, error }) => ({
     ...shape,
     data: {

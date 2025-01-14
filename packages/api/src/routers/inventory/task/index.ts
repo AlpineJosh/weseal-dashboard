@@ -5,6 +5,7 @@ import { eq, schema, sql } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
+import { decimal } from "../../../lib/decimal";
 import { publicProcedure } from "../../../trpc";
 import { taskItemRouter } from "./item";
 
@@ -16,7 +17,7 @@ const taskItemInput = z.object({
   componentId: z.string(),
   batchId: z.number(),
   pickLocationId: z.number(),
-  quantity: z.number(),
+  quantity: decimal(),
 });
 
 const taskInput = z.object({
@@ -25,7 +26,7 @@ const taskInput = z.object({
 });
 
 const productionTaskInput = taskInput.extend({
-  quantity: z.number(),
+  quantity: decimal(),
   putLocationId: z.number(),
 });
 
@@ -100,7 +101,7 @@ export const taskRouter = {
               .insert(schema.base.productionJob)
               .values({
                 batchNumber: input.batchReference,
-                targetQuantity: input.quantity,
+                targetQuantity: input.quantity.toNumber(),
                 outputComponentId: input.outputComponentId,
                 outputLocationId: input.outputLocationId,
               })

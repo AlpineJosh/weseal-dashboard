@@ -1,3 +1,4 @@
+import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
@@ -11,7 +12,7 @@ import { Field, Form } from "@repo/ui/components/form";
 const taskSchema = z.object({
   componentId: z.string(),
   locationId: z.string(),
-  quantity: z.any(),
+  quantity: decimal(),
 });
 
 export function StockAdjustmentTaskForm({
@@ -48,7 +49,7 @@ export function StockAdjustmentTaskForm({
     createMovement({
       batchId,
       locationId: locId,
-      quantity: Number(quantity),
+      quantity,
     });
     onSave();
   };

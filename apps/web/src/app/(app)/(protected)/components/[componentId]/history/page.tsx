@@ -70,7 +70,7 @@ export default function HistoryPage({
                 <Datatable.Cell id="locationName">
                   {data.locationName}
                 </Datatable.Cell>
-                <Datatable.NumberCell
+                <Datatable.DecimalCell
                   id="quantity"
                   value={data.quantity}
                   unit={data.componentUnit}

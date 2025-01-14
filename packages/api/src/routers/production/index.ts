@@ -1,10 +1,12 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import Decimal from "decimal.js";
 import { z } from "zod";
 
 import { eq, schema } from "@repo/db";
 
 import { db } from "../../db";
 import { datatable } from "../../lib/datatable";
+import { decimal } from "../../lib/decimal";
 import { publicProcedure } from "../../trpc";
 import { productionJobInputRouter } from "./input";
 
@@ -28,7 +30,7 @@ export const updateProductionJobInput = z.object({
 
 export const jobOutputInput = z.object({
   id: z.number(),
-  quantity: z.number(),
+  quantity: decimal(),
 });
 
 const listProductionJobInput = datatable(schema.base.productionJobOverview);
@@ -115,7 +117,7 @@ export const productionRouter = {
     });
 
     for (const subcomponent of subcomponents) {
-      let quantityRequired = subcomponent.quantity * input.quantity;
+      let quantityRequired = subcomponent.quantity.mul(input.quantity);
       const inputs = batchInputs
         .filter((input) => input.batch.componentId === subcomponent.componentId)
         .sort(
@@ -123,20 +125,20 @@ export const productionRouter = {
         );
 
       for (const input of inputs) {
-        const quantityUsed = Math.min(
+        const quantityUsed = Decimal.min(
           quantityRequired,
-          input.quantityAllocated - input.quantityUsed,
+          input.quantityAllocated.sub(input.quantityUsed),
         );
 
         await db
           .update(schema.base.productionBatchInput)
           .set({
-            quantityUsed: input.quantityUsed + quantityUsed,
+            quantityUsed: input.quantityUsed.add(quantityUsed),
           })
           .where(eq(schema.base.batch.id, input.batch.id));
         await db.insert(schema.base.batchMovement).values({
           batchId: input.batch.id,
-          quantity: -quantityUsed,
+          quantity: quantityUsed.neg(),
           date: new Date(),
           locationId: job.outputLocationId,
           userId: "",
@@ -144,10 +146,10 @@ export const productionRouter = {
           productionBatchInputId: input.id,
         });
 
-        quantityRequired -= quantityUsed;
+        quantityRequired = quantityRequired.sub(quantityUsed);
       }
 
-      if (quantityRequired <= 0) {
+      if (quantityRequired.lte(0)) {
         break;
       }
     }

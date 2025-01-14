@@ -1,5 +1,7 @@
+import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,7 +14,7 @@ const taskSchema = z.object({
   componentId: z.string(),
   productionJobId: z.coerce.number(),
   putLocationId: z.coerce.number(),
-  quantity: z.coerce.number(),
+  quantity: decimal(),
 });
 
 export function ProductionOutTaskForm({
@@ -28,7 +30,7 @@ export function ProductionOutTaskForm({
       componentId: undefined,
       productionJobId: undefined,
       putLocationId: undefined,
-      quantity: 1,
+      quantity: new Decimal(1),
     },
   });
 

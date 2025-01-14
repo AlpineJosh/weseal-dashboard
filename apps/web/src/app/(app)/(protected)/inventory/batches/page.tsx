@@ -63,14 +63,14 @@ export default function BatchOverview() {
                   <Datatable.Cell id="entryDate">
                     {data.entryDate?.toLocaleDateString()}
                   </Datatable.Cell>
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="totalQuantity"
                     value={data.totalQuantity ?? 0}
                     unit={data.unit}
                     precision={6}
                     className="flex flex-row items-baseline space-x-1"
                   />
-                  <Datatable.NumberCell
+                  <Datatable.DecimalCell
                     id="allocatedQuantity"
                     value={data.allocatedQuantity ?? 0}
                     unit={data.unit}

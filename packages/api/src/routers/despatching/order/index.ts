@@ -5,6 +5,7 @@ import { eq, schema } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatable";
+import { decimal } from "../../../lib/decimal";
 import { publicProcedure } from "../../../trpc";
 import { salesOrderItemRouter } from "./item";
 
@@ -21,7 +22,7 @@ const despatchOrderInput = z.object({
     z.object({
       pickLocationId: z.number(),
       batchId: z.number(),
-      quantity: z.number(),
+      quantity: decimal(),
     }),
   ),
 });
@@ -75,7 +76,7 @@ export const salesOrderRouter = {
 
           await tx.insert(schema.base.batchMovement).values({
             batchId: item.batchId,
-            quantity: -item.quantity,
+            quantity: item.quantity.neg(),
             userId: "",
             type: "despatch",
             locationId: item.pickLocationId,
