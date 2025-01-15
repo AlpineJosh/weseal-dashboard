@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import { faPlus } from "@repo/pro-solid-svg-icons";
 import { Combobox, Input, Select } from "@repo/ui/components/control";
+import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider, Icon } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 import { Heading } from "@repo/ui/components/typography";
@@ -54,6 +55,7 @@ export const ProductionTaskForm = ({
   onSave,
 }: ProductionTaskFormProps) => {
   const utils = api.useUtils();
+  const { addToast } = useToast();
 
   const form = useForm<z.infer<typeof productionTaskInput>>({
     resolver: zodResolver(productionTaskInput),
@@ -104,6 +106,10 @@ export const ProductionTaskForm = ({
   const handleSubmit = (input: z.infer<typeof productionTaskInput>) => {
     createTask(input);
     onSave();
+    addToast({
+      type: "success",
+      message: "Production Task Created",
+    });
   };
 
   return (

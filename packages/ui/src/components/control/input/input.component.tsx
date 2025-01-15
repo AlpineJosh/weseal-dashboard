@@ -108,9 +108,9 @@ export const Input = ({ className, step = "any", ...props }: InputProps) => {
             className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
             onClick={() => {
               if (ref.current) {
-                const value = ref.current.valueAsNumber;
+                const value = ref.current.value;
                 const increment = step === "any" ? 1 : step;
-                ref.current.valueAsNumber = value + increment;
+                ref.current.value = (Number(value) + increment).toString();
                 ref.current.dispatchEvent(
                   new Event("input", { bubbles: true }),
                 );
@@ -125,9 +125,9 @@ export const Input = ({ className, step = "any", ...props }: InputProps) => {
             className="absolute right-0 top-0 aspect-square h-full"
             onClick={() => {
               if (ref.current) {
-                const value = ref.current.valueAsNumber;
+                const value = ref.current.value;
                 const increment = step === "any" ? 1 : step;
-                ref.current.valueAsNumber = value - increment;
+                ref.current.value = (Number(value) - increment).toString();
                 ref.current.dispatchEvent(
                   new Event("input", { bubbles: true }),
                 );

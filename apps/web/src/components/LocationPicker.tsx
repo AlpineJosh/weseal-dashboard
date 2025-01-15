@@ -132,30 +132,31 @@ const LocationPickerItem = ({
     let remaining = quantity;
 
     for (const location of locations) {
-      if (location.overridden) {
-        if (location.blocked) {
-          continue;
-        }
-        remaining = remaining.sub(location.using);
+      if (location.overridden && !location.blocked && location.using.gt(0)) {
         batches.push({
           pickLocationId: location.locationId,
           batchId: location.batchId,
           quantity: location.using,
           componentId: id,
         });
+        remaining = remaining.sub(location.using);
       }
     }
 
-    for (const location of locations) {
-      if (!location.blocked && !location.overridden && remaining.gt(0)) {
-        const use = Decimal.min(location.total, remaining);
-        remaining = remaining.sub(use);
-        batches.push({
-          pickLocationId: location.locationId,
-          batchId: location.batchId,
-          quantity: use,
-          componentId: id,
-        });
+    if (remaining.gt(0)) {
+      for (const location of locations) {
+        if (!location.blocked && !location.overridden && remaining.gt(0)) {
+          const use = Decimal.min(location.free, remaining);
+          if (use.gt(0)) {
+            remaining = remaining.sub(use);
+            batches.push({
+              pickLocationId: location.locationId,
+              batchId: location.batchId,
+              quantity: use,
+              componentId: id,
+            });
+          }
+        }
       }
     }
 
@@ -167,13 +168,13 @@ const LocationPickerItem = ({
             batch.pickLocationId === newBatch.pickLocationId &&
             batch.batchId === newBatch.batchId,
         );
-        return !existingBatch || existingBatch.quantity !== newBatch.quantity;
+        return !existingBatch || !existingBatch.quantity.eq(newBatch.quantity);
       });
 
     if (hasChanges) {
       onChange(batches);
     }
-  }, [locations, quantity, onChange, value, id]);
+  }, [locations, quantity, id]);
 
   const getUsing = (location: LocationsType) => {
     const existing = value.find(
@@ -209,10 +210,10 @@ const LocationPickerItem = ({
         <Text className="text-muted-foreground grow truncate text-sm">
           {component.description}
         </Text>
-        <Text className={cn(totalAvailable < quantity && "text-destructive")}>
+        <Text className={cn(totalAvailable.lt(quantity) && "text-destructive")}>
           Available:{" "}
           <Strong
-            className={cn(totalAvailable < quantity && "text-destructive")}
+            className={cn(totalAvailable.lt(quantity) && "text-destructive")}
           >
             {totalAvailable.toFixed(6)}
           </Strong>
@@ -224,7 +225,7 @@ const LocationPickerItem = ({
             className="w-24"
             value={quantity.toFixed(6)}
             min={0}
-            onChange={(e) => setQuantity(new Decimal(e.target.valueAsNumber))}
+            onChange={(e) => setQuantity(new Decimal(e.target.value))}
           />
         </span>
       </div>
@@ -270,7 +271,7 @@ const LocationPickerItem = ({
                 max={location.free.toFixed(6)}
                 value={getUsing(location).toFixed(6)}
                 onChange={(e) => {
-                  updateUsing(location, new Decimal(e.target.valueAsNumber));
+                  updateUsing(location, new Decimal(e.target.value));
                 }}
               />
             </span>
