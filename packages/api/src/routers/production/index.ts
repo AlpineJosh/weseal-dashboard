@@ -97,100 +97,104 @@ export const productionRouter = {
         .where(eq(schema.base.productionJob.id, input.id))
         .returning();
     }),
-  process: publicProcedure.input(jobOutputInput).mutation(async ({ input }) => {
-    const job = await db.query.productionJob.findFirst({
-      where: eq(schema.base.productionJob.id, input.id),
-    });
-    if (!job) {
-      throw new Error("Job not found");
-    }
-
-    const subcomponents = await db.query.subcomponent.findMany({
-      where: eq(schema.base.subcomponent.componentId, job.outputComponentId),
-    });
-
-    const batchInputs = await db.query.productionBatchInput.findMany({
-      where: eq(schema.base.productionBatchInput.jobId, job.id),
-      with: {
-        batch: true,
-      },
-    });
-
-    for (const subcomponent of subcomponents) {
-      let quantityRequired = subcomponent.quantity.mul(input.quantity);
-      const inputs = batchInputs
-        .filter((input) => input.batch.componentId === subcomponent.componentId)
-        .sort(
-          (a, b) => a.batch.entryDate.getTime() - b.batch.entryDate.getTime(),
-        );
-
-      for (const input of inputs) {
-        const quantityUsed = Decimal.min(
-          quantityRequired,
-          input.quantityAllocated.sub(input.quantityUsed),
-        );
-
-        await db
-          .update(schema.base.productionBatchInput)
-          .set({
-            quantityUsed: input.quantityUsed.add(quantityUsed),
-          })
-          .where(eq(schema.base.batch.id, input.batch.id));
-        await db.insert(schema.base.batchMovement).values({
-          batchId: input.batch.id,
-          quantity: quantityUsed.neg(),
-          date: new Date(),
-          locationId: job.outputLocationId,
-          userId: "",
-          type: "production",
-          productionBatchInputId: input.id,
-        });
-
-        quantityRequired = quantityRequired.sub(quantityUsed);
+  process: publicProcedure
+    .input(jobOutputInput)
+    .mutation(async ({ input, ctx }) => {
+      const job = await db.query.productionJob.findFirst({
+        where: eq(schema.base.productionJob.id, input.id),
+      });
+      if (!job) {
+        throw new Error("Job not found");
       }
 
-      if (quantityRequired.lte(0)) {
-        break;
+      const subcomponents = await db.query.subcomponent.findMany({
+        where: eq(schema.base.subcomponent.componentId, job.outputComponentId),
+      });
+
+      const batchInputs = await db.query.productionBatchInput.findMany({
+        where: eq(schema.base.productionBatchInput.jobId, job.id),
+        with: {
+          batch: true,
+        },
+      });
+
+      for (const subcomponent of subcomponents) {
+        let quantityRequired = subcomponent.quantity.mul(input.quantity);
+        const inputs = batchInputs
+          .filter(
+            (input) => input.batch.componentId === subcomponent.componentId,
+          )
+          .sort(
+            (a, b) => a.batch.entryDate.getTime() - b.batch.entryDate.getTime(),
+          );
+
+        for (const input of inputs) {
+          const quantityUsed = Decimal.min(
+            quantityRequired,
+            input.quantityAllocated.sub(input.quantityUsed),
+          );
+
+          await db
+            .update(schema.base.productionBatchInput)
+            .set({
+              quantityUsed: input.quantityUsed.add(quantityUsed),
+            })
+            .where(eq(schema.base.batch.id, input.batch.id));
+          await db.insert(schema.base.batchMovement).values({
+            batchId: input.batch.id,
+            quantity: quantityUsed.neg(),
+            date: new Date(),
+            locationId: job.outputLocationId,
+            userId: ctx.user.id,
+            type: "production",
+            productionBatchInputId: input.id,
+          });
+
+          quantityRequired = quantityRequired.sub(quantityUsed);
+        }
+
+        if (quantityRequired.lte(0)) {
+          break;
+        }
       }
-    }
 
-    const outputBatches = await db
-      .insert(schema.base.batch)
-      .values({
-        componentId: job.outputComponentId,
-        batchReference: job.batchNumber,
-        entryDate: new Date(),
-      })
-      .onConflictDoNothing()
-      .returning();
+      const outputBatches = await db
+        .insert(schema.base.batch)
+        .values({
+          componentId: job.outputComponentId,
+          batchReference: job.batchNumber,
+          entryDate: new Date(),
+        })
+        .onConflictDoNothing()
+        .returning();
 
-    const outputBatch = outputBatches[0];
+      const outputBatch = outputBatches[0];
 
-    if (!outputBatch) {
-      throw new Error("Failed to create output batch");
-    }
+      if (!outputBatch) {
+        throw new Error("Failed to create output batch");
+      }
 
-    const batchOutput = await db
-      .insert(schema.base.productionBatchOutput)
-      .values({
-        jobId: job.id,
+      const batchOutput = await db
+        .insert(schema.base.productionBatchOutput)
+        .values({
+          jobId: job.id,
+          batchId: outputBatch.id,
+          productionQuantity: input.quantity,
+          productionDate: new Date(),
+        })
+        .returning();
+
+      await db.insert(schema.base.batchMovement).values({
         batchId: outputBatch.id,
-        productionQuantity: input.quantity,
-        productionDate: new Date(),
-      })
-      .returning();
+        quantity: input.quantity,
+        date: new Date(),
+        locationId: job.outputLocationId,
+        userId: "",
+        type: "production",
+      });
 
-    await db.insert(schema.base.batchMovement).values({
-      batchId: outputBatch.id,
-      quantity: input.quantity,
-      date: new Date(),
-      locationId: job.outputLocationId,
-      userId: "",
-      type: "production",
-    });
-
-    return batchOutput;
-  }),
+      return batchOutput;
+    }),
   inputs: productionJobInputRouter,
 } satisfies TRPCRouterRecord;
 
