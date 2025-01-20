@@ -189,7 +189,7 @@ export const productionRouter = {
         quantity: input.quantity,
         date: new Date(),
         locationId: job.outputLocationId,
-        userId: "",
+        userId: ctx.user.id,
         type: "production",
       });
 
