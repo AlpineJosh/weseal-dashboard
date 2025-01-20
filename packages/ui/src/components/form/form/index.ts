@@ -1,2 +1,3 @@
-export { ManagedForm, Form } from "./form.component";
-export type { ManagedFormProps, FormProps } from "./form.component";
+export { Form } from "./form.component";
+export type { FormProps } from "./form.component";
+export { useForm } from "./form.hook";

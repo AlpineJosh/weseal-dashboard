@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import type { InputProps } from "./input.component";
-import { Input } from "./input.component";
+import type { TextInputProps } from "./input.component";
+import { TextInput } from "./input.component";
 
-const meta: Meta<InputProps> = {
+const meta: Meta<TextInputProps> = {
   title: "Control/Input",
-  component: Input,
+  component: TextInput,
 };
 
 export default meta;
 
-type Story = StoryObj<InputProps>;
+type Story = StoryObj<TextInputProps>;
 
 export const Default: Story = {
   args: { className: "w-[200px]" },

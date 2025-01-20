@@ -1,29 +1,37 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 
-import type { ListboxProps } from "./listbox.component";
-import { Listbox } from "./listbox.component";
+import type { ListboxProps } from "./listbox.new";
+import { Option } from "../option/option.component";
+import { Listbox } from "./listbox.new";
 
-const meta: Meta<ListboxProps<object>> = {
+const meta: Meta<ListboxProps<string, { id: string; name: string }>> = {
   title: "Control/Listbox",
   component: Listbox,
 };
 
 export default meta;
 
-type Story = StoryObj<ListboxProps<{ id: string; name: string }>>;
+type Story = StoryObj<ListboxProps<string, { id: string; name: string }>>;
+
+const options = [
+  { id: "chocolate", name: "Chocolate" },
+  { id: "mint", name: "Mint" },
+  { id: "strawberry", name: "Strawberry" },
+  { id: "vanilla", name: "Vanilla" },
+];
 
 export const Default: Story = {
   render: (args) => (
     <Listbox aria-label="Ice cream flavor" {...args}>
-      <Listbox.Option id="chocolate">Chocolate</Listbox.Option>
-      <Listbox.Option id="mint">Mint</Listbox.Option>
-      <Listbox.Option id="strawberry">Strawberry</Listbox.Option>
-      <Listbox.Option id="vanilla">Vanilla</Listbox.Option>
+      {(option) => (
+        <Option key={option.id} value={option.id}>
+          {option.name}
+        </Option>
+      )}
     </Listbox>
   ),
   args: {
     className: "bg-white shadow-md",
-    selectionMode: "single",
+    options,
   },
 };

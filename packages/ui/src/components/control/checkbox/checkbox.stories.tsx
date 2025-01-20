@@ -22,22 +22,14 @@ export const Default: Story = {
 export const Selected: Story = {
   ...Default,
   args: {
-    isSelected: true,
-  },
-};
-
-export const Indeterminate: Story = {
-  ...Default,
-  args: {
-    isSelected: true,
-    isIndeterminate: true,
+    value: true,
   },
 };
 
 export const Disabled: Story = {
   ...Default,
   args: {
-    isDisabled: true,
-    isSelected: true,
+    disabled: true,
+    value: true,
   },
 };

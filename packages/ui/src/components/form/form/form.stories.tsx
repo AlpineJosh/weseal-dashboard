@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 
 import type { FormProps } from "./form.component";
 import { Checkbox, Combobox, Input, Select, Switch } from "../../control";
-import { AsyncCombobox } from "../../control/combobox/combobox.component";
-import { Field, FieldGroup } from "../field";
+import { Description } from "../description";
+import { Field } from "../field";
+import { Label } from "../label";
 import { Form } from "./form.component";
 
 const meta: Meta<FormProps<FieldValues>> = {
@@ -34,12 +35,12 @@ const DefaultForm = (props: FormProps<FieldValues>) => {
 
   return (
     <div className="flex flex-row gap-12">
-      <Form {...props} form={form}>
+      {/* <Form {...props} form={form}>
         <FieldGroup>
           <Field name="text">
-            <Field.Label>Text</Field.Label>
-            <Field.Description>Text description</Field.Description>
-            <Field.Control>
+            <Label>Text</Label>
+            <Description>Text description</Description>
+            <Control>
               <Input type="text" />
             </Field.Control>
             <Field.Message>Text help</Field.Message>
@@ -122,7 +123,7 @@ const DefaultForm = (props: FormProps<FieldValues>) => {
             </Field.Control>
           </Field>
         </FieldGroup>
-      </Form>
+      </Form> */}
       <div className="w-64">
         <pre>{JSON.stringify(values, null, 2)}</pre>
       </div>

@@ -8,29 +8,33 @@ import * as Aria from "react-aria-components";
 import { faMinus, faPlus } from "@repo/pro-solid-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
 
+import type { ControlProps } from "../../form";
+import type { ControlInputProps } from "../types";
 import { Icon } from "../../element/icon/icon.component";
+import { Control } from "../../form";
+import { useControllable } from "../../utility/hooks/useControllable.hook";
 
-const dateTypes = ["date", "datetime-local", "month", "time", "week"] as const;
-type DateType = (typeof dateTypes)[number];
-type InputType =
-  | "email"
-  | "number"
-  | "password"
-  | "search"
-  | "tel"
-  | "text"
-  | "url"
-  | DateType;
+// const dateTypes = ["date", "datetime-local", "month", "time", "week"] as const;
+// type DateType = (typeof dateTypes)[number];
+// type InputType =
+//   | "email"
+//   | "number"
+//   | "password"
+//   | "search"
+//   | "tel"
+//   | "text"
+//   | "url"
+//   | DateType;
 
 const variants = {
-  control: cva([
-    "relative block w-full overflow-hidden",
-    "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
-    "dark:before:hidden",
-    "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-ring",
-    "has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-content/5 before:has-[[data-disabled]]:shadow-none",
-    "before:has-[[data-invalid]]:shadow-red-500/10",
-  ]),
+  // control: cva([
+  //   "relative block w-full overflow-hidden",
+  //   "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
+  //   "dark:before:hidden",
+  //   "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-ring",
+  //   "has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-content/5 before:has-[[data-disabled]]:shadow-none",
+  //   "before:has-[[data-invalid]]:shadow-red-500/10",
+  // ]),
   input: cva(
     [
       // Basic layout
@@ -81,66 +85,73 @@ const variants = {
   ),
 };
 
-export type InputProps = {
-  type: InputType;
-  step?: number | "any";
-} & Omit<ComponentPropsWithRef<"input">, "type" | "step">;
+export type TextInputProps = ControlInputProps<string>;
 
-export const Input = ({ className, step = "any", ...props }: InputProps) => {
-  const ref = useRef<HTMLInputElement>(null);
+export const TextInput = ({
+  value,
+  onChange,
+  defaultValue = "",
+  ...props
+}: TextInputProps) => {
+  const [controlledValue, setControlledValue] = useControllable({
+    value,
+    onChange,
+    defaultValue,
+  });
   return (
-    <span data-slot="control" className={cn([variants.control(), className])}>
-      <Aria.Input
-        ref={ref}
-        {...props}
+    <Control {...props}>
+      <input
+        type="text"
+        value={controlledValue}
+        onChange={(event) => setControlledValue(event.target.value)}
         className={cn(
           variants.input({
-            isDate: dateTypes.includes(props.type as DateType),
-            isNumeric: props.type === "number",
+            // isDate: dateTypes.includes(props.type as DateType),
+            // isNumeric: props.type === "number",
           }),
         )}
-        step={props.type === "number" ? step : undefined}
+        // step={props.type === "number" ? step : undefined}
       />
-      {props.type === "number" && (
-        <>
-          <button
-            type="button"
-            className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
-            onClick={() => {
-              if (ref.current) {
-                const value = ref.current.value;
-                const increment = step === "any" ? 1 : step;
-                ref.current.value = (Number(value) + increment).toString();
-                ref.current.dispatchEvent(
-                  new Event("input", { bubbles: true }),
-                );
-              }
-            }}
-            aria-label="Increment"
-          >
-            <Icon icon={faPlus} />
-          </button>
-          <button
-            type="button"
-            className="absolute right-0 top-0 aspect-square h-full"
-            onClick={() => {
-              if (ref.current) {
-                const value = ref.current.value;
-                const increment = step === "any" ? 1 : step;
-                ref.current.value = (Number(value) - increment).toString();
-                ref.current.dispatchEvent(
-                  new Event("input", { bubbles: true }),
-                );
-              }
-            }}
-            aria-label="Increment"
-          >
-            <Icon icon={faMinus} />
-          </button>
-        </>
-      )}
-    </span>
+      {/* {props.type === "number" && (
+            <>
+              <button
+                type="button"
+                className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
+                onClick={() => {
+                  if (ref.current) {
+                    const value = ref.current.value;
+                    const increment = step === "any" ? 1 : step;
+                    ref.current.value = (Number(value) + increment).toString();
+                    ref.current.dispatchEvent(
+                      new Event("input", { bubbles: true }),
+                    );
+                  }
+                }}
+                aria-label="Increment"
+              >
+                <Icon icon={faPlus} />
+              </button>
+              <button
+                type="button"
+                className="absolute right-0 top-0 aspect-square h-full"
+                onClick={() => {
+                  if (ref.current) {
+                    const value = ref.current.value;
+                    const increment = step === "any" ? 1 : step;
+                    ref.current.value = (Number(value) - increment).toString();
+                    ref.current.dispatchEvent(
+                      new Event("input", { bubbles: true }),
+                    );
+                  }
+                }}
+                aria-label="Increment"
+              >
+                <Icon icon={faMinus} />
+              </button>
+            </>
+          )} */}
+    </Control>
   );
 };
 
-Input.displayName = "Input";
+TextInput.displayName = "TextInput";
