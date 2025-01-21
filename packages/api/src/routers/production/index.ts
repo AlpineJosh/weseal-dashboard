@@ -107,8 +107,14 @@ export const productionRouter = {
         throw new Error("Job not found");
       }
 
+      const wip = await db.query.component.findFirst({
+        where: eq(schema.base.component.id, `${job.outputComponentId}WIP`),
+      });
+
+      const componentId = wip ? wip.id : job.outputComponentId;
+
       const subcomponents = await db.query.subcomponent.findMany({
-        where: eq(schema.base.subcomponent.componentId, job.outputComponentId),
+        where: eq(schema.base.subcomponent.componentId, componentId),
       });
 
       const batchInputs = await db.query.productionBatchInput.findMany({
@@ -122,7 +128,7 @@ export const productionRouter = {
         let quantityRequired = subcomponent.quantity.mul(input.quantity);
         const inputs = batchInputs
           .filter(
-            (input) => input.batch.componentId === subcomponent.componentId,
+            (input) => input.batch.componentId === subcomponent.subcomponentId,
           )
           .sort(
             (a, b) => a.batch.entryDate.getTime() - b.batch.entryDate.getTime(),
@@ -140,6 +146,7 @@ export const productionRouter = {
               quantityUsed: input.quantityUsed.add(quantityUsed),
             })
             .where(eq(schema.base.batch.id, input.batch.id));
+
           await db.insert(schema.base.batchMovement).values({
             batchId: input.batch.id,
             quantity: quantityUsed.neg(),

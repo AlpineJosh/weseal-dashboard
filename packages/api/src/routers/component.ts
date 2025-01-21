@@ -39,8 +39,14 @@ export const componentRouter = {
   subcomponents: publicProcedure
     .input(z.object({ componentId: z.string() }))
     .query(async ({ input }) => {
+      const wip = await db.query.component.findFirst({
+        where: eq(schema.base.component.id, `${input.componentId}WIP`),
+      });
+
+      const componentId = wip ? `${input.componentId}WIP` : input.componentId;
+
       return await db.query.subcomponent.findMany({
-        where: eq(schema.base.subcomponent.componentId, input.componentId),
+        where: eq(schema.base.subcomponent.componentId, componentId),
         with: {
           subcomponent: true,
         },
