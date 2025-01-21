@@ -55,7 +55,7 @@ export type ComboboxProps<TValue, TOption> = Omit<
   ControlInputProps<TValue>,
   "children"
 > &
-  OptionSelectProps<TValue, TOption>;
+  OptionSelectProps<TValue, TOption> & {};
 
 export const Combobox = <TValue, TOption>({
   children,

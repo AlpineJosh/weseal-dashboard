@@ -10,21 +10,10 @@ import { ListboxProvider } from "./listbox.context";
 
 const variants = cva(["bg-white shadow-md", "focus-within:bg-secondary"]);
 
-export interface StaticListboxParent<TValue> {
-  children:
-    | ReactElement<OptionProps<TValue>>
-    | ReactElement<OptionProps<TValue>>[];
-  options: undefined;
-}
-
-export interface DynamicListboxParent<TValue, TOption> {
+export interface OptionSelectProps<TValue, TOption> {
   children: (option: TOption) => ReactElement<OptionProps<TValue>>;
   options: TOption[];
 }
-
-export type OptionSelectProps<TValue, TOption> =
-  | StaticListboxParent<TValue>
-  | DynamicListboxParent<TValue, TOption>;
 
 export type ListboxProps<TValue, TOption> = Omit<
   ControlInputProps<TValue>,
