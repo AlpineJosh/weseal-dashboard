@@ -1,5 +1,5 @@
 export * from "./select";
-export * from "./input";
+export * from "./text";
 export * from "./listbox";
 export * from "./combobox";
 export * from "./switch";

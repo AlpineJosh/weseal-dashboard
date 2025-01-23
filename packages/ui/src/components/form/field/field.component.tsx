@@ -1,12 +1,15 @@
-import type { ComponentPropsWithRef } from "react";
+import type { ComponentPropsWithRef, ComponentType } from "react";
 import { useId } from "react";
 import { cva } from "class-variance-authority";
+import { Label } from "react-aria-components";
 import { useController } from "react-hook-form";
 import { useImmer } from "use-immer";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
+import type { ControlTypeProps } from "../control/control.component";
 import type { FieldIds } from "./field.hook";
+import { Description, Message } from "..";
 import { FieldContext } from "./field.hook";
 
 const variants = cva("flex flex-col", {
@@ -28,7 +31,6 @@ const variants = cva("flex flex-col", {
 
 export type FieldProps = ComponentPropsWithRef<"div"> & {
   name: string;
-  valueAsNumber?: boolean;
   layout?: "row" | "column";
 };
 

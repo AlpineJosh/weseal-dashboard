@@ -2,10 +2,9 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
 import { faCheck } from "@repo/pro-solid-svg-icons";
-import { cn } from "@repo/ui/lib/class-merge";
 import { colorVariants } from "@repo/ui/lib/colors";
 
-import type { ControlInputProps, InputProps } from "../types";
+import type { InputProps } from "../types";
 import { Icon } from "../../element";
 import { Control } from "../../form/control/control.component";
 import { useControllable } from "../../utility/hooks/useControllable.hook";
@@ -24,7 +23,7 @@ const variants = cva(
     "after:absolute after:inset-0 after:rounded-sm after:shadow-[inset_0_1px_theme(colors.white/15%)]",
     "dark:after:-inset-px dark:after:hidden dark:after:rounded-sm",
 
-    "has-[:checked:disabled]:ark:after:hidden has-[:checked]:border-transparent has-[:checked]:bg-color-border has-[:checked]:text-background has-[:checked]:before:bg-color has-[:checked]:dark:bg-color has-[:checked]:dark:after:block",
+    "has-[:checked]:border-transparent has-[:checked]:bg-color-border has-[:checked]:text-background has-[:checked]:before:bg-color has-[:checked]:dark:bg-color has-[:checked]:dark:after:block has-[:checked:disabled]:dark:after:hidden",
     // Focus ring
     "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
     // Disabled state
@@ -40,7 +39,7 @@ const variants = cva(
   },
 );
 
-type CheckboxProps = ControlInputProps<boolean> & VariantProps<typeof variants>;
+type CheckboxProps = InputProps<boolean> & VariantProps<typeof variants>;
 
 const Checkbox = ({
   value,

@@ -14,18 +14,16 @@ export const useControl = <T = unknown>(id?: string) => {
   }, [id, setIds, ids.controlId]);
 
   return {
-    props: {
-      id: ids.controlId,
-      // Core ARIA attributes
-      "aria-labelledby": ids.labelId,
-      "aria-describedby": fieldState.error
-        ? `${ids.descriptionId} ${ids.messageId}`
-        : ids.descriptionId,
-      // State-based ARIA attributes
-      "aria-invalid": fieldState.invalid,
-      "aria-errormessage": fieldState.error ? ids.messageId : undefined,
-      invalid: fieldState.invalid,
-    },
-    field,
+    id: ids.controlId,
+    // Core ARIA attributes
+    "aria-labelledby": ids.labelId,
+    "aria-describedby": fieldState.error
+      ? `${ids.descriptionId} ${ids.messageId}`
+      : ids.descriptionId,
+    // State-based ARIA attributes
+    "aria-invalid": fieldState.invalid,
+    "aria-errormessage": fieldState.error ? ids.messageId : undefined,
+    invalid: fieldState.invalid,
+    ...field,
   };
 };

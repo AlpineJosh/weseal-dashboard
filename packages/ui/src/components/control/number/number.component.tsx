@@ -1,6 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
+import { Decimal } from "decimal.js";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
@@ -16,18 +17,18 @@ const variants = {
   ]),
 };
 
-export type TextInputProps = InputTypeProps<string>;
+export type NumberInputProps = InputTypeProps<Decimal>;
 
-export const TextInput = ({
+export const NumberInput = ({
   name,
   value,
   onChange,
   onBlur,
-  defaultValue = "",
+  defaultValue = new Decimal(0),
   disabled,
   invalid,
   ...props
-}: TextInputProps) => {
+}: NumberInputProps) => {
   const [controlledValue, setControlledValue] = useControllable({
     value,
     onChange,
@@ -37,9 +38,11 @@ export const TextInput = ({
     <Input {...props}>
       <input
         name={name}
-        type="text"
-        value={controlledValue}
-        onChange={(event) => setControlledValue(event.target.value)}
+        type="number"
+        value={controlledValue?.toString()}
+        onChange={(event) =>
+          setControlledValue(new Decimal(event.target.value))
+        }
         onBlur={onBlur}
         disabled={disabled}
         data-disabled={disabled}
@@ -50,6 +53,6 @@ export const TextInput = ({
   );
 };
 
-export const TextControl = withControl(TextInput);
+export const NumberControl = withControl(NumberInput);
 
-export const TextField = withField(TextControl);
+export const NumberField = withField(NumberControl);

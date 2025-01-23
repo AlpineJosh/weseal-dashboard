@@ -1,69 +1,36 @@
-import type { VariantProps } from "class-variance-authority";
-import type {
-  ComponentPropsWithRef,
-  DetailedHTMLProps,
-  ElementType,
-  HTMLAttributes,
-} from "react";
-import { cva } from "class-variance-authority";
+import type { ComponentType, ReactNode } from "react";
 
-import type { Maybe } from "../../utility/types";
+import type { InputTypeProps } from "../input/input.component";
+import { useControl } from "./control.hook";
 
-const variants = cva(
-  [
-    // Base layout
-    "relative block w-full overflow-hidden",
+export interface ControlProps<TValue> {
+  children: (props: InputTypeProps<TValue>) => ReactNode;
+}
 
-    // Background and shadow (before pseudo)
-    "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
-    "dark:before:hidden",
+export type ControlTypeProps<TValue> = Omit<
+  InputTypeProps<TValue>,
+  "value" | "defaultValue" | "onChange" | "onBlur" | "name"
+>;
 
-    // Focus ring (after pseudo)
-    "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-ring",
+export function Control<TValue>({ children, ...props }: ControlProps<TValue>) {
+  const inputProps = useControl();
 
-    // Border styling and states
-    "rounded-lg border border-content/10 data-[hovered]:border-content/20",
-    "has-[:invalid]:border-error/50 has-[:invalid]:data-[hovered]:border-error/50 has-[:invalid]:after:focus-within:ring-error/50",
-    "has-[:disabled]:opacity-50 has-[:disabled]:before:bg-content/5 has-[:disabled]:before:shadow-none has-[:disabled]:dark:before:bg-white/5",
+  return children({ ...props, ...inputProps });
+}
 
-    // Common spacing
-    "[&>*]:px-[calc(theme(spacing[3.5])-1px)] [&>*]:py-[calc(theme(spacing[2.5])-1px)]",
+export function withControl<TValue>(
+  InputComponent: ComponentType<InputTypeProps<TValue>>,
+) {
+  function ControlComponent(props: ControlTypeProps<TValue>) {
+    return (
+      <Control<TValue> {...props}>
+        {(controlProps) => <InputComponent {...controlProps} />}
+      </Control>
+    );
+  }
 
-    // Common text styling
-    "[&>*]:text-base/6 [&>*]:text-content [&>*]:placeholder:text-content-muted",
-  ],
-  {
-    variants: {
-      scale: {
-        sm: "[&>*]:px-3 [&>*]:py-2 [&>*]:text-sm",
-        md: "", // default size
-        lg: "[&>*]:px-4 [&>*]:py-3 [&>*]:text-lg",
-      },
-    },
-    defaultVariants: {
-      scale: "md",
-    },
-  },
-);
+  // Set display name for better debugging
+  ControlComponent.displayName = `${InputComponent.displayName ?? InputComponent.name}Control`;
 
-export type ControlProps = VariantProps<typeof variants> &
-  React.PropsWithChildren<
-    DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>
-  >;
-
-export function Control({
-  children,
-  scale,
-  className,
-  ...props
-}: ControlProps) {
-  return (
-    <span
-      data-slot="control"
-      className={variants({ scale, className })}
-      {...props}
-    >
-      {children}
-    </span>
-  );
+  return ControlComponent;
 }
