@@ -226,7 +226,7 @@ export const taskOverview = pgTable("task_overview", {
 
 export const taskItemOverview = pgTable("task_item_overview", {
   displayId: integer("display_id").notNull(),
-  taskIds: json("task_ids").$type<number[]>().notNull(),
+  itemIds: json("item_ids").$type<number[]>().notNull(),
   batchId: integer("batch_id"),
   batchReference: varchar("batch_reference"),
   componentId: varchar("component_id").notNull(),
