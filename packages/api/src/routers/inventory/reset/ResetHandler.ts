@@ -169,7 +169,7 @@ export class ResetHandler implements ResetData {
       .values({
         outputComponentId: componentId,
         outputLocationId: 1,
-        batchNumber: reference,
+        batchReference: reference,
         isActive: false,
       })
       .returning({ id: schema.base.productionJob.id })

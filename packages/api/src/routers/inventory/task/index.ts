@@ -100,7 +100,7 @@ export const taskRouter = {
             const jobs = await tx
               .insert(schema.base.productionJob)
               .values({
-                batchNumber: input.batchReference,
+                batchReference: input.batchReference,
                 targetQuantity: input.quantity.toNumber(),
                 outputComponentId: input.outputComponentId,
                 outputLocationId: input.outputLocationId,

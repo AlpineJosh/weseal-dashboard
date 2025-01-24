@@ -18,7 +18,7 @@ const taskItemOverview = datatable(schema.base.taskItemOverview);
 export const taskItemRouter = {
   get: publicProcedure.input(uniqueTaskItemInput).query(async ({ input }) => {
     return await db.query.taskItemOverview.findFirst({
-      where: eq(schema.base.taskItemOverview.id, input.id),
+      where: eq(schema.base.taskItemOverview.displayId, input.id),
     });
   }),
   list: publicProcedure

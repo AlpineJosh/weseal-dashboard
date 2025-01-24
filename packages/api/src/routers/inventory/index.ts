@@ -10,7 +10,7 @@ import { movementsRouter } from "./movement";
 import { ResetHandler } from "./reset/ResetHandler";
 import { taskRouter } from "./task";
 
-const quantityOverview = datatable(schema.base.batchLocationQuantity);
+const inventoryOverview = datatable(schema.base.inventoryOverview);
 
 export const inventoryRouter = {
   resetInventory: publicProcedure.mutation(async () => {
@@ -18,9 +18,9 @@ export const inventoryRouter = {
     return { success: true };
   }),
   quantity: publicProcedure
-    .input(quantityOverview.inputSchema)
+    .input(inventoryOverview.inputSchema)
     .query(async ({ input }) => {
-      return quantityOverview.query(input);
+      return inventoryOverview.query(input);
     }),
   tasks: taskRouter,
   locations: locationRouter,

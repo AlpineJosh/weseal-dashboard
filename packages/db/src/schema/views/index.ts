@@ -3,6 +3,7 @@ import {
   boolean,
   date,
   integer,
+  json,
   pgTable,
   serial,
   smallint,
@@ -23,12 +24,13 @@ import {
   location,
 } from "../public/inventory.schema";
 
-export const batchLocationQuantity = pgTable("batch_location_quantity", {
+export const inventoryOverview = pgTable("inventory_overview", {
   componentId: varchar("component_id").notNull(),
   componentDescription: varchar("component_description").notNull(),
-  isTracked: boolean("tracked").notNull(),
   componentUnit: varchar("component_unit"),
-  batchId: integer("batch_id").notNull(),
+  isStockTracked: boolean("stock_tracked").notNull(),
+  isBatchTracked: boolean("batch_tracked").notNull(),
+  batchId: integer("batch_id"),
   batchReference: varchar("batch_reference"),
   batchEntryDate: date("batch_entry_date", { mode: "date" }),
   locationId: integer("location_id").notNull(),
@@ -38,19 +40,19 @@ export const batchLocationQuantity = pgTable("batch_location_quantity", {
   free: numericDecimal("free").notNull(),
 });
 
-export const batchLocationQuantityRelations = relations(
-  batchLocationQuantity,
+export const inventoryOverviewRelations = relations(
+  inventoryOverview,
   ({ one }) => ({
     location: one(location, {
-      fields: [batchLocationQuantity.locationId],
+      fields: [inventoryOverview.locationId],
       references: [location.id],
     }),
     batch: one(batch, {
-      fields: [batchLocationQuantity.batchId],
+      fields: [inventoryOverview.batchId],
       references: [batch.id],
     }),
     component: one(componentOverview, {
-      fields: [batchLocationQuantity.componentId],
+      fields: [inventoryOverview.componentId],
       references: [componentOverview.id],
     }),
   }),
@@ -70,8 +72,8 @@ export const componentOverview = pgTable("component_overview", {
   categoryName: varchar("category_name"),
   departmentId: integer("department_id"),
   departmentName: varchar("department_name"),
-  isTraceable: boolean("traceable"),
-  isTracked: boolean("tracked"),
+  isStockTracked: boolean("stock_tracked").notNull(),
+  isBatchTracked: boolean("batch_tracked").notNull(),
   defaultLocationId: integer("default_location_id"),
   requiresQualityCheck: boolean("requires_quality_check"),
   qualityCheckDetails: varchar("quality_check_details"),
@@ -99,7 +101,7 @@ export const componentOverviewRelations = relations(
       fields: [componentOverview.defaultLocationId],
       references: [location.id],
     }),
-    locations: many(batchLocationQuantity),
+    locations: many(inventoryOverview),
   }),
 );
 
@@ -112,8 +114,6 @@ export const batchOverview = pgTable("batch_overview", {
   totalQuantity: numericDecimal("total_quantity"),
   freeQuantity: numericDecimal("free_quantity"),
   unit: varchar("component_unit"),
-  // isTraceable: boolean("traceable"),
-  // isTracked: boolean("tracked"),
 });
 
 export const batchOverviewRelations = relations(
@@ -124,7 +124,7 @@ export const batchOverviewRelations = relations(
       references: [componentOverview.id],
     }),
     movements: many(batchMovement),
-    locations: many(batchLocationQuantity),
+    locations: many(inventoryOverview),
   }),
 );
 
@@ -225,8 +225,8 @@ export const taskOverview = pgTable("task_overview", {
 });
 
 export const taskItemOverview = pgTable("task_item_overview", {
-  id: integer("id").notNull(),
-  taskId: integer("task_id").notNull(),
+  displayId: integer("display_id").notNull(),
+  taskIds: json("task_ids").$type<number[]>().notNull(),
   batchId: integer("batch_id"),
   batchReference: varchar("batch_reference"),
   componentId: varchar("component_id").notNull(),
@@ -290,7 +290,8 @@ export const salesOrderItemOverview = pgTable("sales_order_item_overview", {
 });
 
 export const salesDespatchOverview = pgTable("sales_despatch_overview", {
-  id: integer("id").notNull(),
+  displayId: integer("display_id").notNull(),
+  itemIds: json("despatch_item_ids").$type<number[]>().notNull(),
   orderId: integer("order_id").notNull(),
   customerId: varchar("customer_id").notNull(),
   customerName: varchar("customer_name").notNull(),

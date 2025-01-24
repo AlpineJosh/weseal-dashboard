@@ -17,7 +17,7 @@ const despatchOverview = datatable(schema.base.salesDespatchOverview);
 export const salesDespatchRouter = {
   get: publicProcedure.input(uniqueDespatchInput).query(async ({ input }) => {
     return await db.query.salesDespatchOverview.findFirst({
-      where: eq(schema.base.salesDespatchOverview.id, input.id),
+      where: eq(schema.base.salesDespatchOverview.displayId, input.id),
     });
   }),
   list: publicProcedure

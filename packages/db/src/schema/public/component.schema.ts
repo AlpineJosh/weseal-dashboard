@@ -57,7 +57,8 @@ export const component = pgTable("component", {
   unit: varchar("unit"),
   categoryId: smallint("category_id").references(() => componentCategory.id),
   departmentId: integer("department_id").references(() => department.id),
-  isTraceable: boolean("traceable").default(false),
+  isStockTracked: boolean("stock_tracked").default(true),
+  isBatchTracked: boolean("batch_tracked").default(false),
   defaultLocationId: integer("default_location_id").references(
     () => location.id,
   ),

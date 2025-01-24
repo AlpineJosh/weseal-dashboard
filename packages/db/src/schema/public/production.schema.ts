@@ -18,7 +18,7 @@ export const productionJob = pgTable("production_job", {
   outputComponentId: varchar("output_component_id")
     .notNull()
     .references(() => component.id),
-  batchNumber: varchar("batch_number"),
+  batchReference: varchar("batch_number"),
   outputLocationId: integer("output_location_id")
     .notNull()
     .references(() => location.id),

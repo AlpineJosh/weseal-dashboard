@@ -169,7 +169,7 @@ export const productionRouter = {
         .insert(schema.base.batch)
         .values({
           componentId: job.outputComponentId,
-          batchReference: job.batchNumber,
+          batchReference: job.batchReference,
           entryDate: new Date(),
         })
         .onConflictDoNothing()
