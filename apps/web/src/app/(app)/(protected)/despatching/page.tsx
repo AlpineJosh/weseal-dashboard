@@ -5,9 +5,9 @@ import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
-import { Heading } from "@repo/ui/components/typography";
+import { Heading, TextLink } from "@repo/ui/components/typography";
 
-export default function ReceivingPage() {
+export default function DespatchingPage() {
   return (
     <div className="flex flex-col gap-4">
       <Heading level={1}>Sales Orders</Heading>
@@ -40,9 +40,17 @@ export default function ReceivingPage() {
             <Datatable.Body data={props.data}>
               {({ data }) => (
                 <Datatable.Row key={data.id}>
-                  <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                  <Datatable.Cell id="id">
+                    <TextLink href={`/despatching/orders/${data.id}`}>
+                      {data.id}
+                    </TextLink>
+                  </Datatable.Cell>
                   <Datatable.Cell id="customer">
-                    {data.customerName}
+                    <TextLink
+                      href={`/despatching/customers/${data.customerId}`}
+                    >
+                      {data.customerName}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="status">
                     <Badge
