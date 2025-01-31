@@ -39,7 +39,7 @@ const newProductionTaskInput = productionTaskInput.extend({
 
 const existingProductionTaskInput = productionTaskInput.extend({
   type: z.literal("production-existing"),
-  productionJobId: z.number(),
+  productionJobId: z.number().optional(),
 });
 
 const despatchTaskInput = taskInput.extend({
@@ -117,14 +117,16 @@ export const taskRouter = {
             break;
           }
           case "production-existing": {
-            await tx
-              .update(schema.base.productionJob)
-              .set({
-                targetQuantity: sql`${schema.base.productionJob.targetQuantity} + ${input.quantity}`,
-              })
-              .where(eq(schema.base.productionJob.id, input.productionJobId));
+            if (input.productionJobId) {
+              await tx
+                .update(schema.base.productionJob)
+                .set({
+                  targetQuantity: sql`${schema.base.productionJob.targetQuantity} + ${input.quantity}`,
+                })
+                .where(eq(schema.base.productionJob.id, input.productionJobId));
 
-            task.productionJobId = input.productionJobId;
+              task.productionJobId = input.productionJobId;
+            }
             break;
           }
           case "despatch": {

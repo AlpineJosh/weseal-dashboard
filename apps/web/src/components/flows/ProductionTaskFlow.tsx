@@ -75,11 +75,18 @@ export const ProductionTaskForm = ({
   const batchReference = form.watch("batchReference");
   const jobReady = !!productionJobId || !!batchReference;
 
+  const { data: component } = api.component.get.useQuery(
+    {
+      id: componentId,
+    },
+    { enabled: !!componentId },
+  );
+
   const { data: subcomponents } = api.component.subcomponents.useQuery(
     {
       componentId,
     },
-    { enabled: !!componentId },
+    { enabled: !!component },
   );
 
   const { data: productionJobs } = api.production.list.useQuery(
@@ -88,7 +95,7 @@ export const ProductionTaskForm = ({
         outputComponentId: { eq: componentId },
       },
     },
-    { enabled: !!componentId },
+    { enabled: component?.isBatchTracked },
   );
 
   useEffect(() => {
@@ -154,7 +161,7 @@ export const ProductionTaskForm = ({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        {productionJobs && (
+        {component?.isBatchTracked && productionJobs && (
           <>
             {productionJobs.rows.length > 0 && (
               <>
@@ -237,73 +244,70 @@ export const ProductionTaskForm = ({
                 </Field>
               </>
             )}
-            <Divider />
-
-            <Field name="putLocationId" layout="row">
-              <Field.Label>Input Location</Field.Label>
-              <Field.Control>
-                <AsyncCombobox
-                  data={(query) => {
-                    const { data, isLoading } =
-                      api.inventory.locations.list.useQuery({
-                        search: { query },
-                      });
-                    return {
-                      isLoading: isLoading,
-                      items: data?.rows ?? [],
-                    };
-                  }}
-                  keyAccessor={(location) => location.id}
-                  textValueAccessor={(location) => location.name}
-                >
-                  {(location) => {
-                    return (
-                      <Combobox.Option
-                        id={location.id}
-                        textValue={location.name}
-                      >
-                        {location.name}
-                      </Combobox.Option>
-                    );
-                  }}
-                </AsyncCombobox>
-              </Field.Control>
-            </Field>
-            <Field name="quantity" layout="row" valueAsNumber>
-              <Field.Label>
-                {type === "production-new" ? "Quantity" : "Additional Quantity"}
-              </Field.Label>
-              <Field.Control>
-                <Input type="number" />
-              </Field.Control>
-            </Field>
-
-            <Field name="assignedToId" layout="row">
-              <Field.Label>Assigned To</Field.Label>
-              <Field.Control>
-                <AsyncCombobox
-                  data={(query) => {
-                    const { data, isLoading } = api.profile.list.useQuery({
-                      search: { query },
-                    });
-
-                    return { items: data?.rows ?? [], isLoading };
-                  }}
-                  keyAccessor={(profile) => profile.id}
-                  textValueAccessor={(profile) => profile.name ?? ""}
-                >
-                  {(profile) => {
-                    return (
-                      <Combobox.Option id={profile.id}>
-                        {profile.name}
-                      </Combobox.Option>
-                    );
-                  }}
-                </AsyncCombobox>
-              </Field.Control>
-            </Field>
           </>
         )}
+        <Divider />
+
+        <Field name="putLocationId" layout="row">
+          <Field.Label>Input Location</Field.Label>
+          <Field.Control>
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } =
+                  api.inventory.locations.list.useQuery({
+                    search: { query },
+                  });
+                return {
+                  isLoading: isLoading,
+                  items: data?.rows ?? [],
+                };
+              }}
+              keyAccessor={(location) => location.id}
+              textValueAccessor={(location) => location.name}
+            >
+              {(location) => {
+                return (
+                  <Combobox.Option id={location.id} textValue={location.name}>
+                    {location.name}
+                  </Combobox.Option>
+                );
+              }}
+            </AsyncCombobox>
+          </Field.Control>
+        </Field>
+        <Field name="quantity" layout="row" valueAsNumber>
+          <Field.Label>
+            {type === "production-new" ? "Quantity" : "Additional Quantity"}
+          </Field.Label>
+          <Field.Control>
+            <Input type="number" />
+          </Field.Control>
+        </Field>
+
+        <Field name="assignedToId" layout="row">
+          <Field.Label>Assigned To</Field.Label>
+          <Field.Control>
+            <AsyncCombobox
+              data={(query) => {
+                const { data, isLoading } = api.profile.list.useQuery({
+                  search: { query },
+                });
+
+                return { items: data?.rows ?? [], isLoading };
+              }}
+              keyAccessor={(profile) => profile.id}
+              textValueAccessor={(profile) => profile.name ?? ""}
+            >
+              {(profile) => {
+                return (
+                  <Combobox.Option id={profile.id}>
+                    {profile.name}
+                  </Combobox.Option>
+                );
+              }}
+            </AsyncCombobox>
+          </Field.Control>
+        </Field>
         <div className="-mx-8 flex max-h-[400px] flex-col overflow-y-auto border-b border-t border-content/10 bg-background-muted px-8">
           {jobReady ? (
             <Controller
