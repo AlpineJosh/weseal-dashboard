@@ -1,31 +1,15 @@
-import * as bitSystems from "./bit-systems";
-import base from "./public";
-import * as sage from "./sage";
-import * as views from "./views";
+import bitSystemsSchema from "./bit-systems";
+import publicSchema from "./public";
+import sageSchema from "./sage";
 
-export type UnifiedSchema = typeof base &
-  typeof views &
-  typeof sage &
-  typeof bitSystems;
-
-export const unifiedSchema = {
-  ...base,
-  ...views,
-  ...sage,
-  ...bitSystems,
-} as UnifiedSchema;
+export type Schema = typeof publicSchema &
+  typeof sageSchema &
+  typeof bitSystemsSchema;
 
 export const schema = {
-  base: {
-    ...base,
-    ...views,
-  },
-  sage,
-  bitSystems,
-};
+  ...publicSchema,
+  ...sageSchema,
+  ...bitSystemsSchema,
+} as Schema;
 
-export interface DatabaseSchema {
-  base: typeof schema.base;
-  sage: typeof schema.sage;
-  bitSystems: typeof schema.bitSystems;
-}
+export { bitSystemsSchema, publicSchema, sageSchema };

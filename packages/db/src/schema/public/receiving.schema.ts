@@ -10,7 +10,6 @@ import {
 
 import { numericDecimal } from "../../lib/numeric";
 import { component } from "./component.schema";
-import { batch } from "./inventory.schema";
 
 export const supplier = pgTable("supplier", {
   id: varchar("id").primaryKey(),
@@ -99,9 +98,7 @@ export const purchaseReceipt = pgTable("purchase_receipt", {
   orderId: integer("order_id")
     .notNull()
     .references(() => purchaseOrder.id),
-  expectedReceiptDate: timestamp("expected_receipt_date"),
-  receiptDate: timestamp("receipt_date"),
-  isReceived: boolean("is_received").notNull().default(false),
+  receiptDate: timestamp("receipt_date").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -127,9 +124,9 @@ export const purchaseReceiptItem = pgTable("purchase_receipt_item", {
   receiptId: integer("receipt_id")
     .notNull()
     .references(() => purchaseReceipt.id),
-  batchId: integer("batch_id")
+  componentId: varchar("component_id")
     .notNull()
-    .references(() => batch.id),
+    .references(() => component.id),
   quantity: numericDecimal("quantity"),
   createdAt: timestamp("created_at")
     .notNull()
@@ -147,9 +144,9 @@ export const purchaseReceiptItemRelations = relations(
       fields: [purchaseReceiptItem.receiptId],
       references: [purchaseReceipt.id],
     }),
-    batch: one(batch, {
-      fields: [purchaseReceiptItem.batchId],
-      references: [batch.id],
+    component: one(component, {
+      fields: [purchaseReceiptItem.componentId],
+      references: [component.id],
     }),
   }),
 );

@@ -10,7 +10,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { numericDecimal } from "../../lib/numeric";
-import { batch, location } from "./inventory.schema";
+import { batch } from "./batch.schema";
+import { location } from "./location.schema";
 
 export const department = pgTable("department", {
   id: integer("id").primaryKey(),

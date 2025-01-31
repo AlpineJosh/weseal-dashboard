@@ -5,6 +5,7 @@ import { eq, schema } from "@repo/db";
 
 import { db } from "../db";
 import { datatable } from "../lib/datatable";
+import { getComponentOverview } from "../models/component";
 import { publicProcedure } from "../trpc";
 
 export const uniqueComponentSchema = z.object({
