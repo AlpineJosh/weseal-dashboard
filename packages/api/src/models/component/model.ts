@@ -1,23 +1,22 @@
-import type { z } from "zod";
+import { eq, publicSchema, sql, sum } from "@repo/db";
 
-import { eq, schema, sql, sum } from "@repo/db";
+import { db } from "../../db";
+import { datatable } from "../../lib/datatables";
+import { coalesce } from "../../lib/operators";
 
-import { db } from "../db";
-import { datatable } from "../lib/datatables";
-import { coalesce } from "../lib/operators";
-
-const { component, componentCategory, department, inventoryOverview } =
-  schema.base;
+const { component, componentCategory, department, inventory } = publicSchema;
 
 const quantities = db
   .select({
-    componentId: inventoryOverview.componentId,
-    total: sum(inventoryOverview.total).as("total"),
-    allocated: sum(inventoryOverview.allocated).as("allocated"),
-    free: sum(inventoryOverview.free).as("free"),
+    componentId: inventory.componentId,
+    totalQuantity: sum(inventory.totalQuantity).as("total_quantity"),
+    allocatedQuantity: sum(inventory.allocatedQuantity).as(
+      "allocated_quantity",
+    ),
+    freeQuantity: sum(inventory.freeQuantity).as("free_quantity"),
   })
-  .from(inventoryOverview)
-  .groupBy(inventoryOverview.componentId)
+  .from(inventory)
+  .groupBy(inventory.componentId)
   .as("quantities");
 
 const overview = db
@@ -37,13 +36,13 @@ const overview = db
     createdAt: component.createdAt,
     lastModified: component.lastModified,
     isDeleted: component.isDeleted,
-    totalQuantity: coalesce(quantities.total, 0).as("total_quantity"),
-    allocatedQuantity: coalesce(quantities.allocated, 0).as(
+    totalQuantity: coalesce(quantities.totalQuantity, 0).as("total_quantity"),
+    allocatedQuantity: coalesce(quantities.allocatedQuantity, 0).as(
       "allocated_quantity",
     ),
-    freeQuantity: coalesce(quantities.free, 0).as("free_quantity"),
+    freeQuantity: coalesce(quantities.freeQuantity, 0).as("free_quantity"),
     sageDiscrepancy:
-      sql<number>`${coalesce(component.sageQuantity, 0)} - ${coalesce(quantities.total, 0)}`.as(
+      sql<number>`${coalesce(component.sageQuantity, 0)} - ${coalesce(quantities.totalQuantity, 0)}`.as(
         "sage_discrepancy",
       ),
     categoryName: componentCategory.name,
@@ -55,8 +54,4 @@ const overview = db
   .leftJoin(department, eq(component.departmentId, department.id))
   .as("overview");
 
-const componentDatatable = datatable(overview);
-
-export const Component = {
-  datatable: componentDatatable,
-};
+export default datatable(overview);

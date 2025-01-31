@@ -26,7 +26,7 @@ export type DatatableInputSchema<
   search: SearchSchema<T, S>;
 }>;
 
-interface DatatableInput<
+export interface DatatableInput<
   T extends FieldSelection,
   S extends DatatableSchema<T>,
 > {
@@ -36,7 +36,7 @@ interface DatatableInput<
   search?: SearchInput<T, S>;
 }
 
-interface DatatableOutput<
+export interface DatatableOutput<
   T extends FieldSelection,
   S extends DatatableSchema<T>,
 > {
@@ -44,16 +44,22 @@ interface DatatableOutput<
   pagination: PaginationOutput;
 }
 
-export type DatatableQuery<
+export type DatatableManyQuery<
   T extends FieldSelection,
   S extends DatatableSchema<T>,
 > = (input: DatatableInput<T, S>) => Promise<DatatableOutput<T, S>>;
 
+export type DatatableFirstQuery<
+  T extends FieldSelection,
+  S extends DatatableSchema<T>,
+> = (input: DatatableInput<T, S>) => Promise<DatatableData<T, S>>;
+
 export const datatable = <T extends Record<string, Column | SQL.Aliased>>(
   view: SubqueryWithSelection<T, string>,
 ): {
-  schema: DatatableInputSchema<T, DatatableSchema<T>>;
-  query: DatatableQuery<T, DatatableSchema<T>>;
+  $schema: DatatableInputSchema<T, DatatableSchema<T>>;
+  findMany: DatatableManyQuery<T, DatatableSchema<T>>;
+  findFirst: DatatableFirstQuery<T, DatatableSchema<T>>;
 } => {
   const schema = getDatatableSchema(view);
 
@@ -69,7 +75,7 @@ export const datatable = <T extends Record<string, Column | SQL.Aliased>>(
     search: searchSchema,
   }) as DatatableInputSchema<T, DatatableSchema<T>>;
 
-  const query = async (
+  const findMany = async (
     input: DatatableInput<T, DatatableSchema<T>>,
   ): Promise<{
     rows: DatatableData<T, DatatableSchema<T>>[];
@@ -102,5 +108,25 @@ export const datatable = <T extends Record<string, Column | SQL.Aliased>>(
     };
   };
 
-  return { schema: inputSchema, query };
+  const findFirst = async (
+    input: DatatableInput<T, DatatableSchema<T>>,
+  ): Promise<DatatableData<T, DatatableSchema<T>>> => {
+    const { sort, filter, search } = input;
+    const where = and(
+      buildFilterClause(schema, filter),
+      buildSearchClause(schema, search),
+    );
+    const order = buildSortClause(schema, sort) ?? [];
+
+    const results = await db
+      .select()
+      .from(view)
+      .where(where)
+      .orderBy(...order)
+      .limit(1);
+
+    return results[0] as DatatableData<T, DatatableSchema<T>>;
+  };
+
+  return { $schema: inputSchema, findMany, findFirst };
 };
