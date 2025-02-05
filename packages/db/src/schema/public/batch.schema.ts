@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { date, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 
 import { component } from "./component.schema";
 import { batchMovement } from "./inventory.schema";
@@ -11,7 +11,6 @@ export const batch = pgTable("batch", {
     .notNull()
     .references(() => component.id),
   batchReference: varchar("batch_reference"),
-  entryDate: date("entry_date", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),

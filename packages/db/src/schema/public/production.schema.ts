@@ -16,7 +16,7 @@ import { location } from "./location.schema";
 
 export const productionJob = pgTable("production_job", {
   id: serial("id").notNull().primaryKey(),
-  outputComponentId: varchar("output_component_id")
+  componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
   batchId: integer("batch_id").references(() => batch.id),
@@ -38,8 +38,8 @@ export const productionJob = pgTable("production_job", {
 export const productionJobRelations = relations(
   productionJob,
   ({ one, many }) => ({
-    outputComponent: one(component, {
-      fields: [productionJob.outputComponentId],
+    component: one(component, {
+      fields: [productionJob.componentId],
       references: [component.id],
     }),
     outputLocation: one(location, {
