@@ -2,7 +2,10 @@ import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
 
 import type { Column, SQL } from "@repo/db";
 
-export type Field = Column | SQL.Aliased;
+export type SQLAliased<T = unknown> = SQL.Aliased<T> & {
+  dataType: FieldDataType;
+};
+export type Field = Column | SQLAliased;
 
 export type FieldSelection = Record<string, Field>;
 
@@ -27,6 +30,14 @@ export interface DataTypeMap {
   json: unknown;
   custom: unknown;
   buffer: Buffer;
+}
+
+export function as<T>(
+  sql: SQL<T>,
+  alias: string,
+  dataType: FieldDataType,
+): SQLAliased<T> {
+  return Object.assign(sql.as(alias), { dataType });
 }
 
 export type InferFieldDataType<T extends Field> =
@@ -62,10 +73,10 @@ export type InferFieldType<T extends Field> =
 export const getFieldDataType = <T extends Field>(
   field: T,
 ): InferFieldType<T> => {
-  if (field._.brand === "Column") {
-    return field._.dataType as InferFieldType<T>;
+  if (!("fieldAlias" in field)) {
+    return field.dataType as InferFieldType<T>;
   } else {
-    return typeof field._.type as InferFieldType<T>;
+    return field.dataType as InferFieldType<T>;
   }
 };
 

@@ -1,11 +1,11 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
-import { componentRouter } from "./routers/component";
-import { despatchingRouter } from "./routers/despatching";
-import { inventoryRouter } from "./routers/inventory";
-import { productionRouter } from "./routers/production";
-import { profileRouter } from "./routers/profile";
-import { receivingRouter } from "./routers/receiving";
+import { componentRouter } from "./models/component";
+import { despatchingRouter } from "./models/despatching";
+import { inventoryRouter } from "./models/inventory";
+import { productionRouter } from "./models/production";
+import { profileRouter } from "./models/profile";
+import { receivingRouter } from "./models/receiving";
 import {
   createCallerFactory,
   createTRPCContext,

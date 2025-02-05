@@ -1,11 +1,11 @@
 import { eq, publicSchema, sql, sum } from "@repo/db";
 
-import { db } from "../../db";
-import { datatable } from "../../lib/datatables";
-import { as } from "../../lib/datatables/types";
-import { coalesce } from "../../lib/operators";
+import { db } from "../../../db";
+import { datatable } from "../../../lib/datatables";
+import { as } from "../../../lib/datatables/types";
+import { coalesce } from "../../../lib/operators";
 
-const { component, componentCategory, department, inventory } = publicSchema;
+const { subcomponent, component, inventory } = publicSchema;
 
 const quantities = db
   .select({
@@ -24,21 +24,16 @@ const quantities = db
 
 const overview = db
   .select({
-    id: component.id,
+    id: subcomponent.id,
+    componentId: subcomponent.componentId,
+    subcomponentId: subcomponent.subcomponentId,
+    quantityRequired: subcomponent.quantity,
     description: component.description,
     hasSubcomponents: component.hasSubcomponents,
     sageQuantity: component.sageQuantity,
     unit: component.unit,
-    categoryId: component.categoryId,
-    departmentId: component.departmentId,
     isStockTracked: component.isStockTracked,
     isBatchTracked: component.isBatchTracked,
-    defaultLocationId: component.defaultLocationId,
-    requiresQualityCheck: component.requiresQualityCheck,
-    qualityCheckDetails: component.qualityCheckDetails,
-    createdAt: component.createdAt,
-    lastModified: component.lastModified,
-    isDeleted: component.isDeleted,
     totalQuantity: as(
       coalesce(quantities.totalQuantity, 0),
       "total_quantity",
@@ -59,13 +54,9 @@ const overview = db
       "sage_discrepancy",
       "number",
     ),
-    categoryName: componentCategory.name,
-    departmentName: department.name,
   })
-  .from(component)
-  .leftJoin(quantities, eq(component.id, quantities.componentId))
-  .leftJoin(componentCategory, eq(component.categoryId, componentCategory.id))
-  .leftJoin(department, eq(component.departmentId, department.id))
+  .from(subcomponent)
+  .leftJoin(component, eq(subcomponent.subcomponentId, component.id))
   .as("overview");
 
 export default datatable(overview);

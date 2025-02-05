@@ -1,7 +1,6 @@
 import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
-import type { Column, SQL } from "@repo/db";
 import { and, count } from "@repo/db";
 
 import type { FilterInput, FilterSchema } from "./filter";
@@ -54,7 +53,7 @@ export type DatatableFirstQuery<
   S extends DatatableSchema<T>,
 > = (input: DatatableInput<T, S>) => Promise<DatatableData<T, S>>;
 
-export const datatable = <T extends Record<string, Column | SQL.Aliased>>(
+export const datatable = <T extends FieldSelection>(
   view: SubqueryWithSelection<T, string>,
 ): {
   $schema: DatatableInputSchema<T, DatatableSchema<T>>;
