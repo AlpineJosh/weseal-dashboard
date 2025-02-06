@@ -1,6 +1,79 @@
-CREATE SCHEMA "SAGE";
+CREATE SCHEMA "bit_systems";
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."ACCOUNT_STATUS" (
+CREATE SCHEMA "sage";
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "bit_systems"."bin" (
+	"pk_Bin_ID" integer PRIMARY KEY NOT NULL,
+	"fk_Warehouse_ID" integer,
+	"Name" varchar(255),
+	"IsUnspecifiedBin" integer,
+	"DateTimeCreated" timestamp,
+	"LastUpdated" timestamp,
+	"Sequence" integer
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "bit_systems"."bin_item" (
+	"pk_BinItem_ID" integer PRIMARY KEY NOT NULL,
+	"fk_StockItem_ID" integer,
+	"fk_Bin_ID" integer,
+	"QuantityInStock" double precision,
+	"QuantityAllocated" double precision,
+	"DateTimeCreated" timestamp,
+	"LastUpdated" timestamp,
+	"Priority" smallint
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "bit_systems"."stock_item" (
+	"pk_StockItem_ID" integer PRIMARY KEY NOT NULL,
+	"Code" varchar(255),
+	"DateTimeCreated" timestamp,
+	"DeletedOn" timestamp,
+	"Description" varchar(255),
+	"CategoryNo" integer,
+	"CategoryName" varchar(255),
+	"UnitWeight" double precision,
+	"Barcode" varchar(255),
+	"SupplierCode" varchar(255),
+	"SupplierName" varchar(255),
+	"PartNo" varchar(255),
+	"DepartmentCode" integer,
+	"DepartmentName" varchar(255),
+	"CustomField1" varchar(255),
+	"CustomField2" varchar(255),
+	"CustomField3" varchar(255),
+	"TraceableItemTypeID" integer,
+	"IgnoreStockLevel" integer
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "bit_systems"."traceable_bin_item" (
+	"pk_TraceableBinItem_ID" integer PRIMARY KEY NOT NULL,
+	"fk_TraceableItem_ID" integer,
+	"fk_BinItem_ID" integer,
+	"QuantityInStock" double precision,
+	"QuantityAllocated" double precision,
+	"DateTimeCreated" timestamp
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "bit_systems"."traceable_item" (
+	"pk_TraceableItem_ID" integer PRIMARY KEY NOT NULL,
+	"fk_StockItem_ID" integer,
+	"fk_TraceableType_ID" integer,
+	"IdentificationNo" varchar(255),
+	"AlternativeRef" varchar(255),
+	"Notes" varchar(255),
+	"SellByDate" timestamp,
+	"UseByDate" timestamp,
+	"DateTimeCreated" timestamp,
+	"LastUpdated" timestamp
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "bit_systems"."warehouse" (
+	"pk_Warehouse_ID" integer PRIMARY KEY NOT NULL,
+	"Name" varchar(255),
+	"Description" varchar(255)
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "sage"."ACCOUNT_STATUS" (
 	"NUMBER" smallint,
 	"STATUS" varchar,
 	"ON_HOLD" smallint,
@@ -9,7 +82,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."ACCOUNT_STATUS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."ACCRUAL" (
+CREATE TABLE IF NOT EXISTS "sage"."ACCRUAL" (
 	"NAME" varchar,
 	"NOMINAL_CODE_1" varchar,
 	"NOMINAL_CODE_2" varchar,
@@ -23,7 +96,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."ACCRUAL" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HEADER" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_HEADER" (
 	"TRAN_NUMBER" integer,
 	"ITEM_COUNT" integer,
 	"TYPE" varchar,
@@ -112,7 +185,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HEADER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_HEADER" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_HISTORY_HEADER" (
 	"TRAN_NUMBER" integer,
 	"ITEM_COUNT" integer,
 	"TYPE" varchar,
@@ -158,7 +231,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_HEADER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_JOURNAL" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_HISTORY_JOURNAL" (
 	"TRAN_NUMBER" integer,
 	"TYPE" varchar,
 	"DATE" timestamp,
@@ -186,7 +259,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_JOURNAL" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_SPLIT" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_HISTORY_SPLIT" (
 	"TRAN_NUMBER" integer,
 	"TYPE" varchar,
 	"DATE" timestamp,
@@ -220,7 +293,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_SPLIT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_USAGE" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_HISTORY_USAGE" (
 	"TYPE" varchar,
 	"USAGE_NUMBER" integer,
 	"SPLIT_NUMBER" integer,
@@ -238,7 +311,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_HISTORY_USAGE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_JOURNAL" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_JOURNAL" (
 	"TRAN_NUMBER" integer,
 	"TYPE" varchar,
 	"DATE" timestamp,
@@ -276,7 +349,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_JOURNAL" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_SPLIT" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_SPLIT" (
 	"TRAN_NUMBER" integer,
 	"TYPE" varchar,
 	"DATE" timestamp,
@@ -351,7 +424,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_SPLIT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_USAGE" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_USAGE" (
 	"TYPE" varchar,
 	"USAGE_NUMBER" integer,
 	"SPLIT_NUMBER" integer,
@@ -369,7 +442,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_USAGE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_VAT" (
+CREATE TABLE IF NOT EXISTS "sage"."AUDIT_VAT" (
 	"TRAN_NUMBER" integer,
 	"TYPE" varchar,
 	"DATE" timestamp,
@@ -414,7 +487,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."AUDIT_VAT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."BANK" (
+CREATE TABLE IF NOT EXISTS "sage"."BANK" (
 	"ACCOUNT_REF" varchar,
 	"ACCOUNT_NUMBER" varchar,
 	"ACCOUNT_NAME" varchar,
@@ -454,7 +527,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."BANK" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."BANK_STATEMENT" (
+CREATE TABLE IF NOT EXISTS "sage"."BANK_STATEMENT" (
 	"ACCOUNT_REF" varchar,
 	"STATEMENT_REF" varchar,
 	"CLOSING_BALANCE" double precision,
@@ -476,7 +549,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."BANK_STATEMENT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."BANK_STATEMENT_LINE" (
+CREATE TABLE IF NOT EXISTS "sage"."BANK_STATEMENT_LINE" (
 	"ACCOUNT_REF" varchar,
 	"ITEM_NUMBER" integer,
 	"TRAN_NUMBER" integer,
@@ -486,7 +559,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."BANK_STATEMENT_LINE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT" (
+CREATE TABLE IF NOT EXISTS "sage"."CALENDAR_EVENT" (
 	"UNIQUE_ID" integer,
 	"OCCURRENCE_TYPE" smallint,
 	"RECURRENCE_PATTERN_ID" integer,
@@ -517,7 +590,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT_LABEL" (
+CREATE TABLE IF NOT EXISTS "sage"."CALENDAR_EVENT_LABEL" (
 	"UNIQUE_ID" integer,
 	"NAME" varchar,
 	"COLOR" integer,
@@ -527,7 +600,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT_LABEL" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT_LOCATION" (
+CREATE TABLE IF NOT EXISTS "sage"."CALENDAR_EVENT_LOCATION" (
 	"LOCATION" varchar,
 	"POSITION_IN_LIST" integer,
 	"RECORD_CREATE_DATE" timestamp,
@@ -535,7 +608,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT_LOCATION" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT_RECURRENCE_PATTERN" (
+CREATE TABLE IF NOT EXISTS "sage"."CALENDAR_EVENT_RECURRENCE_PATTERN" (
 	"UNIQUE_ID" integer,
 	"START_TIME" timestamp,
 	"DURATION_IN_MINUTES" integer,
@@ -563,7 +636,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CALENDAR_EVENT_RECURRENCE_PATTERN" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CATEGORY" (
+CREATE TABLE IF NOT EXISTS "sage"."CATEGORY" (
 	"CHART" integer,
 	"CATEGORY" integer,
 	"FLAG_ASSET_LIABILITY" smallint,
@@ -576,13 +649,13 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CATEGORY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CAT_TITLE" (
+CREATE TABLE IF NOT EXISTS "sage"."CAT_TITLE" (
 	"CHART" integer,
 	"CATEGORY" integer,
 	"TITLE" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CHART_LIST" (
+CREATE TABLE IF NOT EXISTS "sage"."CHART_LIST" (
 	"CHART" integer,
 	"NAME" varchar,
 	"RECORD_CREATE_DATE" timestamp,
@@ -590,7 +663,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CHART_LIST" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_RETURN" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_RETURN" (
 	"RETURN_ID" integer,
 	"CONTRACTOR_UTR" varchar,
 	"ACCOUNTS_OFFICE_REFERENCE_NUMBER" varchar,
@@ -603,7 +676,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_RETURN" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_RETURN_TRANSACTION" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_RETURN_TRANSACTION" (
 	"TRANSACTION_ID" integer,
 	"RETURN_ID" integer,
 	"RECORD_CREATE_DATE" timestamp,
@@ -611,7 +684,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_RETURN_TRANSACTION" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SETTINGS" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_SETTINGS" (
 	"IS_CONTRACTOR" smallint,
 	"IS_SUBCONTRACTOR" smallint,
 	"UNIQUE_TAX_REFERENCE" varchar,
@@ -633,7 +706,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SETTINGS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_SUBCONTRACTOR" (
 	"SUPPLIER_REFN" varchar,
 	"COMPANY_TYPE" varchar,
 	"COMPANY_TYPE_CODE" smallint,
@@ -662,7 +735,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR_LEGACY" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_SUBCONTRACTOR_LEGACY" (
 	"SUPPLER_REFN" varchar,
 	"CIS_TYPE" varchar,
 	"CIS_TYPE_CODE" smallint,
@@ -676,7 +749,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR_LEGACY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR_RETURN" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_SUBCONTRACTOR_RETURN" (
 	"RETURN_ID" integer,
 	"SUPPLIER_REFN" varchar,
 	"UNIQUE_TAX_REFERENCE" varchar,
@@ -696,7 +769,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR_RETURN" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR_TAX_HISTORY" (
+CREATE TABLE IF NOT EXISTS "sage"."CIS_SUBCONTRACTOR_TAX_HISTORY" (
 	"SUPPLIER_REFN" varchar,
 	"TAX_TREATMENT" varchar,
 	"TAX_TREATMENT_CODE" smallint,
@@ -706,7 +779,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CIS_SUBCONTRACTOR_TAX_HISTORY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CLEARED_TRAN_RANGE" (
+CREATE TABLE IF NOT EXISTS "sage"."CLEARED_TRAN_RANGE" (
 	"CATE_ID" integer,
 	"START_TRAN_NUMBER" integer,
 	"END_TRAN_NUMBER" integer,
@@ -715,7 +788,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CLEARED_TRAN_RANGE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CLEAR_AUDIT_TRAIL_EVENT" (
+CREATE TABLE IF NOT EXISTS "sage"."CLEAR_AUDIT_TRAIL_EVENT" (
 	"CATE_ID" integer,
 	"DATE" timestamp,
 	"USER_NAME" varchar,
@@ -726,7 +799,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CLEAR_AUDIT_TRAIL_EVENT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."COMMUNICATION_ADDRESS" (
+CREATE TABLE IF NOT EXISTS "sage"."COMMUNICATION_ADDRESS" (
 	"ACCOUNT_TYPE" smallint,
 	"ACCOUNT_REF" varchar,
 	"LETTER_TYPE_ID" integer,
@@ -738,7 +811,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."COMMUNICATION_ADDRESS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."COMPANY" (
+CREATE TABLE IF NOT EXISTS "sage"."COMPANY" (
 	"COMPANYID" varchar,
 	"PROTX_VENDOR" varchar,
 	"CASH_REGISTER_BANK" varchar,
@@ -910,7 +983,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."COMPANY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."COMPANY_DEL_ADDR" (
+CREATE TABLE IF NOT EXISTS "sage"."COMPANY_DEL_ADDR" (
 	"REFERENCE" varchar,
 	"ADDRESS_REF" integer,
 	"DESCRIPTION" varchar,
@@ -937,7 +1010,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."COMPANY_DEL_ADDR" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY" (
+CREATE TABLE IF NOT EXISTS "sage"."CONTACT_HISTORY" (
 	"UNIQUE_ID" integer,
 	"SAL_PUR" varchar,
 	"REFN" varchar,
@@ -974,7 +1047,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY_CONTACT_OUTCOME" (
+CREATE TABLE IF NOT EXISTS "sage"."CONTACT_HISTORY_CONTACT_OUTCOME" (
 	"UNIQUE_ID" integer,
 	"OUTCOME_TYPE" smallint,
 	"DESCRIPTION" varchar,
@@ -983,7 +1056,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY_CONTACT_OUTCOME" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY_CONTACT_TYPE" (
+CREATE TABLE IF NOT EXISTS "sage"."CONTACT_HISTORY_CONTACT_TYPE" (
 	"UNIQUE_ID" integer,
 	"CONTACT_TYPE" smallint,
 	"DESCRIPTION" varchar,
@@ -993,7 +1066,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY_CONTACT_TYPE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY_MAJOR_TYPE" (
+CREATE TABLE IF NOT EXISTS "sage"."CONTACT_HISTORY_MAJOR_TYPE" (
 	"UNIQUE_ID" integer,
 	"CONTACT_MAJOR_TYPE" smallint,
 	"DESCRIPTION" varchar,
@@ -1002,7 +1075,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CONTACT_HISTORY_MAJOR_TYPE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."COUNTRY_CODE" (
+CREATE TABLE IF NOT EXISTS "sage"."COUNTRY_CODE" (
 	"CODE" varchar,
 	"NAME" varchar,
 	"EU_MEMBER" smallint,
@@ -1011,7 +1084,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."COUNTRY_CODE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CREDIT_BUREAU" (
+CREATE TABLE IF NOT EXISTS "sage"."CREDIT_BUREAU" (
 	"NUMBER" smallint,
 	"NAME" varchar,
 	"WEB_ADDRESS" varchar,
@@ -1021,7 +1094,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CREDIT_BUREAU" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."CURRENCY" (
+CREATE TABLE IF NOT EXISTS "sage"."CURRENCY" (
 	"NUMBER" smallint,
 	"CODE" varchar,
 	"SYMBOL" varchar,
@@ -1036,7 +1109,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."CURRENCY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."DELETED_RECORDS" (
+CREATE TABLE IF NOT EXISTS "sage"."DELETED_RECORDS" (
 	"TABLE_ID" integer,
 	"FOREIGN_REF" text,
 	"DELETION_DATE_TIME" timestamp,
@@ -1046,8 +1119,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."DELETED_RECORDS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."DEPARTMENT" (
-	"NUMBER" smallint,
+CREATE TABLE IF NOT EXISTS "sage"."DEPARTMENT" (
+	"NUMBER" smallint PRIMARY KEY NOT NULL,
 	"NAME" varchar,
 	"REFERENCE" varchar,
 	"RECORD_CREATE_DATE" timestamp,
@@ -1055,7 +1128,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."DEPARTMENT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."DIRECT_DEBIT_PAYMENT_REQUESTS" (
+CREATE TABLE IF NOT EXISTS "sage"."DIRECT_DEBIT_PAYMENT_REQUESTS" (
 	"TRAN_NUMBER" integer,
 	"PAYMENT_REQUEST_ID" varchar,
 	"DIRECT_DEBIT_STATUS" smallint,
@@ -1070,12 +1143,12 @@ CREATE TABLE IF NOT EXISTS "SAGE"."DIRECT_DEBIT_PAYMENT_REQUESTS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."DISPUTE_REASON" (
+CREATE TABLE IF NOT EXISTS "sage"."DISPUTE_REASON" (
 	"CODE" smallint,
 	"DETAILS" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."ECSALES_FILL" (
+CREATE TABLE IF NOT EXISTS "sage"."ECSALES_FILL" (
 	"COUNTRY_CODE" varchar,
 	"VAT_NUMBER" varchar,
 	"NET" double precision,
@@ -1089,7 +1162,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."ECSALES_FILL" (
 	"SUBMISSION_ERRORS" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."ECSALES_HEADER" (
+CREATE TABLE IF NOT EXISTS "sage"."ECSALES_HEADER" (
 	"DATE_FROM" timestamp,
 	"DATE_TO" timestamp,
 	"VAT_NUMBER" varchar,
@@ -1110,7 +1183,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."ECSALES_HEADER" (
 	"DUE_DATE" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."ECSALES_SPLIT" (
+CREATE TABLE IF NOT EXISTS "sage"."ECSALES_SPLIT" (
 	"TYPE" varchar,
 	"ID" integer,
 	"NOMINAL_CODE" varchar,
@@ -1125,7 +1198,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."ECSALES_SPLIT" (
 	"INDICATOR" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."EC_VAT_DESCRIPTION" (
+CREATE TABLE IF NOT EXISTS "sage"."EC_VAT_DESCRIPTION" (
 	"UNIQUE_ID" integer,
 	"DESCRIPTION" varchar,
 	"RECORD_CREATE_DATE" timestamp,
@@ -1133,7 +1206,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."EC_VAT_DESCRIPTION" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."ESUBMISSION_SETTINGS" (
+CREATE TABLE IF NOT EXISTS "sage"."ESUBMISSION_SETTINGS" (
 	"USER_ID" varchar,
 	"EMPLOYER_REFERENCE" varchar,
 	"IS_AGENT" smallint,
@@ -1143,7 +1216,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."ESUBMISSION_SETTINGS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."FINANCIAL_BUDGET" (
+CREATE TABLE IF NOT EXISTS "sage"."FINANCIAL_BUDGET" (
 	"ACCOUNT_REF" varchar,
 	"ANALYSIS_ID" integer,
 	"YEAR" smallint,
@@ -1157,7 +1230,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."FINANCIAL_BUDGET" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."FIXED_ASSET" (
+CREATE TABLE IF NOT EXISTS "sage"."FIXED_ASSET" (
 	"ASSET_REF" varchar,
 	"DETAILS_1" varchar,
 	"DETAILS_2" varchar,
@@ -1184,12 +1257,12 @@ CREATE TABLE IF NOT EXISTS "SAGE"."FIXED_ASSET" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."FIXED_ASSET_CAT" (
+CREATE TABLE IF NOT EXISTS "sage"."FIXED_ASSET_CAT" (
 	"NUMBER" smallint,
 	"NAME" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."FUND" (
+CREATE TABLE IF NOT EXISTS "sage"."FUND" (
 	"FUND_ID" integer,
 	"FUND_TYPE_ID" integer,
 	"DESCRIPTION" varchar,
@@ -1203,7 +1276,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."FUND" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."FUND_TYPE" (
+CREATE TABLE IF NOT EXISTS "sage"."FUND_TYPE" (
 	"FUND_TYPE_ID" integer,
 	"DESCRIPTION" varchar,
 	"RECORD_CREATE_DATE" timestamp,
@@ -1211,7 +1284,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."FUND_TYPE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."GDN_ITEM" (
+CREATE TABLE IF NOT EXISTS "sage"."GDN_ITEM" (
 	"UNIQUE_ID" integer,
 	"GDN_NUMBER" integer,
 	"ITEM_NUMBER" integer,
@@ -1227,10 +1300,11 @@ CREATE TABLE IF NOT EXISTS "SAGE"."GDN_ITEM" (
 	"PRINTED_FLAG" smallint,
 	"RECORD_CREATE_DATE" timestamp,
 	"RECORD_MODIFY_DATE" timestamp,
-	"RECORD_DELETED" smallint
+	"RECORD_DELETED" smallint,
+	CONSTRAINT "GDN_ITEM_GDN_NUMBER_ITEM_NUMBER_pk" PRIMARY KEY("GDN_NUMBER","ITEM_NUMBER")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."GRN_ITEM" (
+CREATE TABLE IF NOT EXISTS "sage"."GRN_ITEM" (
 	"GRN_NUMBER" integer,
 	"ITEM_NUMBER" integer,
 	"ORDER_NUMBER" integer,
@@ -1244,10 +1318,11 @@ CREATE TABLE IF NOT EXISTS "SAGE"."GRN_ITEM" (
 	"QTY_ON_ORDER" double precision,
 	"RECORD_CREATE_DATE" timestamp,
 	"RECORD_MODIFY_DATE" timestamp,
-	"RECORD_DELETED" smallint
+	"RECORD_DELETED" smallint,
+	CONSTRAINT "GRN_ITEM_GRN_NUMBER_ITEM_NUMBER_pk" PRIMARY KEY("GRN_NUMBER","ITEM_NUMBER")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."INTRASTAT" (
+CREATE TABLE IF NOT EXISTS "sage"."INTRASTAT" (
 	"ORDER_NUMBER" varchar,
 	"ACCOUNT_REF" varchar,
 	"STOCK_CODE" varchar,
@@ -1272,7 +1347,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."INTRASTAT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."INVOICE" (
+CREATE TABLE IF NOT EXISTS "sage"."INVOICE" (
 	"INVOICE_NUMBER" integer,
 	"INVOICE_TYPE_CODE" smallint,
 	"INVOICE_TYPE" varchar,
@@ -1394,7 +1469,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."INVOICE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."INVOICE_ITEM" (
+CREATE TABLE IF NOT EXISTS "sage"."INVOICE_ITEM" (
 	"INVOICE_NUMBER" integer,
 	"ITEM_NUMBER" smallint,
 	"JOB_NUMBER" varchar,
@@ -1440,7 +1515,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."INVOICE_ITEM" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."LETTER_TYPE" (
+CREATE TABLE IF NOT EXISTS "sage"."LETTER_TYPE" (
 	"UNIQUE_ID" integer,
 	"LETTER_TYPE" smallint,
 	"DESCRIPTION" varchar,
@@ -1451,7 +1526,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."LETTER_TYPE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."NOMINAL_LEDGER" (
+CREATE TABLE IF NOT EXISTS "sage"."NOMINAL_LEDGER" (
 	"ACCOUNT_REF" varchar,
 	"NAME" varchar,
 	"ACCOUNT_TYPE" smallint,
@@ -1578,7 +1653,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."NOMINAL_LEDGER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PAYMENT_INFO" (
+CREATE TABLE IF NOT EXISTS "sage"."PAYMENT_INFO" (
 	"TRAN_NUMBER" integer,
 	"PAYMENT_STATUS" smallint,
 	"PAYMENT_STATUS_DESCRIPTION" varchar,
@@ -1590,7 +1665,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PAYMENT_INFO" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PAYMENT_METHOD" (
+CREATE TABLE IF NOT EXISTS "sage"."PAYMENT_METHOD" (
 	"UNIQUE_ID" integer,
 	"DESCRIPTION" varchar,
 	"ONLINE" smallint,
@@ -1600,12 +1675,12 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PAYMENT_METHOD" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PERIOD" (
+CREATE TABLE IF NOT EXISTS "sage"."PERIOD" (
 	"PERIOD" smallint,
 	"DESCRIPTION" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."POP_ITEM" (
+CREATE TABLE IF NOT EXISTS "sage"."POP_ITEM" (
 	"ORDER_NUMBER" integer,
 	"ITEM_NUMBER" smallint,
 	"JOB_NUMBER" varchar,
@@ -1651,7 +1726,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."POP_ITEM" (
 	"PROJECT_REF" varchar,
 	"PROJECT_NAME" varchar,
 	"COST_CODE_REF" varchar,
-	"ITEMID" integer,
+	"ITEMID" integer PRIMARY KEY NOT NULL,
 	"GENERATED_MESSAGE" smallint,
 	"QTY_INVOICED" double precision,
 	"RECORD_CREATE_DATE" timestamp,
@@ -1659,7 +1734,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."POP_ITEM" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PREPAYMENT" (
+CREATE TABLE IF NOT EXISTS "sage"."PREPAYMENT" (
 	"NAME" varchar,
 	"NOMINAL_CODE_1" varchar,
 	"NOMINAL_CODE_2" varchar,
@@ -1673,7 +1748,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PREPAYMENT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PRICE" (
+CREATE TABLE IF NOT EXISTS "sage"."PRICE" (
 	"PRICE_ID" varchar,
 	"TYPE" varchar,
 	"PRICING_REF" varchar,
@@ -1690,7 +1765,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PRICE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PRICE_LIST" (
+CREATE TABLE IF NOT EXISTS "sage"."PRICE_LIST" (
 	"TYPE" varchar,
 	"PRICING_REF" varchar,
 	"NAME" varchar,
@@ -1701,7 +1776,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PRICE_LIST" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT" (
 	"REFERENCE" varchar,
 	"NAME" varchar,
 	"DESCRIPTION" varchar,
@@ -1743,7 +1818,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_BUDGET" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_BUDGET" (
 	"PROJECT_ID" integer,
 	"COST_CODE_ID" integer,
 	"AMOUNT" double precision,
@@ -1752,7 +1827,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_BUDGET" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_COST_CODE" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_COST_CODE" (
 	"COST_CODE_ID" integer,
 	"REFERENCE" varchar,
 	"DESCRIPTION" varchar,
@@ -1762,7 +1837,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_COST_CODE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_COST_TYPE" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_COST_TYPE" (
 	"COST_TYPE_ID" integer,
 	"NAME" varchar,
 	"IS_DEFAULT" smallint,
@@ -1771,7 +1846,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_COST_TYPE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_ONLY_TRAN" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_ONLY_TRAN" (
 	"PROJECT_TRAN_ID" integer,
 	"TYPE" varchar,
 	"ACCOUNT_REF" varchar,
@@ -1791,7 +1866,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_ONLY_TRAN" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_RELATIONSHIP" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_RELATIONSHIP" (
 	"ANCESTOR_ID" integer,
 	"DESCENDENT_ID" integer,
 	"GENERATION_GAP" integer,
@@ -1800,7 +1875,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_RELATIONSHIP" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_RESOURCE" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_RESOURCE" (
 	"RESOURCE_ID" integer,
 	"REFERENCE" varchar,
 	"NAME" varchar,
@@ -1812,7 +1887,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_RESOURCE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_RESOURCE_TYPE" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_RESOURCE_TYPE" (
 	"TYPE_ID" integer,
 	"NAME" varchar,
 	"RECORD_CREATE_DATE" timestamp,
@@ -1820,7 +1895,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_RESOURCE_TYPE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_REVENUE_CODE" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_REVENUE_CODE" (
 	"REVENUE_CODE_ID" integer,
 	"REFERENCE" varchar,
 	"DESCRIPTION" varchar,
@@ -1829,7 +1904,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_REVENUE_CODE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_STATUS" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_STATUS" (
 	"STATUS_ID" integer,
 	"REFERENCE" varchar,
 	"NAME" varchar,
@@ -1841,7 +1916,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_STATUS" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_TRAN" (
+CREATE TABLE IF NOT EXISTS "sage"."PROJECT_TRAN" (
 	"PROJECT_TRAN_ID" integer,
 	"AUDIT_TRAIL_ID" integer,
 	"STOCK_TRAIL_ID" integer,
@@ -1856,7 +1931,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROJECT_TRAN" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PROTX_PAYMENT" (
+CREATE TABLE IF NOT EXISTS "sage"."PROTX_PAYMENT" (
 	"VENDOR_TX_CODE" varchar,
 	"VPS_TX_ID" varchar,
 	"TX_AUTH_NUMBER" varchar,
@@ -1870,7 +1945,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PROTX_PAYMENT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PURCHASE_DEL_ADDR" (
+CREATE TABLE IF NOT EXISTS "sage"."PURCHASE_DEL_ADDR" (
 	"REFERENCE" varchar,
 	"ACCOUNT_REF" varchar,
 	"ADDRESS_REF" integer,
@@ -1898,8 +1973,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PURCHASE_DEL_ADDR" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PURCHASE_LEDGER" (
-	"ACCOUNT_REF" varchar,
+CREATE TABLE IF NOT EXISTS "sage"."PURCHASE_LEDGER" (
+	"ACCOUNT_REF" varchar PRIMARY KEY NOT NULL,
 	"NAME" varchar,
 	"ADDRESS_1" varchar,
 	"ADDRESS_2" varchar,
@@ -2053,8 +2128,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PURCHASE_LEDGER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."PURCHASE_ORDER" (
-	"ORDER_NUMBER" integer,
+CREATE TABLE IF NOT EXISTS "sage"."PURCHASE_ORDER" (
+	"ORDER_NUMBER" integer PRIMARY KEY NOT NULL,
 	"ORDER_OR_QUOTE" varchar,
 	"ORDER_DATE" timestamp,
 	"DELIVERY_DATE" timestamp,
@@ -2161,7 +2236,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."PURCHASE_ORDER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."RECURRING" (
+CREATE TABLE IF NOT EXISTS "sage"."RECURRING" (
 	"UNIQUE_ID" integer,
 	"TYPE" varchar,
 	"NOMINAL_CODE" varchar,
@@ -2184,7 +2259,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."RECURRING" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."REMITTANCE" (
+CREATE TABLE IF NOT EXISTS "sage"."REMITTANCE" (
 	"URN" varchar,
 	"BANK_CODE" varchar,
 	"ACCOUNT_REF" varchar,
@@ -2223,7 +2298,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."REMITTANCE" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."RTD_SUMMARY" (
+CREATE TABLE IF NOT EXISTS "sage"."RTD_SUMMARY" (
 	"VAT_BOX" smallint,
 	"VAT_BOX_NAME" varchar,
 	"TAX_CODE" varchar,
@@ -2243,12 +2318,12 @@ CREATE TABLE IF NOT EXISTS "SAGE"."RTD_SUMMARY" (
 	"HEADING_REVALUATION" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SAGEPAY_PAY_BY_LINK" (
+CREATE TABLE IF NOT EXISTS "sage"."SAGEPAY_PAY_BY_LINK" (
 	"CUSTOMER_REFN" varchar,
 	"PAYMENT_AMOUNT" double precision
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SALES_DEL_ADDR" (
+CREATE TABLE IF NOT EXISTS "sage"."SALES_DEL_ADDR" (
 	"REFERENCE" varchar,
 	"ACCOUNT_REF" varchar,
 	"ADDRESS_REF" integer,
@@ -2276,8 +2351,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SALES_DEL_ADDR" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SALES_LEDGER" (
-	"ACCOUNT_REF" varchar,
+CREATE TABLE IF NOT EXISTS "sage"."SALES_LEDGER" (
+	"ACCOUNT_REF" varchar PRIMARY KEY NOT NULL,
 	"NAME" varchar,
 	"ADDRESS_1" varchar,
 	"ADDRESS_2" varchar,
@@ -2435,8 +2510,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SALES_LEDGER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SALES_ORDER" (
-	"ORDER_NUMBER" integer,
+CREATE TABLE IF NOT EXISTS "sage"."SALES_ORDER" (
+	"ORDER_NUMBER" integer PRIMARY KEY NOT NULL,
 	"ORDER_TYPE_CODE" smallint,
 	"ORDER_OR_QUOTE" varchar,
 	"ORDER_DATE" timestamp,
@@ -2558,7 +2633,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SALES_ORDER" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SOFA_CATEGORY" (
+CREATE TABLE IF NOT EXISTS "sage"."SOFA_CATEGORY" (
 	"SOFA_ID" integer,
 	"DESCRIPTION" varchar,
 	"RECORD_CREATE_DATE" timestamp,
@@ -2566,7 +2641,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SOFA_CATEGORY" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SOP_ITEM" (
+CREATE TABLE IF NOT EXISTS "sage"."SOP_ITEM" (
 	"ORDER_NUMBER" integer,
 	"ITEM_NUMBER" smallint,
 	"JOB_NUMBER" varchar,
@@ -2609,7 +2684,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SOP_ITEM" (
 	"THIS_RECORD" integer,
 	"POP_ITEM_ID" integer,
 	"DUE_DATE" timestamp,
-	"ITEMID" integer,
+	"ITEMID" integer PRIMARY KEY NOT NULL,
 	"NEGOTIATION_DISC_NET" double precision,
 	"NEGOTIATION_DISC_NET_BASE" double precision,
 	"GENERATED_MESSAGE" smallint,
@@ -2618,8 +2693,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SOP_ITEM" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."STOCK" (
-	"STOCK_CODE" varchar,
+CREATE TABLE IF NOT EXISTS "sage"."STOCK" (
+	"STOCK_CODE" varchar PRIMARY KEY NOT NULL,
 	"DESCRIPTION" varchar,
 	"UNIT_OF_SALE" varchar,
 	"NOMINAL_CODE" varchar,
@@ -2985,7 +3060,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."STOCK" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_ALLOCATION" (
+CREATE TABLE IF NOT EXISTS "sage"."STOCK_ALLOCATION" (
 	"STOCK_ALLOCATION_ID" integer,
 	"PROJECT_ID" integer,
 	"COST_CODE_ID" integer,
@@ -3001,12 +3076,12 @@ CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_ALLOCATION" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_CAT" (
-	"NUMBER" smallint,
+CREATE TABLE IF NOT EXISTS "sage"."STOCK_CAT" (
+	"NUMBER" smallint PRIMARY KEY NOT NULL,
 	"NAME" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_COMP" (
+CREATE TABLE IF NOT EXISTS "sage"."STOCK_COMP" (
 	"ASSEMBLY_CODE" varchar,
 	"COMPONENT_CODE" varchar,
 	"COMPONENT_CODE_INDENT" varchar,
@@ -3017,8 +3092,8 @@ CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_COMP" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_TRAN" (
-	"TRAN_NUMBER" integer,
+CREATE TABLE IF NOT EXISTS "sage"."STOCK_TRAN" (
+	"TRAN_NUMBER" integer PRIMARY KEY NOT NULL,
 	"STOCK_CODE" varchar,
 	"TYPE" varchar,
 	"DATE" timestamp,
@@ -3038,7 +3113,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."STOCK_TRAN" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."SUPPLIER_PAYMENT_INFO" (
+CREATE TABLE IF NOT EXISTS "sage"."SUPPLIER_PAYMENT_INFO" (
 	"ACCOUNT_REF" varchar,
 	"PAYEE_STATUS" smallint,
 	"PAYEE_STATUS_DESCRIPTION" varchar,
@@ -3047,7 +3122,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."SUPPLIER_PAYMENT_INFO" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."TAX_CODE" (
+CREATE TABLE IF NOT EXISTS "sage"."TAX_CODE" (
 	"TAX_CODE" varchar,
 	"TAX_CODE_ID" smallint,
 	"DESCRIPTION" varchar,
@@ -3060,7 +3135,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."TAX_CODE" (
 	"IS_REVERSECHARGE" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."UPDATE_LEDGER" (
+CREATE TABLE IF NOT EXISTS "sage"."UPDATE_LEDGER" (
 	"INVOICE_NUMBER" integer,
 	"TRAN_NUMBER" integer,
 	"TYPE" varchar,
@@ -3077,13 +3152,13 @@ CREATE TABLE IF NOT EXISTS "SAGE"."UPDATE_LEDGER" (
 	"CARR_GROSS" double precision
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_ADJUSTMENT" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_ADJUSTMENT" (
 	"VAT_BOX" smallint,
 	"REASON" varchar,
 	"VALUE" double precision
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_DETAILS" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_DETAILS" (
 	"VAT_BOX" integer,
 	"VAT_BOX_NAME" varchar,
 	"TAX_CODE" varchar,
@@ -3099,7 +3174,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."VAT_DETAILS" (
 	"VAT_TRAN_NAME" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_RETURN" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_RETURN" (
 	"VAT_BOX" smallint,
 	"VAT_BOX_NAME" varchar,
 	"COUNT_ALL" integer,
@@ -3109,7 +3184,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."VAT_RETURN" (
 	"AMOUNT" double precision
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_RETURN_RECEIPT" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_RETURN_RECEIPT" (
 	"UNIQUE_ID" integer,
 	"RECEIPT_TYPE" smallint,
 	"VAT_AMOUNT" double precision,
@@ -3128,7 +3203,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."VAT_RETURN_RECEIPT" (
 	"RECORD_DELETED" smallint
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_REV_CHARGE_DETAIL" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_REV_CHARGE_DETAIL" (
 	"CUSTOMER_REF" varchar,
 	"VAT_NUMBER" varchar,
 	"TRANS_NO" integer,
@@ -3138,7 +3213,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."VAT_REV_CHARGE_DETAIL" (
 	"AMOUNT" double precision
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_REV_CHARGE_HEADER" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_REV_CHARGE_HEADER" (
 	"DATE_FROM" timestamp,
 	"DATE_TO" timestamp,
 	"VAT_NUMBER" varchar,
@@ -3148,7 +3223,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."VAT_REV_CHARGE_HEADER" (
 	"ADDRESS_3" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_REV_CHARGE_RETURN" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_REV_CHARGE_RETURN" (
 	"CUSTOMER_REF" varchar,
 	"VAT_NUMBER" varchar,
 	"MONTH_1" double precision,
@@ -3165,7 +3240,7 @@ CREATE TABLE IF NOT EXISTS "SAGE"."VAT_REV_CHARGE_RETURN" (
 	"MONTH_12" double precision
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "SAGE"."VAT_SUMMARY" (
+CREATE TABLE IF NOT EXISTS "sage"."VAT_SUMMARY" (
 	"VAT_BOX" smallint,
 	"VAT_BOX_NAME" varchar,
 	"TAX_CODE" varchar,

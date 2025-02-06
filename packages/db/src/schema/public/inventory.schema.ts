@@ -1,4 +1,5 @@
-import { relations, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import { and, eq, ne, or, relations, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -34,27 +35,45 @@ export const transactionType = pgEnum("transaction_type", [
   "found",
 ]);
 
-export const componentLot = pgTable("component_lot", {
-  id: serial("id").notNull().primaryKey(),
-  componentId: varchar("component_id")
-    .notNull()
-    .references(() => component.id),
-  batchId: integer("batch_id").references(() => batch.id),
-  entryDate: date("entry_date", { mode: "date" }).notNull(),
-  purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
-    () => purchaseReceiptItem.id,
-  ),
-  productionJobId: integer("production_job_id").references(
-    () => productionJob.id,
-  ),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`now()`),
-  lastModified: timestamp("last_modified")
-    .notNull()
-    .default(sql`now()`)
-    .$onUpdate(() => new Date()),
-});
+export const componentLot = pgTable(
+  "component_lot",
+  {
+    id: serial("id").notNull().primaryKey(),
+    componentId: varchar("component_id")
+      .notNull()
+      .references(() => component.id),
+    batchId: integer("batch_id").references(() => batch.id),
+    entryDate: date("entry_date", { mode: "date" }).notNull(),
+    purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
+      () => purchaseReceiptItem.id,
+    ),
+    productionJobId: integer("production_job_id").references(
+      () => productionJob.id,
+    ),
+    createdAt: timestamp("created_at")
+      .notNull()
+      .default(sql`now()`),
+    lastModified: timestamp("last_modified")
+      .notNull()
+      .default(sql`now()`)
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    checkConstraint: {
+      name: "component_lot_check",
+      expression: or(
+        and(
+          ne(table.productionJobId, null),
+          eq(table.purchaseReceiptItemId, null),
+        ),
+        and(
+          ne(table.purchaseReceiptItemId, null),
+          eq(table.productionJobId, null),
+        ),
+      ) as SQL<boolean>,
+    },
+  }),
+);
 
 export const componentLotRelations = relations(componentLot, ({ one }) => ({
   component: one(component, {
@@ -110,6 +129,33 @@ export const inventoryLotRelations = relations(inventoryLot, ({ one }) => ({
     references: [location.id],
   }),
 }));
+
+export const inventoryLotLedger = pgTable("inventory_lot_ledger", {
+  id: serial("id").notNull().primaryKey(),
+  componentLotId: integer("component_lot_id")
+    .notNull()
+    .references(() => componentLot.id),
+  locationId: integer("location_id")
+    .notNull()
+    .references(() => location.id),
+  quantity: numericDecimal("quantity").notNull(),
+  userId: uuid("user_id").references(() => profile.id),
+  type: transactionType("type").notNull(),
+  isAllocated: boolean("is_allocated").notNull().default(false),
+  salesDespatchItemId: integer("sales_despatch_item_id").references(
+    () => salesDespatchItem.id,
+  ),
+  productionJobInputId: integer("production_job_input_id").references(
+    () => productionJobInput.id,
+  ),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`now()`),
+  lastModified: timestamp("last_modified")
+    .notNull()
+    .default(sql`now()`)
+    .$onUpdate(() => new Date()),
+});
 
 export const inventory = pgTable(
   "inventory",
@@ -168,14 +214,14 @@ export const inventoryLedger = pgTable("inventory_ledger", {
   userId: uuid("user_id").references(() => profile.id),
   type: transactionType("type").notNull(),
   isAllocated: boolean("is_allocated").notNull().default(false),
-  purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
-    () => purchaseReceiptItem.id,
-  ),
   salesDespatchItemId: integer("sales_despatch_item_id").references(
     () => salesDespatchItem.id,
   ),
   productionJobInputId: integer("production_job_input_id").references(
     () => productionJobInput.id,
+  ),
+  purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
+    () => purchaseReceiptItem.id,
   ),
   productionJobId: integer("production_job_id").references(
     () => productionJob.id,

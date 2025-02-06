@@ -1,9 +1,443 @@
 {
-  "id": "27813ba4-b113-4e0f-ac15-28b8ce6a3314",
-  "prevId": "fc60a0cb-68a3-418c-a580-b6c281e0c021",
+  "id": "c3bb161c-3475-40b1-a66f-005b7c1f6e93",
+  "prevId": "35b30619-3006-41a4-9a9c-43ef5cc28d9c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "bit_systems.bin": {
+      "name": "bin",
+      "schema": "bit_systems",
+      "columns": {
+        "pk_Bin_ID": {
+          "name": "pk_Bin_ID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "fk_Warehouse_ID": {
+          "name": "fk_Warehouse_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Name": {
+          "name": "Name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "IsUnspecifiedBin": {
+          "name": "IsUnspecifiedBin",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DateTimeCreated": {
+          "name": "DateTimeCreated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LastUpdated": {
+          "name": "LastUpdated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Sequence": {
+          "name": "Sequence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bit_systems.bin_item": {
+      "name": "bin_item",
+      "schema": "bit_systems",
+      "columns": {
+        "pk_BinItem_ID": {
+          "name": "pk_BinItem_ID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "fk_StockItem_ID": {
+          "name": "fk_StockItem_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fk_Bin_ID": {
+          "name": "fk_Bin_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "QuantityInStock": {
+          "name": "QuantityInStock",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "QuantityAllocated": {
+          "name": "QuantityAllocated",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DateTimeCreated": {
+          "name": "DateTimeCreated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LastUpdated": {
+          "name": "LastUpdated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Priority": {
+          "name": "Priority",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bit_systems.stock_item": {
+      "name": "stock_item",
+      "schema": "bit_systems",
+      "columns": {
+        "pk_StockItem_ID": {
+          "name": "pk_StockItem_ID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "Code": {
+          "name": "Code",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DateTimeCreated": {
+          "name": "DateTimeCreated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DeletedOn": {
+          "name": "DeletedOn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Description": {
+          "name": "Description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CategoryNo": {
+          "name": "CategoryNo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CategoryName": {
+          "name": "CategoryName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UnitWeight": {
+          "name": "UnitWeight",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Barcode": {
+          "name": "Barcode",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "SupplierCode": {
+          "name": "SupplierCode",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "SupplierName": {
+          "name": "SupplierName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "PartNo": {
+          "name": "PartNo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DepartmentCode": {
+          "name": "DepartmentCode",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DepartmentName": {
+          "name": "DepartmentName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CustomField1": {
+          "name": "CustomField1",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CustomField2": {
+          "name": "CustomField2",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CustomField3": {
+          "name": "CustomField3",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "TraceableItemTypeID": {
+          "name": "TraceableItemTypeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "IgnoreStockLevel": {
+          "name": "IgnoreStockLevel",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bit_systems.traceable_bin_item": {
+      "name": "traceable_bin_item",
+      "schema": "bit_systems",
+      "columns": {
+        "pk_TraceableBinItem_ID": {
+          "name": "pk_TraceableBinItem_ID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "fk_TraceableItem_ID": {
+          "name": "fk_TraceableItem_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fk_BinItem_ID": {
+          "name": "fk_BinItem_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "QuantityInStock": {
+          "name": "QuantityInStock",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "QuantityAllocated": {
+          "name": "QuantityAllocated",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DateTimeCreated": {
+          "name": "DateTimeCreated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bit_systems.traceable_item": {
+      "name": "traceable_item",
+      "schema": "bit_systems",
+      "columns": {
+        "pk_TraceableItem_ID": {
+          "name": "pk_TraceableItem_ID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "fk_StockItem_ID": {
+          "name": "fk_StockItem_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fk_TraceableType_ID": {
+          "name": "fk_TraceableType_ID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "IdentificationNo": {
+          "name": "IdentificationNo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "AlternativeRef": {
+          "name": "AlternativeRef",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Notes": {
+          "name": "Notes",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "SellByDate": {
+          "name": "SellByDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UseByDate": {
+          "name": "UseByDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "DateTimeCreated": {
+          "name": "DateTimeCreated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LastUpdated": {
+          "name": "LastUpdated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "bit_systems.warehouse": {
+      "name": "warehouse",
+      "schema": "bit_systems",
+      "columns": {
+        "pk_Warehouse_ID": {
+          "name": "pk_Warehouse_ID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "Name": {
+          "name": "Name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Description": {
+          "name": "Description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.batch": {
+      "name": "batch",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_reference": {
+          "name": "batch_reference",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "batch_component_id_component_id_fk": {
+          "name": "batch_component_id_component_id_fk",
+          "tableFrom": "batch",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.component": {
       "name": "component",
       "schema": "",
@@ -29,7 +463,7 @@
         },
         "sage_quantity": {
           "name": "sage_quantity",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": true
         },
@@ -51,8 +485,15 @@
           "primaryKey": false,
           "notNull": false
         },
-        "traceable": {
-          "name": "traceable",
+        "stock_tracked": {
+          "name": "stock_tracked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "batch_tracked": {
+          "name": "batch_tracked",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
@@ -260,7 +701,7 @@
         },
         "quantity": {
           "name": "quantity",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": true
         },
@@ -446,15 +887,21 @@
           "primaryKey": false,
           "notNull": true
         },
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
         "batch_id": {
           "name": "batch_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "quantity": {
           "name": "quantity",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": true
         },
@@ -481,6 +928,19 @@
           "tableTo": "sales_despatch",
           "columnsFrom": [
             "despatch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sales_despatch_item_component_id_component_id_fk": {
+          "name": "sales_despatch_item_component_id_component_id_fk",
+          "tableFrom": "sales_despatch_item",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
           ],
           "columnsTo": [
             "id"
@@ -613,13 +1073,13 @@
         },
         "quantity_ordered": {
           "name": "quantity_ordered",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": true
         },
         "sage_quantity_despatched": {
           "name": "sage_quantity_despatched",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": true
         },
@@ -677,68 +1137,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.batch": {
-      "name": "batch",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "component_id": {
-          "name": "component_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "batch_reference": {
-          "name": "batch_reference",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "entry_date": {
-          "name": "entry_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "last_modified": {
-          "name": "last_modified",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "batch_component_id_component_id_fk": {
-          "name": "batch_component_id_component_id_fk",
-          "tableFrom": "batch",
-          "tableTo": "component",
-          "columnsFrom": [
-            "component_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.batch_movement": {
       "name": "batch_movement",
       "schema": "",
@@ -769,46 +1167,22 @@
         },
         "quantity": {
           "name": "quantity",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "type": {
           "name": "type",
-          "type": "batch_movement_type",
+          "type": "transaction_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
-        },
-        "purchase_receipt_item_id": {
-          "name": "purchase_receipt_item_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sales_despatch_item_id": {
-          "name": "sales_despatch_item_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "production_batch_input_id": {
-          "name": "production_batch_input_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "production_batch_output_id": {
-          "name": "production_batch_output_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -853,51 +1227,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "batch_movement_purchase_receipt_item_id_purchase_receipt_item_id_fk": {
-          "name": "batch_movement_purchase_receipt_item_id_purchase_receipt_item_id_fk",
+        "batch_movement_user_id_profile_id_fk": {
+          "name": "batch_movement_user_id_profile_id_fk",
           "tableFrom": "batch_movement",
-          "tableTo": "purchase_receipt_item",
+          "tableTo": "profile",
           "columnsFrom": [
-            "purchase_receipt_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "batch_movement_sales_despatch_item_id_sales_despatch_item_id_fk": {
-          "name": "batch_movement_sales_despatch_item_id_sales_despatch_item_id_fk",
-          "tableFrom": "batch_movement",
-          "tableTo": "sales_despatch_item",
-          "columnsFrom": [
-            "sales_despatch_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "batch_movement_production_batch_input_id_production_batch_input_id_fk": {
-          "name": "batch_movement_production_batch_input_id_production_batch_input_id_fk",
-          "tableFrom": "batch_movement",
-          "tableTo": "production_batch_input",
-          "columnsFrom": [
-            "production_batch_input_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "batch_movement_production_batch_output_id_production_batch_output_id_fk": {
-          "name": "batch_movement_production_batch_output_id_production_batch_output_id_fk",
-          "tableFrom": "batch_movement",
-          "tableTo": "production_batch_output",
-          "columnsFrom": [
-            "production_batch_output_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -954,6 +1289,672 @@
       },
       "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.component_lot": {
+      "name": "component_lot",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entry_date": {
+          "name": "entry_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "purchase_receipt_item_id": {
+          "name": "purchase_receipt_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_job_id": {
+          "name": "production_job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "component_lot_component_id_component_id_fk": {
+          "name": "component_lot_component_id_component_id_fk",
+          "tableFrom": "component_lot",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "component_lot_batch_id_batch_id_fk": {
+          "name": "component_lot_batch_id_batch_id_fk",
+          "tableFrom": "component_lot",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "component_lot_purchase_receipt_item_id_purchase_receipt_item_id_fk": {
+          "name": "component_lot_purchase_receipt_item_id_purchase_receipt_item_id_fk",
+          "tableFrom": "component_lot",
+          "tableTo": "purchase_receipt_item",
+          "columnsFrom": [
+            "purchase_receipt_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "component_lot_production_job_id_production_job_id_fk": {
+          "name": "component_lot_production_job_id_production_job_id_fk",
+          "tableFrom": "component_lot",
+          "tableTo": "production_job",
+          "columnsFrom": [
+            "production_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.inventory": {
+      "name": "inventory",
+      "schema": "",
+      "columns": {
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entry_date": {
+          "name": "entry_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_quantity": {
+          "name": "total_quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "allocated_quantity": {
+          "name": "allocated_quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "free_quantity": {
+          "name": "free_quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inventory_component_id_component_id_fk": {
+          "name": "inventory_component_id_component_id_fk",
+          "tableFrom": "inventory",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_batch_id_batch_id_fk": {
+          "name": "inventory_batch_id_batch_id_fk",
+          "tableFrom": "inventory",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_location_id_location_id_fk": {
+          "name": "inventory_location_id_location_id_fk",
+          "tableFrom": "inventory",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "inventory_component_id_batch_id_location_id_pk": {
+          "name": "inventory_component_id_batch_id_location_id_pk",
+          "columns": [
+            "component_id",
+            "batch_id",
+            "location_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.inventory_ledger": {
+      "name": "inventory_ledger",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "transaction_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_allocated": {
+          "name": "is_allocated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "sales_despatch_item_id": {
+          "name": "sales_despatch_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_job_input_id": {
+          "name": "production_job_input_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "purchase_receipt_item_id": {
+          "name": "purchase_receipt_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_job_id": {
+          "name": "production_job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inventory_ledger_component_id_component_id_fk": {
+          "name": "inventory_ledger_component_id_component_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_batch_id_batch_id_fk": {
+          "name": "inventory_ledger_batch_id_batch_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_location_id_location_id_fk": {
+          "name": "inventory_ledger_location_id_location_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_user_id_profile_id_fk": {
+          "name": "inventory_ledger_user_id_profile_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "profile",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_sales_despatch_item_id_sales_despatch_item_id_fk": {
+          "name": "inventory_ledger_sales_despatch_item_id_sales_despatch_item_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "sales_despatch_item",
+          "columnsFrom": [
+            "sales_despatch_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_production_job_input_id_production_job_input_id_fk": {
+          "name": "inventory_ledger_production_job_input_id_production_job_input_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "production_job_input",
+          "columnsFrom": [
+            "production_job_input_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_purchase_receipt_item_id_purchase_receipt_item_id_fk": {
+          "name": "inventory_ledger_purchase_receipt_item_id_purchase_receipt_item_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "purchase_receipt_item",
+          "columnsFrom": [
+            "purchase_receipt_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_ledger_production_job_id_production_job_id_fk": {
+          "name": "inventory_ledger_production_job_id_production_job_id_fk",
+          "tableFrom": "inventory_ledger",
+          "tableTo": "production_job",
+          "columnsFrom": [
+            "production_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.inventory_lot": {
+      "name": "inventory_lot",
+      "schema": "",
+      "columns": {
+        "component_lot_id": {
+          "name": "component_lot_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_quantity": {
+          "name": "total_quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "allocated_quantity": {
+          "name": "allocated_quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "free_quantity": {
+          "name": "free_quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inventory_lot_component_lot_id_component_lot_id_fk": {
+          "name": "inventory_lot_component_lot_id_component_lot_id_fk",
+          "tableFrom": "inventory_lot",
+          "tableTo": "component_lot",
+          "columnsFrom": [
+            "component_lot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_lot_location_id_location_id_fk": {
+          "name": "inventory_lot_location_id_location_id_fk",
+          "tableFrom": "inventory_lot",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "inventory_lot_component_lot_id_location_id_pk": {
+          "name": "inventory_lot_component_lot_id_location_id_pk",
+          "columns": [
+            "component_lot_id",
+            "location_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.inventory_lot_ledger": {
+      "name": "inventory_lot_ledger",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "component_lot_id": {
+          "name": "component_lot_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "transaction_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_allocated": {
+          "name": "is_allocated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "sales_despatch_item_id": {
+          "name": "sales_despatch_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_job_input_id": {
+          "name": "production_job_input_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inventory_lot_ledger_component_lot_id_component_lot_id_fk": {
+          "name": "inventory_lot_ledger_component_lot_id_component_lot_id_fk",
+          "tableFrom": "inventory_lot_ledger",
+          "tableTo": "component_lot",
+          "columnsFrom": [
+            "component_lot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_lot_ledger_location_id_location_id_fk": {
+          "name": "inventory_lot_ledger_location_id_location_id_fk",
+          "tableFrom": "inventory_lot_ledger",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_lot_ledger_user_id_profile_id_fk": {
+          "name": "inventory_lot_ledger_user_id_profile_id_fk",
+          "tableFrom": "inventory_lot_ledger",
+          "tableTo": "profile",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_lot_ledger_sales_despatch_item_id_sales_despatch_item_id_fk": {
+          "name": "inventory_lot_ledger_sales_despatch_item_id_sales_despatch_item_id_fk",
+          "tableFrom": "inventory_lot_ledger",
+          "tableTo": "sales_despatch_item",
+          "columnsFrom": [
+            "sales_despatch_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inventory_lot_ledger_production_job_input_id_production_job_input_id_fk": {
+          "name": "inventory_lot_ledger_production_job_input_id_production_job_input_id_fk",
+          "tableFrom": "inventory_lot_ledger",
+          "tableTo": "production_job_input",
+          "columnsFrom": [
+            "production_job_input_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -1136,8 +2137,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.task": {
-      "name": "task",
+    "public.production_job": {
+      "name": "production_job",
       "schema": "",
       "columns": {
         "id": {
@@ -1146,104 +2147,9 @@
           "primaryKey": true,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "batch_movement_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_cancelled": {
-          "name": "is_cancelled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "assigned_to_user_id": {
-          "name": "assigned_to_user_id",
+        "component_id": {
+          "name": "component_id",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by_user_id": {
-          "name": "created_by_user_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "production_job_id": {
-          "name": "production_job_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sales_despatch_id": {
-          "name": "sales_despatch_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "last_modified": {
-          "name": "last_modified",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "task_production_job_id_production_job_id_fk": {
-          "name": "task_production_job_id_production_job_id_fk",
-          "tableFrom": "task",
-          "tableTo": "production_job",
-          "columnsFrom": [
-            "production_job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "task_sales_despatch_id_sales_despatch_id_fk": {
-          "name": "task_sales_despatch_id_sales_despatch_id_fk",
-          "tableFrom": "task",
-          "tableTo": "sales_despatch",
-          "columnsFrom": [
-            "sales_despatch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.task_item": {
-      "name": "task_item",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "task_id": {
-          "name": "task_id",
-          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -1251,25 +2157,27 @@
           "name": "batch_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
-        },
-        "pick_location_id": {
-          "name": "pick_location_id",
-          "type": "integer",
-          "primaryKey": false,
           "notNull": false
         },
-        "put_location_id": {
-          "name": "put_location_id",
+        "output_location_id": {
+          "name": "output_location_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "real",
-          "primaryKey": false,
           "notNull": true
+        },
+        "target_quantity": {
+          "name": "target_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "quantity_produced": {
+          "name": "quantity_produced",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "is_complete": {
           "name": "is_complete",
@@ -1295,312 +2203,25 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "task_item_task_id_task_id_fk": {
-          "name": "task_item_task_id_task_id_fk",
-          "tableFrom": "task_item",
-          "tableTo": "task",
-          "columnsFrom": [
-            "task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "task_item_batch_id_batch_id_fk": {
-          "name": "task_item_batch_id_batch_id_fk",
-          "tableFrom": "task_item",
-          "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "task_item_pick_location_id_location_id_fk": {
-          "name": "task_item_pick_location_id_location_id_fk",
-          "tableFrom": "task_item",
-          "tableTo": "location",
-          "columnsFrom": [
-            "pick_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "task_item_put_location_id_location_id_fk": {
-          "name": "task_item_put_location_id_location_id_fk",
-          "tableFrom": "task_item",
-          "tableTo": "location",
-          "columnsFrom": [
-            "put_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.production_batch_input": {
-      "name": "production_batch_input",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "job_id": {
-          "name": "job_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "batch_id": {
-          "name": "batch_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quantity_allocated": {
-          "name": "quantity_allocated",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "location_id": {
-          "name": "location_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quantity_used": {
-          "name": "quantity_used",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "last_modified": {
-          "name": "last_modified",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "production_batch_input_job_id_production_job_id_fk": {
-          "name": "production_batch_input_job_id_production_job_id_fk",
-          "tableFrom": "production_batch_input",
-          "tableTo": "production_job",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "production_batch_input_batch_id_batch_id_fk": {
-          "name": "production_batch_input_batch_id_batch_id_fk",
-          "tableFrom": "production_batch_input",
-          "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "production_batch_input_location_id_location_id_fk": {
-          "name": "production_batch_input_location_id_location_id_fk",
-          "tableFrom": "production_batch_input",
-          "tableTo": "location",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.production_batch_output": {
-      "name": "production_batch_output",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "job_id": {
-          "name": "job_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "batch_id": {
-          "name": "batch_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "production_quantity": {
-          "name": "production_quantity",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "production_date": {
-          "name": "production_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "last_modified": {
-          "name": "last_modified",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "production_batch_output_job_id_production_job_id_fk": {
-          "name": "production_batch_output_job_id_production_job_id_fk",
-          "tableFrom": "production_batch_output",
-          "tableTo": "production_job",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "production_batch_output_batch_id_batch_id_fk": {
-          "name": "production_batch_output_batch_id_batch_id_fk",
-          "tableFrom": "production_batch_output",
-          "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.production_job": {
-      "name": "production_job",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "output_component_id": {
-          "name": "output_component_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "batch_number": {
-          "name": "batch_number",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "output_location_id": {
-          "name": "output_location_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "target_quantity": {
-          "name": "target_quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "last_modified": {
-          "name": "last_modified",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "production_job_output_component_id_component_id_fk": {
-          "name": "production_job_output_component_id_component_id_fk",
+        "production_job_component_id_component_id_fk": {
+          "name": "production_job_component_id_component_id_fk",
           "tableFrom": "production_job",
           "tableTo": "component",
           "columnsFrom": [
-            "output_component_id"
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "production_job_batch_id_batch_id_fk": {
+          "name": "production_job_batch_id_batch_id_fk",
+          "tableFrom": "production_job",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
           ],
           "columnsTo": [
             "id"
@@ -1619,6 +2240,170 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.production_job_input": {
+      "name": "production_job_input",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "production_job_id": {
+          "name": "production_job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity_allocated": {
+          "name": "quantity_allocated",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "quantity_used": {
+          "name": "quantity_used",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "production_job_input_production_job_id_production_job_id_fk": {
+          "name": "production_job_input_production_job_id_production_job_id_fk",
+          "tableFrom": "production_job_input",
+          "tableTo": "production_job",
+          "columnsFrom": [
+            "production_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "production_job_input_component_id_component_id_fk": {
+          "name": "production_job_input_component_id_component_id_fk",
+          "tableFrom": "production_job_input",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "production_job_input_batch_id_batch_id_fk": {
+          "name": "production_job_input_batch_id_batch_id_fk",
+          "tableFrom": "production_job_input",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "production_job_input_location_id_location_id_fk": {
+          "name": "production_job_input_location_id_location_id_fk",
+          "tableFrom": "production_job_input",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.profile": {
+      "name": "profile",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "profile_id_users_id_fk": {
+          "name": "profile_id_users_id_fk",
+          "tableFrom": "profile",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1733,13 +2518,13 @@
         },
         "quantity_ordered": {
           "name": "quantity_ordered",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": false
         },
         "sage_quantity_received": {
           "name": "sage_quantity_received",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1813,24 +2598,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "expected_receipt_date": {
-          "name": "expected_receipt_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
         "receipt_date": {
           "name": "receipt_date",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
-        },
-        "is_received": {
-          "name": "is_received",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -1882,15 +2654,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "batch_id": {
-          "name": "batch_id",
-          "type": "integer",
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
         "quantity": {
           "name": "quantity",
-          "type": "real",
+          "type": "NUMERIC(15,6)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1924,12 +2696,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "purchase_receipt_item_batch_id_batch_id_fk": {
-          "name": "purchase_receipt_item_batch_id_batch_id_fk",
+        "purchase_receipt_item_component_id_component_id_fk": {
+          "name": "purchase_receipt_item_component_id_component_id_fk",
           "tableFrom": "purchase_receipt_item",
-          "tableTo": "batch",
+          "tableTo": "component",
           "columnsFrom": [
-            "batch_id"
+            "component_id"
           ],
           "columnsTo": [
             "id"
@@ -1984,9 +2756,269 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.ACCOUNT_STATUS": {
+    "public.task": {
+      "name": "task",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "transaction_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_cancelled": {
+          "name": "is_cancelled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "assigned_to_user_id": {
+          "name": "assigned_to_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_job_id": {
+          "name": "production_job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sales_despatch_id": {
+          "name": "sales_despatch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "task_assigned_to_user_id_profile_id_fk": {
+          "name": "task_assigned_to_user_id_profile_id_fk",
+          "tableFrom": "task",
+          "tableTo": "profile",
+          "columnsFrom": [
+            "assigned_to_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_created_by_user_id_profile_id_fk": {
+          "name": "task_created_by_user_id_profile_id_fk",
+          "tableFrom": "task",
+          "tableTo": "profile",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_production_job_id_production_job_id_fk": {
+          "name": "task_production_job_id_production_job_id_fk",
+          "tableFrom": "task",
+          "tableTo": "production_job",
+          "columnsFrom": [
+            "production_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_sales_despatch_id_sales_despatch_id_fk": {
+          "name": "task_sales_despatch_id_sales_despatch_id_fk",
+          "tableFrom": "task",
+          "tableTo": "sales_despatch",
+          "columnsFrom": [
+            "sales_despatch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.task_item": {
+      "name": "task_item",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pick_location_id": {
+          "name": "pick_location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "put_location_id": {
+          "name": "put_location_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "NUMERIC(15,6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_complete": {
+          "name": "is_complete",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_modified": {
+          "name": "last_modified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "task_item_task_id_task_id_fk": {
+          "name": "task_item_task_id_task_id_fk",
+          "tableFrom": "task_item",
+          "tableTo": "task",
+          "columnsFrom": [
+            "task_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_item_component_id_component_id_fk": {
+          "name": "task_item_component_id_component_id_fk",
+          "tableFrom": "task_item",
+          "tableTo": "component",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_item_batch_id_batch_id_fk": {
+          "name": "task_item_batch_id_batch_id_fk",
+          "tableFrom": "task_item",
+          "tableTo": "batch",
+          "columnsFrom": [
+            "batch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_item_pick_location_id_location_id_fk": {
+          "name": "task_item_pick_location_id_location_id_fk",
+          "tableFrom": "task_item",
+          "tableTo": "location",
+          "columnsFrom": [
+            "pick_location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_item_put_location_id_location_id_fk": {
+          "name": "task_item_put_location_id_location_id_fk",
+          "tableFrom": "task_item",
+          "tableTo": "location",
+          "columnsFrom": [
+            "put_location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "sage.ACCOUNT_STATUS": {
       "name": "ACCOUNT_STATUS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NUMBER": {
           "name": "NUMBER",
@@ -2030,9 +3062,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.ACCRUAL": {
+    "sage.ACCRUAL": {
       "name": "ACCRUAL",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NAME": {
           "name": "NAME",
@@ -2106,9 +3138,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_HEADER": {
+    "sage.AUDIT_HEADER": {
       "name": "AUDIT_HEADER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -2632,9 +3664,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_HISTORY_HEADER": {
+    "sage.AUDIT_HISTORY_HEADER": {
       "name": "AUDIT_HISTORY_HEADER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -2900,9 +3932,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_HISTORY_JOURNAL": {
+    "sage.AUDIT_HISTORY_JOURNAL": {
       "name": "AUDIT_HISTORY_JOURNAL",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -3060,9 +4092,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_HISTORY_SPLIT": {
+    "sage.AUDIT_HISTORY_SPLIT": {
       "name": "AUDIT_HISTORY_SPLIT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -3256,9 +4288,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_HISTORY_USAGE": {
+    "sage.AUDIT_HISTORY_USAGE": {
       "name": "AUDIT_HISTORY_USAGE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TYPE": {
           "name": "TYPE",
@@ -3356,9 +4388,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_JOURNAL": {
+    "sage.AUDIT_JOURNAL": {
       "name": "AUDIT_JOURNAL",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -3576,9 +4608,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_SPLIT": {
+    "sage.AUDIT_SPLIT": {
       "name": "AUDIT_SPLIT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -4018,9 +5050,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_USAGE": {
+    "sage.AUDIT_USAGE": {
       "name": "AUDIT_USAGE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TYPE": {
           "name": "TYPE",
@@ -4118,9 +5150,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.AUDIT_VAT": {
+    "sage.AUDIT_VAT": {
       "name": "AUDIT_VAT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -4380,9 +5412,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.BANK": {
+    "sage.BANK": {
       "name": "BANK",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
@@ -4612,9 +5644,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.BANK_STATEMENT": {
+    "sage.BANK_STATEMENT": {
       "name": "BANK_STATEMENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
@@ -4736,9 +5768,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.BANK_STATEMENT_LINE": {
+    "sage.BANK_STATEMENT_LINE": {
       "name": "BANK_STATEMENT_LINE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
@@ -4788,9 +5820,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CALENDAR_EVENT": {
+    "sage.CALENDAR_EVENT": {
       "name": "CALENDAR_EVENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -4966,9 +5998,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CALENDAR_EVENT_LABEL": {
+    "sage.CALENDAR_EVENT_LABEL": {
       "name": "CALENDAR_EVENT_LABEL",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -5018,9 +6050,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CALENDAR_EVENT_LOCATION": {
+    "sage.CALENDAR_EVENT_LOCATION": {
       "name": "CALENDAR_EVENT_LOCATION",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "LOCATION": {
           "name": "LOCATION",
@@ -5058,9 +6090,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CALENDAR_EVENT_RECURRENCE_PATTERN": {
+    "sage.CALENDAR_EVENT_RECURRENCE_PATTERN": {
       "name": "CALENDAR_EVENT_RECURRENCE_PATTERN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -5218,9 +6250,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CATEGORY": {
+    "sage.CATEGORY": {
       "name": "CATEGORY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CHART": {
           "name": "CHART",
@@ -5288,9 +6320,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CAT_TITLE": {
+    "sage.CAT_TITLE": {
       "name": "CAT_TITLE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CHART": {
           "name": "CHART",
@@ -5316,9 +6348,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CHART_LIST": {
+    "sage.CHART_LIST": {
       "name": "CHART_LIST",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CHART": {
           "name": "CHART",
@@ -5356,9 +6388,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_RETURN": {
+    "sage.CIS_RETURN": {
       "name": "CIS_RETURN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "RETURN_ID": {
           "name": "RETURN_ID",
@@ -5426,9 +6458,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_RETURN_TRANSACTION": {
+    "sage.CIS_RETURN_TRANSACTION": {
       "name": "CIS_RETURN_TRANSACTION",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRANSACTION_ID": {
           "name": "TRANSACTION_ID",
@@ -5466,9 +6498,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_SETTINGS": {
+    "sage.CIS_SETTINGS": {
       "name": "CIS_SETTINGS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "IS_CONTRACTOR": {
           "name": "IS_CONTRACTOR",
@@ -5590,9 +6622,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_SUBCONTRACTOR": {
+    "sage.CIS_SUBCONTRACTOR": {
       "name": "CIS_SUBCONTRACTOR",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "SUPPLIER_REFN": {
           "name": "SUPPLIER_REFN",
@@ -5756,9 +6788,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_SUBCONTRACTOR_LEGACY": {
+    "sage.CIS_SUBCONTRACTOR_LEGACY": {
       "name": "CIS_SUBCONTRACTOR_LEGACY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "SUPPLER_REFN": {
           "name": "SUPPLER_REFN",
@@ -5832,9 +6864,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_SUBCONTRACTOR_RETURN": {
+    "sage.CIS_SUBCONTRACTOR_RETURN": {
       "name": "CIS_SUBCONTRACTOR_RETURN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "RETURN_ID": {
           "name": "RETURN_ID",
@@ -5944,9 +6976,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CIS_SUBCONTRACTOR_TAX_HISTORY": {
+    "sage.CIS_SUBCONTRACTOR_TAX_HISTORY": {
       "name": "CIS_SUBCONTRACTOR_TAX_HISTORY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "SUPPLIER_REFN": {
           "name": "SUPPLIER_REFN",
@@ -5996,9 +7028,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CLEARED_TRAN_RANGE": {
+    "sage.CLEARED_TRAN_RANGE": {
       "name": "CLEARED_TRAN_RANGE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CATE_ID": {
           "name": "CATE_ID",
@@ -6042,9 +7074,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CLEAR_AUDIT_TRAIL_EVENT": {
+    "sage.CLEAR_AUDIT_TRAIL_EVENT": {
       "name": "CLEAR_AUDIT_TRAIL_EVENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CATE_ID": {
           "name": "CATE_ID",
@@ -6100,9 +7132,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.COMMUNICATION_ADDRESS": {
+    "sage.COMMUNICATION_ADDRESS": {
       "name": "COMMUNICATION_ADDRESS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_TYPE": {
           "name": "ACCOUNT_TYPE",
@@ -6164,9 +7196,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.COMPANY": {
+    "sage.COMPANY": {
       "name": "COMPANY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "COMPANYID": {
           "name": "COMPANYID",
@@ -7188,9 +8220,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.COMPANY_DEL_ADDR": {
+    "sage.COMPANY_DEL_ADDR": {
       "name": "COMPANY_DEL_ADDR",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "REFERENCE": {
           "name": "REFERENCE",
@@ -7342,9 +8374,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CONTACT_HISTORY": {
+    "sage.CONTACT_HISTORY": {
       "name": "CONTACT_HISTORY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -7556,9 +8588,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CONTACT_HISTORY_CONTACT_OUTCOME": {
+    "sage.CONTACT_HISTORY_CONTACT_OUTCOME": {
       "name": "CONTACT_HISTORY_CONTACT_OUTCOME",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -7602,9 +8634,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CONTACT_HISTORY_CONTACT_TYPE": {
+    "sage.CONTACT_HISTORY_CONTACT_TYPE": {
       "name": "CONTACT_HISTORY_CONTACT_TYPE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -7654,9 +8686,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CONTACT_HISTORY_MAJOR_TYPE": {
+    "sage.CONTACT_HISTORY_MAJOR_TYPE": {
       "name": "CONTACT_HISTORY_MAJOR_TYPE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -7700,9 +8732,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.COUNTRY_CODE": {
+    "sage.COUNTRY_CODE": {
       "name": "COUNTRY_CODE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CODE": {
           "name": "CODE",
@@ -7746,9 +8778,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CREDIT_BUREAU": {
+    "sage.CREDIT_BUREAU": {
       "name": "CREDIT_BUREAU",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NUMBER": {
           "name": "NUMBER",
@@ -7798,9 +8830,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.CURRENCY": {
+    "sage.CURRENCY": {
       "name": "CURRENCY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NUMBER": {
           "name": "NUMBER",
@@ -7880,9 +8912,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.DELETED_RECORDS": {
+    "sage.DELETED_RECORDS": {
       "name": "DELETED_RECORDS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TABLE_ID": {
           "name": "TABLE_ID",
@@ -7932,15 +8964,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.DEPARTMENT": {
+    "sage.DEPARTMENT": {
       "name": "DEPARTMENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NUMBER": {
           "name": "NUMBER",
           "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "NAME": {
           "name": "NAME",
@@ -7978,9 +9010,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.DIRECT_DEBIT_PAYMENT_REQUESTS": {
+    "sage.DIRECT_DEBIT_PAYMENT_REQUESTS": {
       "name": "DIRECT_DEBIT_PAYMENT_REQUESTS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -8060,9 +9092,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.DISPUTE_REASON": {
+    "sage.DISPUTE_REASON": {
       "name": "DISPUTE_REASON",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CODE": {
           "name": "CODE",
@@ -8082,9 +9114,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.ECSALES_FILL": {
+    "sage.ECSALES_FILL": {
       "name": "ECSALES_FILL",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "COUNTRY_CODE": {
           "name": "COUNTRY_CODE",
@@ -8158,9 +9190,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.ECSALES_HEADER": {
+    "sage.ECSALES_HEADER": {
       "name": "ECSALES_HEADER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "DATE_FROM": {
           "name": "DATE_FROM",
@@ -8276,9 +9308,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.ECSALES_SPLIT": {
+    "sage.ECSALES_SPLIT": {
       "name": "ECSALES_SPLIT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TYPE": {
           "name": "TYPE",
@@ -8358,9 +9390,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.EC_VAT_DESCRIPTION": {
+    "sage.EC_VAT_DESCRIPTION": {
       "name": "EC_VAT_DESCRIPTION",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -8398,9 +9430,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.ESUBMISSION_SETTINGS": {
+    "sage.ESUBMISSION_SETTINGS": {
       "name": "ESUBMISSION_SETTINGS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "USER_ID": {
           "name": "USER_ID",
@@ -8450,9 +9482,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.FINANCIAL_BUDGET": {
+    "sage.FINANCIAL_BUDGET": {
       "name": "FINANCIAL_BUDGET",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
@@ -8526,9 +9558,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.FIXED_ASSET": {
+    "sage.FIXED_ASSET": {
       "name": "FIXED_ASSET",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ASSET_REF": {
           "name": "ASSET_REF",
@@ -8680,9 +9712,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.FIXED_ASSET_CAT": {
+    "sage.FIXED_ASSET_CAT": {
       "name": "FIXED_ASSET_CAT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NUMBER": {
           "name": "NUMBER",
@@ -8702,9 +9734,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.FUND": {
+    "sage.FUND": {
       "name": "FUND",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "FUND_ID": {
           "name": "FUND_ID",
@@ -8778,9 +9810,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.FUND_TYPE": {
+    "sage.FUND_TYPE": {
       "name": "FUND_TYPE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "FUND_TYPE_ID": {
           "name": "FUND_TYPE_ID",
@@ -8818,9 +9850,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.GDN_ITEM": {
+    "sage.GDN_ITEM": {
       "name": "GDN_ITEM",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -8921,12 +9953,20 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "GDN_ITEM_GDN_NUMBER_ITEM_NUMBER_pk": {
+          "name": "GDN_ITEM_GDN_NUMBER_ITEM_NUMBER_pk",
+          "columns": [
+            "GDN_NUMBER",
+            "ITEM_NUMBER"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     },
-    "SAGE.GRN_ITEM": {
+    "sage.GRN_ITEM": {
       "name": "GRN_ITEM",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "GRN_NUMBER": {
           "name": "GRN_NUMBER",
@@ -9015,12 +10055,20 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "GRN_ITEM_GRN_NUMBER_ITEM_NUMBER_pk": {
+          "name": "GRN_ITEM_GRN_NUMBER_ITEM_NUMBER_pk",
+          "columns": [
+            "GRN_NUMBER",
+            "ITEM_NUMBER"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     },
-    "SAGE.INTRASTAT": {
+    "sage.INTRASTAT": {
       "name": "INTRASTAT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ORDER_NUMBER": {
           "name": "ORDER_NUMBER",
@@ -9160,9 +10208,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.INVOICE": {
+    "sage.INVOICE": {
       "name": "INVOICE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "INVOICE_NUMBER": {
           "name": "INVOICE_NUMBER",
@@ -9884,9 +10932,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.INVOICE_ITEM": {
+    "sage.INVOICE_ITEM": {
       "name": "INVOICE_ITEM",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "INVOICE_NUMBER": {
           "name": "INVOICE_NUMBER",
@@ -10152,9 +11200,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.LETTER_TYPE": {
+    "sage.LETTER_TYPE": {
       "name": "LETTER_TYPE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -10210,9 +11258,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.NOMINAL_LEDGER": {
+    "sage.NOMINAL_LEDGER": {
       "name": "NOMINAL_LEDGER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
@@ -10964,9 +12012,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PAYMENT_INFO": {
+    "sage.PAYMENT_INFO": {
       "name": "PAYMENT_INFO",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
@@ -11028,9 +12076,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PAYMENT_METHOD": {
+    "sage.PAYMENT_METHOD": {
       "name": "PAYMENT_METHOD",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -11080,9 +12128,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PERIOD": {
+    "sage.PERIOD": {
       "name": "PERIOD",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "PERIOD": {
           "name": "PERIOD",
@@ -11102,9 +12150,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.POP_ITEM": {
+    "sage.POP_ITEM": {
       "name": "POP_ITEM",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ORDER_NUMBER": {
           "name": "ORDER_NUMBER",
@@ -11379,8 +12427,8 @@
         "ITEMID": {
           "name": "ITEMID",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "GENERATED_MESSAGE": {
           "name": "GENERATED_MESSAGE",
@@ -11418,9 +12466,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PREPAYMENT": {
+    "sage.PREPAYMENT": {
       "name": "PREPAYMENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NAME": {
           "name": "NAME",
@@ -11494,9 +12542,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PRICE": {
+    "sage.PRICE": {
       "name": "PRICE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "PRICE_ID": {
           "name": "PRICE_ID",
@@ -11588,9 +12636,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PRICE_LIST": {
+    "sage.PRICE_LIST": {
       "name": "PRICE_LIST",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TYPE": {
           "name": "TYPE",
@@ -11646,9 +12694,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT": {
+    "sage.PROJECT": {
       "name": "PROJECT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "REFERENCE": {
           "name": "REFERENCE",
@@ -11890,9 +12938,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_BUDGET": {
+    "sage.PROJECT_BUDGET": {
       "name": "PROJECT_BUDGET",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "PROJECT_ID": {
           "name": "PROJECT_ID",
@@ -11936,9 +12984,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_COST_CODE": {
+    "sage.PROJECT_COST_CODE": {
       "name": "PROJECT_COST_CODE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "COST_CODE_ID": {
           "name": "COST_CODE_ID",
@@ -11988,9 +13036,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_COST_TYPE": {
+    "sage.PROJECT_COST_TYPE": {
       "name": "PROJECT_COST_TYPE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "COST_TYPE_ID": {
           "name": "COST_TYPE_ID",
@@ -12034,9 +13082,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_ONLY_TRAN": {
+    "sage.PROJECT_ONLY_TRAN": {
       "name": "PROJECT_ONLY_TRAN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "PROJECT_TRAN_ID": {
           "name": "PROJECT_TRAN_ID",
@@ -12146,9 +13194,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_RELATIONSHIP": {
+    "sage.PROJECT_RELATIONSHIP": {
       "name": "PROJECT_RELATIONSHIP",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ANCESTOR_ID": {
           "name": "ANCESTOR_ID",
@@ -12192,9 +13240,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_RESOURCE": {
+    "sage.PROJECT_RESOURCE": {
       "name": "PROJECT_RESOURCE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "RESOURCE_ID": {
           "name": "RESOURCE_ID",
@@ -12256,9 +13304,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_RESOURCE_TYPE": {
+    "sage.PROJECT_RESOURCE_TYPE": {
       "name": "PROJECT_RESOURCE_TYPE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TYPE_ID": {
           "name": "TYPE_ID",
@@ -12296,9 +13344,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_REVENUE_CODE": {
+    "sage.PROJECT_REVENUE_CODE": {
       "name": "PROJECT_REVENUE_CODE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "REVENUE_CODE_ID": {
           "name": "REVENUE_CODE_ID",
@@ -12342,9 +13390,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_STATUS": {
+    "sage.PROJECT_STATUS": {
       "name": "PROJECT_STATUS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "STATUS_ID": {
           "name": "STATUS_ID",
@@ -12406,9 +13454,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROJECT_TRAN": {
+    "sage.PROJECT_TRAN": {
       "name": "PROJECT_TRAN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "PROJECT_TRAN_ID": {
           "name": "PROJECT_TRAN_ID",
@@ -12488,9 +13536,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PROTX_PAYMENT": {
+    "sage.PROTX_PAYMENT": {
       "name": "PROTX_PAYMENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "VENDOR_TX_CODE": {
           "name": "VENDOR_TX_CODE",
@@ -12564,9 +13612,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PURCHASE_DEL_ADDR": {
+    "sage.PURCHASE_DEL_ADDR": {
       "name": "PURCHASE_DEL_ADDR",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "REFERENCE": {
           "name": "REFERENCE",
@@ -12724,15 +13772,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PURCHASE_LEDGER": {
+    "sage.PURCHASE_LEDGER": {
       "name": "PURCHASE_LEDGER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "NAME": {
           "name": "NAME",
@@ -13646,15 +14694,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.PURCHASE_ORDER": {
+    "sage.PURCHASE_ORDER": {
       "name": "PURCHASE_ORDER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ORDER_NUMBER": {
           "name": "ORDER_NUMBER",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "ORDER_OR_QUOTE": {
           "name": "ORDER_OR_QUOTE",
@@ -14286,9 +15334,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.RECURRING": {
+    "sage.RECURRING": {
       "name": "RECURRING",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -14416,9 +15464,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.REMITTANCE": {
+    "sage.REMITTANCE": {
       "name": "REMITTANCE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "URN": {
           "name": "URN",
@@ -14642,9 +15690,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.RTD_SUMMARY": {
+    "sage.RTD_SUMMARY": {
       "name": "RTD_SUMMARY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "VAT_BOX": {
           "name": "VAT_BOX",
@@ -14754,9 +15802,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SAGEPAY_PAY_BY_LINK": {
+    "sage.SAGEPAY_PAY_BY_LINK": {
       "name": "SAGEPAY_PAY_BY_LINK",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CUSTOMER_REFN": {
           "name": "CUSTOMER_REFN",
@@ -14776,9 +15824,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SALES_DEL_ADDR": {
+    "sage.SALES_DEL_ADDR": {
       "name": "SALES_DEL_ADDR",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "REFERENCE": {
           "name": "REFERENCE",
@@ -14936,15 +15984,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SALES_LEDGER": {
+    "sage.SALES_LEDGER": {
       "name": "SALES_LEDGER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "NAME": {
           "name": "NAME",
@@ -15882,15 +16930,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SALES_ORDER": {
+    "sage.SALES_ORDER": {
       "name": "SALES_ORDER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ORDER_NUMBER": {
           "name": "ORDER_NUMBER",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "ORDER_TYPE_CODE": {
           "name": "ORDER_TYPE_CODE",
@@ -16612,9 +17660,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SOFA_CATEGORY": {
+    "sage.SOFA_CATEGORY": {
       "name": "SOFA_CATEGORY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "SOFA_ID": {
           "name": "SOFA_ID",
@@ -16652,9 +17700,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SOP_ITEM": {
+    "sage.SOP_ITEM": {
       "name": "SOP_ITEM",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ORDER_NUMBER": {
           "name": "ORDER_NUMBER",
@@ -16911,8 +17959,8 @@
         "ITEMID": {
           "name": "ITEMID",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "NEGOTIATION_DISC_NET": {
           "name": "NEGOTIATION_DISC_NET",
@@ -16956,15 +18004,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.STOCK": {
+    "sage.STOCK": {
       "name": "STOCK",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "STOCK_CODE": {
           "name": "STOCK_CODE",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "DESCRIPTION": {
           "name": "DESCRIPTION",
@@ -19150,9 +20198,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.STOCK_ALLOCATION": {
+    "sage.STOCK_ALLOCATION": {
       "name": "STOCK_ALLOCATION",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "STOCK_ALLOCATION_ID": {
           "name": "STOCK_ALLOCATION_ID",
@@ -19238,15 +20286,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.STOCK_CAT": {
+    "sage.STOCK_CAT": {
       "name": "STOCK_CAT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "NUMBER": {
           "name": "NUMBER",
           "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "NAME": {
           "name": "NAME",
@@ -19260,9 +20308,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.STOCK_COMP": {
+    "sage.STOCK_COMP": {
       "name": "STOCK_COMP",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ASSEMBLY_CODE": {
           "name": "ASSEMBLY_CODE",
@@ -19318,15 +20366,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.STOCK_TRAN": {
+    "sage.STOCK_TRAN": {
       "name": "STOCK_TRAN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TRAN_NUMBER": {
           "name": "TRAN_NUMBER",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "STOCK_CODE": {
           "name": "STOCK_CODE",
@@ -19436,9 +20484,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.SUPPLIER_PAYMENT_INFO": {
+    "sage.SUPPLIER_PAYMENT_INFO": {
       "name": "SUPPLIER_PAYMENT_INFO",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "ACCOUNT_REF": {
           "name": "ACCOUNT_REF",
@@ -19482,9 +20530,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.TAX_CODE": {
+    "sage.TAX_CODE": {
       "name": "TAX_CODE",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "TAX_CODE": {
           "name": "TAX_CODE",
@@ -19552,9 +20600,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.UPDATE_LEDGER": {
+    "sage.UPDATE_LEDGER": {
       "name": "UPDATE_LEDGER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "INVOICE_NUMBER": {
           "name": "INVOICE_NUMBER",
@@ -19646,9 +20694,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_ADJUSTMENT": {
+    "sage.VAT_ADJUSTMENT": {
       "name": "VAT_ADJUSTMENT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "VAT_BOX": {
           "name": "VAT_BOX",
@@ -19674,9 +20722,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_DETAILS": {
+    "sage.VAT_DETAILS": {
       "name": "VAT_DETAILS",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "VAT_BOX": {
           "name": "VAT_BOX",
@@ -19762,9 +20810,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_RETURN": {
+    "sage.VAT_RETURN": {
       "name": "VAT_RETURN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "VAT_BOX": {
           "name": "VAT_BOX",
@@ -19814,9 +20862,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_RETURN_RECEIPT": {
+    "sage.VAT_RETURN_RECEIPT": {
       "name": "VAT_RETURN_RECEIPT",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "UNIQUE_ID": {
           "name": "UNIQUE_ID",
@@ -19920,9 +20968,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_REV_CHARGE_DETAIL": {
+    "sage.VAT_REV_CHARGE_DETAIL": {
       "name": "VAT_REV_CHARGE_DETAIL",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CUSTOMER_REF": {
           "name": "CUSTOMER_REF",
@@ -19972,9 +21020,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_REV_CHARGE_HEADER": {
+    "sage.VAT_REV_CHARGE_HEADER": {
       "name": "VAT_REV_CHARGE_HEADER",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "DATE_FROM": {
           "name": "DATE_FROM",
@@ -20024,9 +21072,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_REV_CHARGE_RETURN": {
+    "sage.VAT_REV_CHARGE_RETURN": {
       "name": "VAT_REV_CHARGE_RETURN",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "CUSTOMER_REF": {
           "name": "CUSTOMER_REF",
@@ -20118,9 +21166,9 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "SAGE.VAT_SUMMARY": {
+    "sage.VAT_SUMMARY": {
       "name": "VAT_SUMMARY",
-      "schema": "SAGE",
+      "schema": "sage",
       "columns": {
         "VAT_BOX": {
           "name": "VAT_BOX",
@@ -20226,8 +21274,8 @@
     }
   },
   "enums": {
-    "public.batch_movement_type": {
-      "name": "batch_movement_type",
+    "public.transaction_type": {
+      "name": "transaction_type",
       "schema": "public",
       "values": [
         "despatch",
@@ -20242,7 +21290,8 @@
     }
   },
   "schemas": {
-    "SAGE": "SAGE"
+    "bit_systems": "bit_systems",
+    "sage": "sage"
   },
   "sequences": {},
   "_meta": {

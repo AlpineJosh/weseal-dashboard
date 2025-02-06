@@ -5,71 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1725704648685,
-      "tag": "0000_flashy_sheva_callister",
+      "when": 1738845496028,
+      "tag": "0000_far_sunset_bain",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1725785781304,
-      "tag": "0001_high_sabretooth",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1726080610081,
-      "tag": "0002_robust_fat_cobra",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1726133441390,
-      "tag": "0003_late_power_pack",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1726403247648,
-      "tag": "0004_purple_mentor",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1728895117297,
-      "tag": "0005_curious_bloodscream",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1728895502397,
-      "tag": "0008_slimy_excalibur",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1733132143379,
-      "tag": "0009_faithful_nick_fury",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1733161044009,
-      "tag": "0010_familiar_echo",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1736779013144,
-      "tag": "0011_shiny_warstar",
+      "when": 1738846735450,
+      "tag": "0001_young_young_avengers",
       "breakpoints": true
     }
   ]

@@ -1,5 +1,5 @@
 import bitSystemsSchema from "./bit-systems";
-import publicSchema from "./public";
+import * as publicSchema from "./public";
 import sageSchema from "./sage";
 
 export type Schema = typeof publicSchema &

@@ -7,9 +7,9 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-const bitSystemsSchema = pgSchema("bit_systems");
+export const bitSystemsSchema = pgSchema("bit_systems");
 
-const binItem = bitSystemsSchema.table("bin_item", {
+export const binItem = bitSystemsSchema.table("bin_item", {
   pk_BinItem_ID: integer("pk_BinItem_ID").primaryKey(),
   fk_StockItem_ID: integer("fk_StockItem_ID"),
   fk_Bin_ID: integer("fk_Bin_ID"),
@@ -20,7 +20,7 @@ const binItem = bitSystemsSchema.table("bin_item", {
   Priority: smallint("Priority"),
 });
 
-const bin = bitSystemsSchema.table("bin", {
+export const bin = bitSystemsSchema.table("bin", {
   pk_Bin_ID: integer("pk_Bin_ID").primaryKey(),
   fk_Warehouse_ID: integer("fk_Warehouse_ID"),
   Name: varchar("Name", { length: 255 }),
@@ -30,7 +30,7 @@ const bin = bitSystemsSchema.table("bin", {
   Sequence: integer("Sequence"),
 });
 
-const stockItem = bitSystemsSchema.table("stock_item", {
+export const stockItem = bitSystemsSchema.table("stock_item", {
   pk_StockItem_ID: integer("pk_StockItem_ID").primaryKey(),
   Code: varchar("Code", { length: 255 }),
   DateTimeCreated: timestamp("DateTimeCreated"),
@@ -52,7 +52,7 @@ const stockItem = bitSystemsSchema.table("stock_item", {
   IgnoreStockLevel: integer("IgnoreStockLevel"),
 });
 
-const traceableBinItem = bitSystemsSchema.table("traceable_bin_item", {
+export const traceableBinItem = bitSystemsSchema.table("traceable_bin_item", {
   pk_TraceableBinItem_ID: integer("pk_TraceableBinItem_ID").primaryKey(),
   fk_TraceableItem_ID: integer("fk_TraceableItem_ID"),
   fk_BinItem_ID: integer("fk_BinItem_ID"),
@@ -61,7 +61,7 @@ const traceableBinItem = bitSystemsSchema.table("traceable_bin_item", {
   DateTimeCreated: timestamp("DateTimeCreated"),
 });
 
-const traceableItem = bitSystemsSchema.table("traceable_item", {
+export const traceableItem = bitSystemsSchema.table("traceable_item", {
   pk_TraceableItem_ID: integer("pk_TraceableItem_ID").primaryKey(),
   fk_StockItem_ID: integer("fk_StockItem_ID"),
   fk_TraceableType_ID: integer("fk_TraceableType_ID"),
@@ -74,7 +74,7 @@ const traceableItem = bitSystemsSchema.table("traceable_item", {
   LastUpdated: timestamp("LastUpdated"),
 });
 
-const warehouse = bitSystemsSchema.table("warehouse", {
+export const warehouse = bitSystemsSchema.table("warehouse", {
   pk_Warehouse_ID: integer("pk_Warehouse_ID").primaryKey(),
   Name: varchar("Name", { length: 255 }),
   Description: varchar("Description", { length: 255 }),
