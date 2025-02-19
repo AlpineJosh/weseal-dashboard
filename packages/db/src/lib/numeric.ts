@@ -14,7 +14,7 @@ export const numericDecimal = customType<{
   columnType: "PgNumeric";
 }>({
   dataType(config = { precision: 15, scale: 6 }) {
-    return `decimal(${config.precision},${config.scale})`;
+    return `NUMERIC(${config.precision},${config.scale})`;
   },
   toDriver(value: Decimal | number | string | null): string {
     if (value === null) {

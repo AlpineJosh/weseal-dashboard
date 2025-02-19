@@ -79,3 +79,12 @@ export const warehouse = bitSystemsSchema.table("warehouse", {
   Name: varchar("Name", { length: 255 }),
   Description: varchar("Description", { length: 255 }),
 });
+
+export default {
+  binItem,
+  bin,
+  stockItem,
+  traceableBinItem,
+  traceableItem,
+  warehouse,
+};

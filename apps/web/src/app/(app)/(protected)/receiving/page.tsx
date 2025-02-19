@@ -5,7 +5,7 @@ import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
-import { Heading } from "@repo/ui/components/typography";
+import { Heading, TextLink } from "@repo/ui/components/typography";
 
 export default function ReceivingPage() {
   return (
@@ -13,7 +13,7 @@ export default function ReceivingPage() {
       <Heading level={1}>Purchase Orders</Heading>
 
       <DatatableQueryProvider
-        endpoint={api.receiving.orders.list}
+        endpoint={api.receiving.order.list}
         defaultInput={{
           sort: [{ field: "orderDate", order: "desc" }],
         }}
@@ -33,19 +33,25 @@ export default function ReceivingPage() {
               <Datatable.Column id="orderDate" isSortable>
                 Order Date
               </Datatable.Column>
-              <Datatable.Column id="nextExpectedReceipt" isSortable>
-                Due Date
+              <Datatable.Column id="totalItems" isSortable>
+                Total Items
               </Datatable.Column>
-              <Datatable.Column id="receiptCount" isSortable>
-                Deliveries Received
+              <Datatable.Column id="incompleteItems" isSortable>
+                Incomplete Items
               </Datatable.Column>
             </Datatable.Head>
             <Datatable.Body data={props.data}>
               {({ data }) => (
                 <Datatable.Row key={data.id}>
-                  <Datatable.Cell id="id">{data.id}</Datatable.Cell>
+                  <Datatable.Cell id="id">
+                    <TextLink href={`/receiving/orders/${data.id}`}>
+                      {data.id}
+                    </TextLink>
+                  </Datatable.Cell>
                   <Datatable.Cell id="supplier">
-                    {data.supplierName}
+                    <TextLink href={`/suppliers/${data.supplierId}`}>
+                      {data.supplierName}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="status">
                     <Badge>
@@ -57,13 +63,13 @@ export default function ReceivingPage() {
                     </Badge>
                   </Datatable.Cell>
                   <Datatable.Cell id="orderDate">
-                    {data.orderDate?.toLocaleDateString()}
+                    {data.orderDate.toLocaleDateString()}
                   </Datatable.Cell>
-                  <Datatable.Cell id="nextExpectedReceipt">
-                    {data.nextExpectedReceipt?.toLocaleDateString()}
+                  <Datatable.Cell id="totalItems">
+                    {data.totalItems}
                   </Datatable.Cell>
-                  <Datatable.Cell id="receiptCount">
-                    {data.receiptCount}
+                  <Datatable.Cell id="incompleteItems">
+                    {data.incompleteItems}
                   </Datatable.Cell>
                 </Datatable.Row>
               )}

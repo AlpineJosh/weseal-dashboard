@@ -12,24 +12,18 @@ export default function BatchOverview() {
       <Heading level={1}>Batches</Heading>
       <Text>All batches both active and historical</Text>
 
-      <DatatableQueryProvider
-        endpoint={api.inventory.batches.list}
-        defaultInput={{}}
-      >
+      <DatatableQueryProvider endpoint={api.batch.list} defaultInput={{}}>
         {(props) => (
           <Datatable className="grow overflow-hidden" {...props}>
             <Datatable.Head>
-              <Datatable.Column id="id" isSortable>
-                ID
+              <Datatable.Column id="batchReference" isSortable>
+                Batch Reference
               </Datatable.Column>
               <Datatable.Column id="componentId" isSortable>
                 Stock Code
               </Datatable.Column>
               <Datatable.Column id="componentDescription" isSortable>
                 Description
-              </Datatable.Column>
-              <Datatable.Column id="batchReference" isSortable>
-                Batch
               </Datatable.Column>
               <Datatable.Column id="entryDate" isSortable>
                 Entry Date
@@ -40,13 +34,16 @@ export default function BatchOverview() {
               <Datatable.Column id="allocatedQuantity" isSortable>
                 Allocated
               </Datatable.Column>
+              <Datatable.Column id="freeQuantity" isSortable>
+                Free
+              </Datatable.Column>
             </Datatable.Head>
             <Datatable.Body data={props.data}>
               {({ data }) => (
                 <Datatable.Row key={`${data.id}`}>
                   <Datatable.Cell id="id">
                     <TextLink href={`/inventory/batches/${data.id}`}>
-                      {data.id}
+                      {data.batchReference}
                     </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="componentId">
@@ -61,21 +58,27 @@ export default function BatchOverview() {
                     {data.batchReference}
                   </Datatable.Cell>
                   <Datatable.Cell id="entryDate">
-                    {data.entryDate?.toLocaleDateString()}
+                    {data.entryDate.toLocaleDateString()}
                   </Datatable.Cell>
                   <Datatable.DecimalCell
                     id="totalQuantity"
-                    value={data.totalQuantity ?? 0}
-                    unit={data.unit}
+                    value={data.totalQuantity}
+                    unit={data.componentUnit}
                     precision={6}
                     className="flex flex-row items-baseline space-x-1"
                   />
                   <Datatable.DecimalCell
                     id="allocatedQuantity"
-                    value={data.allocatedQuantity ?? 0}
-                    unit={data.unit}
+                    value={data.allocatedQuantity}
+                    unit={data.componentUnit}
                     precision={6}
                     className="flex flex-row items-baseline space-x-1"
+                  />
+                  <Datatable.DecimalCell
+                    id="freeQuantity"
+                    value={data.freeQuantity}
+                    unit={data.componentUnit}
+                    precision={6}
                   />
                 </Datatable.Row>
               )}

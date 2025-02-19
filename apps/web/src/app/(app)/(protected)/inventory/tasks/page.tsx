@@ -12,10 +12,7 @@ export default function TasksPage() {
     <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
       <Heading level={1}>Tasks</Heading>
 
-      <DatatableQueryProvider
-        endpoint={api.inventory.tasks.list}
-        defaultInput={{}}
-      >
+      <DatatableQueryProvider endpoint={api.task.list} defaultInput={{}}>
         {(props) => (
           <Datatable className="grow overflow-hidden" {...props}>
             <Datatable.Head>
@@ -55,7 +52,7 @@ export default function TasksPage() {
                     {data.assignedToName}
                   </Datatable.Cell>
                   <Datatable.Cell id="isCompleted">
-                    {data.isComplete ? "Yes" : "No"}
+                    {data.itemsComplete ? "Yes" : "No"}
                   </Datatable.Cell>
                 </Datatable.Row>
               )}
