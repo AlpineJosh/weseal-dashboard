@@ -9,7 +9,9 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { batchMovement } from "./inventory.schema";
+import { inventory } from "./inventory.schema";
+import { productionJobAllocation } from "./production.schema";
+import { taskAllocation } from "./task.schema";
 
 export const locationGroup = pgTable("location_group", {
   id: serial("id").notNull().primaryKey(),
@@ -73,5 +75,7 @@ export const locationRelations = relations(location, ({ one, many }) => ({
     fields: [location.typeId],
     references: [locationType.id],
   }),
-  batchMovements: many(batchMovement),
+  inventory: many(inventory),
+  taskAllocations: many(taskAllocation),
+  productionJobAllocations: many(productionJobAllocation),
 }));

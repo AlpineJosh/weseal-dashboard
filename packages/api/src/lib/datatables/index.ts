@@ -1,91 +1,81 @@
 import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
-import { and, count } from "@repo/db";
+import { and, Column, count, is, sql, SQL } from "@repo/db";
 
-import type { FilterInput, FilterSchema } from "./filter";
-import type { PaginationInput, PaginationOutput } from "./pagination";
-import type { SearchInput, SearchSchema } from "./search";
-import type { SortInput, SortSchema } from "./sort";
-import type { DatatableData, DatatableSchema, FieldSelection } from "./types";
+import type {
+  DatatableData,
+  DatatableDefinition,
+  DatatableFirstQuery,
+  DatatableInput,
+  DatatableInputSchema,
+  DatatableManyQuery,
+  DatatableOutput,
+  Fields,
+  FieldSelection,
+} from "./types";
 import { db } from "../../db";
 import { buildFilterClause, buildFilterSchema } from "./filter";
 import { pagination } from "./pagination";
 import { buildSearchClause, buildSearchSchema } from "./search";
 import { buildSortClause, buildSortSchema } from "./sort";
-import { getDatatableSchema } from "./types";
 
-export type DatatableInputSchema<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = z.ZodObject<{
-  pagination: z.ZodType<PaginationInput>;
-  sort: SortSchema<T, S>;
-  filter: FilterSchema<T, S>;
-  search: SearchSchema<T, S>;
-}>;
-
-export interface DatatableInput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> {
-  pagination?: PaginationInput;
-  sort?: SortInput<T, S>;
-  filter?: FilterInput<T, S>;
-  search?: SearchInput<T, S>;
-}
-
-export interface DatatableOutput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> {
-  rows: DatatableData<T, S>[];
-  pagination: PaginationOutput;
-}
-
-export type DatatableManyQuery<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = (input: DatatableInput<T, S>) => Promise<DatatableOutput<T, S>>;
-
-export type DatatableFirstQuery<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = (input: DatatableInput<T, S>) => Promise<DatatableData<T, S>>;
-
-export const datatable = <T extends FieldSelection>(
-  view: SubqueryWithSelection<T, string>,
+export const datatable = <
+  T extends DatatableDefinition,
+  S extends FieldSelection<T>,
+>(
+  definition: T,
+  view: SubqueryWithSelection<S, string>,
 ): {
-  $schema: DatatableInputSchema<T, DatatableSchema<T>>;
-  findMany: DatatableManyQuery<T, DatatableSchema<T>>;
-  findFirst: DatatableFirstQuery<T, DatatableSchema<T>>;
+  $schema: DatatableInputSchema<T>;
+  findMany: DatatableManyQuery<T>;
+  findFirst: DatatableFirstQuery<T>;
 } => {
-  const schema = getDatatableSchema(view);
+  const fieldBuilder: Partial<Fields<T>> = {};
+  for (const key in definition) {
+    if (definition[key] === undefined) {
+      continue;
+    }
+    const field = view._.selectedFields[key];
 
-  const filterSchema = buildFilterSchema(schema);
-  const searchSchema = buildSearchSchema(schema);
-  const sortSchema = buildSortSchema(schema);
+    if (is(field, SQL.Aliased)) {
+      fieldBuilder[key] = {
+        sql: sql.raw(`"${view._.alias}"."${field.fieldAlias}"`),
+        type: definition[key],
+      };
+    } else if (is(field, Column)) {
+      fieldBuilder[key] = {
+        sql: sql.raw(`"${view._.alias}"."${field.name}"`),
+        type: definition[key],
+      };
+    }
+  }
+
+  const fields = fieldBuilder as Fields<T>;
+
+  const filterSchema = buildFilterSchema(definition);
+  const searchSchema = buildSearchSchema(definition);
+  const sortSchema = buildSortSchema(definition);
   const paginationSchema = pagination;
 
   const inputSchema = z.object({
-    pagination: paginationSchema,
-    sort: sortSchema,
+    pagination: paginationSchema.optional(),
+    sort: sortSchema.optional(),
     filter: filterSchema,
-    search: searchSchema,
-  }) as DatatableInputSchema<T, DatatableSchema<T>>;
+    search: searchSchema.optional(),
+  }) as DatatableInputSchema<T>;
 
-  const findMany = async (
-    input: DatatableInput<T, DatatableSchema<T>>,
-  ): Promise<{
-    rows: DatatableData<T, DatatableSchema<T>>[];
-    pagination: PaginationOutput;
-  }> => {
-    const { pagination = { size: 10, page: 1 }, sort, filter, search } = input;
+  const findMany = async ({
+    pagination = { size: 10, page: 1 },
+    sort,
+    filter,
+    search,
+  }: DatatableInput<T>): Promise<DatatableOutput<T>> => {
     const where = and(
-      buildFilterClause(schema, filter),
-      buildSearchClause(schema, search),
+      buildFilterClause(fields, filter),
+      buildSearchClause(fields, search),
     );
-    const order = buildSortClause(schema, sort) ?? [];
+    const order = buildSortClause(fields, sort) ?? [];
     const limit = pagination.size;
     const offset = (pagination.page - 1) * pagination.size;
     const total = await db.select({ count: count() }).from(view).where(where);
@@ -99,7 +89,7 @@ export const datatable = <T extends FieldSelection>(
       .offset(offset);
 
     return {
-      rows: results as DatatableData<T, DatatableSchema<T>>[],
+      rows: results as DatatableData<T>[],
       pagination: {
         ...pagination,
         total: Number(total[0]?.count ?? 0),
@@ -108,14 +98,14 @@ export const datatable = <T extends FieldSelection>(
   };
 
   const findFirst = async (
-    input: DatatableInput<T, DatatableSchema<T>>,
-  ): Promise<DatatableData<T, DatatableSchema<T>>> => {
+    input: Omit<DatatableInput<T>, "pagination">,
+  ): Promise<DatatableData<T>> => {
     const { sort, filter, search } = input;
     const where = and(
-      buildFilterClause(schema, filter),
-      buildSearchClause(schema, search),
+      buildFilterClause(fields, filter),
+      buildSearchClause(fields, search),
     );
-    const order = buildSortClause(schema, sort) ?? [];
+    const order = buildSortClause(fields, sort) ?? [];
 
     const results = await db
       .select()
@@ -124,7 +114,7 @@ export const datatable = <T extends FieldSelection>(
       .orderBy(...order)
       .limit(1);
 
-    return results[0] as DatatableData<T, DatatableSchema<T>>;
+    return results[0] as DatatableData<T>;
   };
 
   return { $schema: inputSchema, findMany, findFirst };

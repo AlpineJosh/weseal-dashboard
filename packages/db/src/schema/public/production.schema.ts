@@ -23,8 +23,12 @@ export const productionJob = pgTable("production_job", {
   outputLocationId: integer("output_location_id")
     .notNull()
     .references(() => location.id),
-  targetQuantity: integer("target_quantity").notNull().default(0),
-  quantityProduced: integer("quantity_produced").notNull().default(0),
+  targetQuantity: numericDecimal("target_quantity")
+    .notNull()
+    .default(new Decimal(0)),
+  quantityProduced: numericDecimal("quantity_produced")
+    .notNull()
+    .default(new Decimal(0)),
   isComplete: boolean("is_complete").notNull().default(false),
   createdAt: timestamp("created_at")
     .notNull()
@@ -46,11 +50,11 @@ export const productionJobRelations = relations(
       fields: [productionJob.outputLocationId],
       references: [location.id],
     }),
-    inputs: many(productionJobInput),
+    allocations: many(productionJobAllocation),
   }),
 );
 
-export const productionJobInput = pgTable("production_job_input", {
+export const productionJobAllocation = pgTable("production_job_allocation", {
   id: serial("id").notNull().primaryKey(),
   productionJobId: integer("production_job_id")
     .notNull()
@@ -62,10 +66,13 @@ export const productionJobInput = pgTable("production_job_input", {
   locationId: integer("location_id")
     .notNull()
     .references(() => location.id),
-  quantityAllocated: numericDecimal("quantity_allocated")
+  totalQuantity: numericDecimal("total_quantity")
     .notNull()
     .default(new Decimal(0)),
-  quantityUsed: numericDecimal("quantity_used")
+  remainingQuantity: numericDecimal("remaining_quantity")
+    .notNull()
+    .default(new Decimal(0)),
+  usedQuantity: numericDecimal("used_quantity")
     .notNull()
     .default(new Decimal(0)),
   createdAt: timestamp("created_at")
@@ -77,24 +84,52 @@ export const productionJobInput = pgTable("production_job_input", {
     .$onUpdate(() => new Date()),
 });
 
-export const productionJobInputRelations = relations(
-  productionJobInput,
+export const productionJobAllocationRelations = relations(
+  productionJobAllocation,
   ({ one }) => ({
     job: one(productionJob, {
-      fields: [productionJobInput.productionJobId],
+      fields: [productionJobAllocation.productionJobId],
       references: [productionJob.id],
     }),
     component: one(component, {
-      fields: [productionJobInput.componentId],
+      fields: [productionJobAllocation.componentId],
       references: [component.id],
     }),
     batch: one(batch, {
-      fields: [productionJobInput.batchId],
+      fields: [productionJobAllocation.batchId],
       references: [batch.id],
     }),
     location: one(location, {
-      fields: [productionJobInput.locationId],
+      fields: [productionJobAllocation.locationId],
       references: [location.id],
+    }),
+  }),
+);
+
+export const productionJobAllocationLot = pgTable(
+  "production_job_allocation_lot",
+  {
+    id: serial("id").notNull().primaryKey(),
+    productionJobAllocationId: integer("production_job_allocation_id")
+      .notNull()
+      .references(() => productionJobAllocation.id),
+    quantity: numericDecimal("quantity").notNull().default(new Decimal(0)),
+    createdAt: timestamp("created_at")
+      .notNull()
+      .default(sql`now()`),
+    lastModified: timestamp("last_modified")
+      .notNull()
+      .default(sql`now()`)
+      .$onUpdate(() => new Date()),
+  },
+);
+
+export const productionJobAllocationLotRelations = relations(
+  productionJobAllocationLot,
+  ({ one }) => ({
+    allocation: one(productionJobAllocation, {
+      fields: [productionJobAllocationLot.productionJobAllocationId],
+      references: [productionJobAllocation.id],
     }),
   }),
 );

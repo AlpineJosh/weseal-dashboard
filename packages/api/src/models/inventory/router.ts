@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { publicProcedure } from "../../trpc";
 import overview from "./model";
+import { resetInventory } from "./reset/model";
 
 export const uniqueInventorySchema = z.object({
   componentId: z.string(),
@@ -22,6 +23,9 @@ export const inventoryRouter = {
   }),
   list: publicProcedure.input(overview.$schema).query(async ({ input }) => {
     return overview.findMany(input);
+  }),
+  reset: publicProcedure.mutation(async () => {
+    return resetInventory();
   }),
 } satisfies TRPCRouterRecord;
 

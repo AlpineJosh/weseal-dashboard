@@ -123,8 +123,8 @@ export const taskItemRouter = {
     .input(uniqueTaskItemInput)
     .mutation(async ({ input }) => {
       return await db
-        .delete(publicSchema.taskItem)
-        .where(eq(publicSchema.taskItem.id, input.id))
+        .delete(publicSchema.taskAllocation)
+        .where(eq(publicSchema.taskAllocation.id, input.id))
         .returning();
     }),
 } satisfies TRPCRouterRecord;

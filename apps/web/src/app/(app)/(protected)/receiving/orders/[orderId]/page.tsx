@@ -3,7 +3,6 @@
 import { component } from "@/models/component";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
-import Decimal from "decimal.js";
 
 import { Datatable } from "@repo/ui/components/display";
 import { TextLink } from "@repo/ui/components/typography";
@@ -18,7 +17,7 @@ export default function ReceivingPage({
   return (
     <>
       <DatatableQueryProvider
-        endpoint={api.receiving.orders.items.list}
+        endpoint={api.receiving.order.item.list}
         defaultInput={{
           filter: {
             orderId: {
@@ -55,11 +54,11 @@ export default function ReceivingPage({
                   />
                   <Datatable.DecimalCell
                     id="quantityReceived"
-                    value={item.quantityReceived ?? new Decimal(0)}
+                    value={item.quantityReceived}
                   />
                   <Datatable.DecimalCell
                     id="sageQuantityReceived"
-                    value={item.sageQuantityReceived ?? new Decimal(0)}
+                    value={item.sageQuantityReceived}
                   />
                 </Datatable.Row>
               )}

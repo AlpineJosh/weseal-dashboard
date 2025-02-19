@@ -2,19 +2,16 @@ import { and, count, eq, not, publicSchema } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 
 const { supplier, purchaseOrder } = publicSchema;
 
 const orders = db
   .select({
     supplierId: purchaseOrder.supplierId,
-    orderCount: as(count(), "order_count", "number"),
-    openOrderCount: as(
-      count(and(not(purchaseOrder.isComplete), not(purchaseOrder.isCancelled))),
-      "open_order_count",
-      "number",
-    ),
+    orderCount: count().as("order_count"),
+    openOrderCount: count(
+      and(not(purchaseOrder.isComplete), not(purchaseOrder.isCancelled)),
+    ).as("open_order_count"),
   })
   .from(purchaseOrder)
   .groupBy(purchaseOrder.supplierId)
@@ -34,4 +31,15 @@ const overview = db
   .leftJoin(orders, eq(supplier.id, orders.supplierId))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "string",
+    name: "string",
+    createdAt: "string",
+    lastModified: "string",
+    isDeleted: "boolean",
+    orderCount: "number",
+    openOrderCount: "number",
+  },
+  overview,
+);

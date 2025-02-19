@@ -2,7 +2,6 @@ import { count, eq, publicSchema } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 
 const { salesDespatch, salesOrder, customer, salesDespatchItem } = publicSchema;
 
@@ -10,7 +9,7 @@ const despatchItems = db
   .select({
     despatchId: salesDespatchItem.despatchId,
     componentId: salesDespatchItem.componentId,
-    itemCount: as(count(), "item_count", "number"),
+    itemCount: count().as("item_count"),
   })
   .from(salesDespatchItem)
   .leftJoin(salesDespatch, eq(salesDespatchItem.despatchId, salesDespatch.id))
@@ -33,4 +32,16 @@ const overview = db
   .leftJoin(customer, eq(salesOrder.customerId, customer.id))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    orderId: "number",
+    despatchDate: "string",
+    isDespatched: "boolean",
+    isCancelled: "boolean",
+    customerId: "string",
+    customerName: "string",
+    itemCount: "number",
+  },
+  overview,
+);

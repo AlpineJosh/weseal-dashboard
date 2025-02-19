@@ -2,7 +2,6 @@ import { count, eq, publicSchema, sum } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 import { coalesce } from "../../../lib/operators";
 
 const { purchaseReceipt, purchaseOrder, supplier, purchaseReceiptItem } =
@@ -11,11 +10,9 @@ const { purchaseReceipt, purchaseOrder, supplier, purchaseReceiptItem } =
 const items = db
   .select({
     receiptId: purchaseReceiptItem.receiptId,
-    itemCount: as(count(), "item_count", "number"),
-    totalQuantity: as(
-      coalesce(sum(purchaseReceiptItem.quantity), 0),
+    itemCount: count().as("item_count"),
+    totalQuantity: coalesce(sum(purchaseReceiptItem.quantity), 0).as(
       "total_quantity",
-      "number",
     ),
   })
   .from(purchaseReceiptItem)
@@ -40,4 +37,17 @@ const overview = db
   .leftJoin(items, eq(items.receiptId, purchaseReceipt.id))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    orderId: "number",
+    supplierId: "string",
+    supplierName: "string",
+    receiptDate: "string",
+    createdAt: "string",
+    lastModified: "string",
+    itemCount: "number",
+    totalQuantity: "number",
+  },
+  overview,
+);

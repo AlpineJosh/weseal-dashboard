@@ -36,7 +36,7 @@ export const purchaseOrder = pgTable("purchase_order", {
   isQuote: boolean("is_quote").notNull().default(false),
   isComplete: boolean("is_complete").notNull().default(false),
   isCancelled: boolean("is_cancelled").notNull().default(false),
-  orderDate: timestamp("order_date"),
+  orderDate: timestamp("order_date").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -67,8 +67,8 @@ export const purchaseOrderItem = pgTable("purchase_order_item", {
   componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
-  quantityOrdered: numericDecimal("quantity_ordered"),
-  sageQuantityReceived: numericDecimal("sage_quantity_received"),
+  quantityOrdered: numericDecimal("quantity_ordered").notNull(),
+  sageQuantityReceived: numericDecimal("sage_quantity_received").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -127,7 +127,7 @@ export const purchaseReceiptItem = pgTable("purchase_receipt_item", {
   componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
-  quantity: numericDecimal("quantity"),
+  quantity: numericDecimal("quantity").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),

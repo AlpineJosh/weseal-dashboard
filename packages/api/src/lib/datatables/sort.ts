@@ -3,57 +3,44 @@ import { z } from "zod";
 import type { SQL } from "@repo/db";
 import { asc, desc } from "@repo/db";
 
-import type { DatatableSchema, FieldSelection } from "./types";
+import type { DatatableDefinition, Fields } from "./types";
 
-export type SortInput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = {
-  field: keyof S;
-  direction: "asc" | "desc";
+export type SortInput<T extends DatatableDefinition> = {
+  field: keyof T;
+  order: "asc" | "desc";
 }[];
 
-export type SortOutput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = {
-  field: keyof S;
-  direction: "asc" | "desc";
+export type SortOutput<T extends DatatableDefinition> = {
+  field: keyof T;
+  order: "asc" | "desc";
 }[];
 
-export type SortSchema<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = z.ZodOptional<z.ZodType<SortInput<T, S>>>;
+export type SortSchema<T extends DatatableDefinition> = z.ZodOptional<
+  z.ZodType<SortInput<T>>
+>;
 
-export const buildSortSchema = <
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
->(
-  schema: S,
-): SortSchema<T, S> => {
-  const fieldEnum = z.enum(Object.keys(schema) as [string, ...string[]]);
+export const buildSortSchema = <T extends DatatableDefinition>(
+  definition: T,
+): SortSchema<T> => {
+  const fieldEnum = z.enum(Object.keys(definition) as [string, ...string[]]);
   return z
     .array(
       z.object({
         field: fieldEnum,
-        direction: z.enum(["asc", "desc"]),
+        order: z.enum(["asc", "desc"]),
       }),
     )
     .optional();
 };
 
-export const buildSortClause = <
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
->(
-  schema: S,
-  input?: SortInput<T, S>,
+export const buildSortClause = <T extends DatatableDefinition>(
+  fields: Fields<T>,
+  input?: SortInput<T>,
 ): undefined | [SQL, ...SQL[]] => {
   if (!input || input.length === 0) return undefined;
 
-  return input.map(({ field, direction }) => {
-    const column = schema[field].field;
-    return direction === "asc" ? asc(column) : desc(column);
+  return input.map(({ field, order }) => {
+    const column = fields[field].sql;
+    return order === "asc" ? asc(column) : desc(column);
   }) as [SQL, ...SQL[]];
 };

@@ -166,7 +166,7 @@ export const taskRouter = {
     //   .where(eq(schema.base.task.id, input.id))
     //   .returning();
   }),
-  items: taskItemRouter,
+  item: taskItemRouter,
 } satisfies TRPCRouterRecord;
 
 export type TaskRouter = typeof taskRouter;

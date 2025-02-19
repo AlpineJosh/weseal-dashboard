@@ -13,7 +13,14 @@ export default function ComponentsPage() {
     <div className="flex flex-col space-y-4">
       <Heading level={1}>Stock Components</Heading>
 
-      <DatatableQueryProvider endpoint={api.component.list} defaultInput={{}}>
+      <DatatableQueryProvider
+        endpoint={api.component.list}
+        defaultInput={{
+          filter: {
+            sageDiscrepancy: { neq: 0 },
+          },
+        }}
+      >
         {(props) => (
           <Datatable {...props}>
             <Datatable.Head>

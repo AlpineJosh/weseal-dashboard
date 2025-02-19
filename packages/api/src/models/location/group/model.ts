@@ -2,7 +2,6 @@ import { eq, publicSchema, sql } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 
 const { locationGroup } = publicSchema;
 
@@ -10,8 +9,8 @@ const locationPath = db.$with("location_paths").as(
   db
     .select({
       id: locationGroup.id,
-      path: as(sql<string[]>`ARRAY[${locationGroup.name}]`, "path", "array"),
-      depth: as(sql<number>`1`, "depth", "number"),
+      path: sql<string[]>`ARRAY[${locationGroup.name}]`.as("path"),
+      depth: sql<number>`1`.as("depth"),
     })
     .from(locationGroup)
     .where(sql`${locationGroup.parentGroupId} IS NULL`)
@@ -19,14 +18,12 @@ const locationPath = db.$with("location_paths").as(
       db
         .select({
           id: locationGroup.id,
-          path: as(
-            sql<
-              string[]
-            >`(SELECT path || ${locationGroup.name} FROM location_paths WHERE id = ${locationGroup.parentGroupId})`,
+          path: sql<
+            string[]
+          >`(SELECT path || ${locationGroup.name} FROM location_paths WHERE id = ${locationGroup.parentGroupId})`.as(
             "path",
-            "array",
           ),
-          depth: as(sql<number>`depth + 1`, "depth", "number"),
+          depth: sql<number>`depth + 1`.as("depth"),
         })
         .from(locationGroup)
         .leftJoin(
@@ -51,4 +48,15 @@ const overview = db
   .leftJoin(locationPath, eq(locationGroup.id, locationPath.id))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    name: "string",
+    details: "string",
+    parentId: "number",
+    path: "array",
+    depth: "number",
+    lastModified: "string",
+  },
+  overview,
+);

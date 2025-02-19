@@ -23,4 +23,18 @@ const overview = db
   .leftJoin(batch, eq(salesDespatchItem.batchId, batch.id))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    despatchId: "number",
+    componentId: "string",
+    batchId: "number",
+    quantity: "decimal",
+    componentDescription: "string",
+    componentUnit: "string",
+    batchReference: "string",
+    createdAt: "string",
+    lastModified: "string",
+  },
+  overview,
+);

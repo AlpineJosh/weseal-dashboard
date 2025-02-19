@@ -1,11 +1,14 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
+import { batchRouter } from "./models/batch/router";
 import { componentRouter } from "./models/component";
 import { despatchingRouter } from "./models/despatching";
 import { inventoryRouter } from "./models/inventory";
+import { locationRouter } from "./models/location";
 import { productionRouter } from "./models/production";
 import { profileRouter } from "./models/profile";
 import { receivingRouter } from "./models/receiving";
+import { taskRouter } from "./models/task/router";
 import {
   createCallerFactory,
   createTRPCContext,
@@ -18,6 +21,9 @@ const appRouter = createTRPCRouter({
   despatching: despatchingRouter,
   receiving: receivingRouter,
   inventory: inventoryRouter,
+  task: taskRouter,
+  batch: batchRouter,
+  location: locationRouter,
   profile: profileRouter,
 });
 

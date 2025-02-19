@@ -2,7 +2,6 @@ import { and, eq, publicSchema, sum } from "@repo/db";
 
 import { db } from "../../../../db";
 import { datatable } from "../../../../lib/datatables";
-import { as } from "../../../../lib/datatables/types";
 import { coalesce } from "../../../../lib/operators";
 
 const { purchaseOrderItem, component, purchaseReceipt, purchaseReceiptItem } =
@@ -12,11 +11,9 @@ const receipts = db
   .select({
     componentId: purchaseReceiptItem.componentId,
     orderId: purchaseReceipt.orderId,
-    quantityReceived: as(
-      coalesce(sum(purchaseReceiptItem.quantity), 0),
-      "quantity_received",
-      "number",
-    ),
+    quantityReceived: coalesce(sum(purchaseReceiptItem.quantity), 0)
+      .mapWith(purchaseReceiptItem.quantity)
+      .as("quantity_received"),
   })
   .from(purchaseReceiptItem)
   .leftJoin(
@@ -32,7 +29,9 @@ const overview = db
     orderId: purchaseOrderItem.orderId,
     componentId: purchaseOrderItem.componentId,
     quantityOrdered: purchaseOrderItem.quantityOrdered,
-    quantityReceived: receipts.quantityReceived,
+    quantityReceived: coalesce(receipts.quantityReceived, 0)
+      .mapWith(purchaseOrderItem.quantityOrdered)
+      .as("quantity_received"),
     sageQuantityReceived: purchaseOrderItem.sageQuantityReceived,
     createdAt: purchaseOrderItem.createdAt,
     lastModified: purchaseOrderItem.lastModified,
@@ -51,4 +50,19 @@ const overview = db
   )
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    orderId: "number",
+    componentId: "string",
+    quantityOrdered: "decimal",
+    quantityReceived: "decimal",
+    sageQuantityReceived: "decimal",
+    createdAt: "string",
+    lastModified: "string",
+    isDeleted: "boolean",
+    componentDescription: "string",
+    componentUnit: "string",
+  },
+  overview,
+);

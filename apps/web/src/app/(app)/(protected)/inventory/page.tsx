@@ -13,10 +13,10 @@ export default function InventoryOverview() {
       <Text>A comprehensive view of live stock across all departments</Text>
 
       <DatatableQueryProvider
-        endpoint={api.inventory.quantity}
+        endpoint={api.inventory.list}
         defaultInput={{
           filter: {
-            total: {
+            totalQuantity: {
               neq: 0,
             },
           },
@@ -57,12 +57,6 @@ export default function InventoryOverview() {
                   <Datatable.Cell id="description">
                     {data.componentDescription}
                   </Datatable.Cell>
-                  <Datatable.Cell id="batch">
-                    <TextLink href={`/inventory/batches/${data.batchId}`}>
-                      {data.batchReference ??
-                        data.batchEntryDate?.toLocaleDateString()}{" "}
-                    </TextLink>
-                  </Datatable.Cell>
                   <Datatable.Cell id="location">
                     <TextLink href={`/inventory/locations/${data.locationId}`}>
                       {data.locationName}
@@ -70,16 +64,14 @@ export default function InventoryOverview() {
                   </Datatable.Cell>
                   <Datatable.DecimalCell
                     id="quantity"
-                    value={data.total}
+                    value={data.totalQuantity}
                     unit={data.componentUnit}
-                    precision={6}
                     className="flex flex-row items-baseline space-x-1"
                   />
                   <Datatable.DecimalCell
                     id="allocated"
-                    value={data.allocated}
+                    value={data.allocatedQuantity}
                     unit={data.componentUnit}
-                    precision={6}
                     className="flex flex-row items-baseline space-x-1"
                   />
                 </Datatable.Row>

@@ -1,16 +1,14 @@
 import type { SQL } from "drizzle-orm";
 import { and, eq, ne, or, relations, sql } from "drizzle-orm";
 import {
-  boolean,
   date,
-  foreignKey,
   integer,
   pgEnum,
   pgTable,
   primaryKey,
   serial,
-  text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -20,7 +18,7 @@ import { batch } from "./batch.schema";
 import { component } from "./component.schema";
 import { salesDespatchItem } from "./despatching.schema";
 import { location } from "./location.schema";
-import { productionJob, productionJobInput } from "./production.schema";
+import { productionJob, productionJobAllocation } from "./production.schema";
 import { profile } from "./profile.schema";
 import { purchaseReceiptItem } from "./receiving.schema";
 
@@ -141,12 +139,11 @@ export const inventoryLotLedger = pgTable("inventory_lot_ledger", {
   quantity: numericDecimal("quantity").notNull(),
   userId: uuid("user_id").references(() => profile.id),
   type: transactionType("type").notNull(),
-  isAllocated: boolean("is_allocated").notNull().default(false),
   salesDespatchItemId: integer("sales_despatch_item_id").references(
     () => salesDespatchItem.id,
   ),
-  productionJobInputId: integer("production_job_input_id").references(
-    () => productionJobInput.id,
+  productionJobAllocationId: integer("production_job_allocation_id").references(
+    () => productionJobAllocation.id,
   ),
   createdAt: timestamp("created_at")
     .notNull()
@@ -160,6 +157,7 @@ export const inventoryLotLedger = pgTable("inventory_lot_ledger", {
 export const inventory = pgTable(
   "inventory",
   {
+    id: serial("id").notNull().primaryKey(),
     componentId: varchar("component_id")
       .notNull()
       .references(() => component.id),
@@ -179,10 +177,10 @@ export const inventory = pgTable(
       .default(sql`now()`)
       .$onUpdate(() => new Date()),
   },
-  (table) => ({
-    pk: primaryKey({
-      columns: [table.componentId, table.batchId, table.locationId],
-    }),
+  (t) => ({
+    unique: unique("unique_inventory")
+      .on(t.componentId, t.batchId, t.locationId)
+      .nullsNotDistinct(),
   }),
 );
 
@@ -213,12 +211,11 @@ export const inventoryLedger = pgTable("inventory_ledger", {
   quantity: numericDecimal("quantity").notNull(),
   userId: uuid("user_id").references(() => profile.id),
   type: transactionType("type").notNull(),
-  isAllocated: boolean("is_allocated").notNull().default(false),
   salesDespatchItemId: integer("sales_despatch_item_id").references(
     () => salesDespatchItem.id,
   ),
-  productionJobInputId: integer("production_job_input_id").references(
-    () => productionJobInput.id,
+  productionJobAllocationId: integer("production_job_allocation_id").references(
+    () => productionJobAllocation.id,
   ),
   purchaseReceiptItemId: integer("purchase_receipt_item_id").references(
     () => purchaseReceiptItem.id,
@@ -262,85 +259,13 @@ export const inventoryLedgerRelations = relations(
       fields: [inventoryLedger.salesDespatchItemId],
       references: [salesDespatchItem.id],
     }),
-    productionJobInput: one(productionJobInput, {
-      fields: [inventoryLedger.productionJobInputId],
-      references: [productionJobInput.id],
+    productionJobAllocation: one(productionJobAllocation, {
+      fields: [inventoryLedger.productionJobAllocationId],
+      references: [productionJobAllocation.id],
     }),
     productionJob: one(productionJob, {
       fields: [inventoryLedger.productionJobId],
       references: [productionJob.id],
-    }),
-  }),
-);
-
-export const batchMovement = pgTable("batch_movement", {
-  id: serial("id").notNull().primaryKey(),
-  date: timestamp("date").notNull(),
-  batchId: integer("batch_id")
-    .notNull()
-    .references(() => batch.id),
-  locationId: integer("location_id")
-    .notNull()
-    .references(() => location.id),
-  quantity: numericDecimal("quantity").notNull(),
-  userId: uuid("user_id").references(() => profile.id),
-  type: transactionType("type").notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`now()`),
-  lastModified: timestamp("last_modified")
-    .notNull()
-    .default(sql`now()`)
-    .$onUpdate(() => new Date()),
-});
-
-export const batchMovementRelations = relations(batchMovement, ({ one }) => ({
-  batch: one(batch, {
-    fields: [batchMovement.batchId],
-    references: [batch.id],
-  }),
-  location: one(location, {
-    fields: [batchMovement.locationId],
-    references: [location.id],
-  }),
-}));
-
-export const batchMovementCorrection = pgTable("batch_movement_correction", {
-  id: serial("id").notNull().primaryKey(),
-  correctionMovementId: integer("correction_movement_id").notNull(),
-  correctedMovementId: integer("corrected_movement_id").notNull(),
-  reason: text("reason"),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`now()`),
-  lastModified: timestamp("last_modified")
-    .notNull()
-    .default(sql`now()`)
-    .$onUpdate(() => new Date()),
-});
-
-export const correctionMovementId = foreignKey({
-  name: "correction_movement_id_batch_movement_id_fk",
-  columns: [batchMovementCorrection.correctionMovementId],
-  foreignColumns: [batchMovement.id],
-});
-
-export const correctedMovementId = foreignKey({
-  name: "corrected_movement_id_batch_movement_id_fk",
-  columns: [batchMovementCorrection.correctedMovementId],
-  foreignColumns: [batchMovement.id],
-});
-
-export const batchMovementCorrectionRelations = relations(
-  batchMovementCorrection,
-  ({ one }) => ({
-    correctionMovement: one(batchMovement, {
-      fields: [batchMovementCorrection.correctionMovementId],
-      references: [batchMovement.id],
-    }),
-    correctedMovement: one(batchMovement, {
-      fields: [batchMovementCorrection.correctedMovementId],
-      references: [batchMovement.id],
     }),
   }),
 );

@@ -1,9 +1,21 @@
 import { z } from "zod";
 
 import type { SQL } from "@repo/db";
-import { and, between, eq, gt, gte, isNull, lt, lte, not, sql } from "@repo/db";
+import {
+  and,
+  between,
+  eq,
+  gt,
+  gte,
+  isNull,
+  lt,
+  lte,
+  ne,
+  not,
+  sql,
+} from "@repo/db";
 
-import type { DatatableSchema, FieldDataType, FieldSelection } from "./types";
+import type { DatatableDefinition, FieldDataType, Fields } from "./types";
 
 export const numberFilterSchema = z
   .object({
@@ -52,6 +64,7 @@ export const booleanFilterSchema = z
 export interface FilterSchemaMap extends Record<FieldDataType, z.ZodType> {
   string: typeof stringFilterSchema;
   number: typeof numberFilterSchema;
+  decimal: typeof numberFilterSchema;
   date: typeof dateFilterSchema;
   boolean: typeof booleanFilterSchema;
   bigint: typeof numberFilterSchema;
@@ -61,39 +74,29 @@ export interface FilterSchemaMap extends Record<FieldDataType, z.ZodType> {
   buffer: never;
 }
 
-export type FilterInput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T> = DatatableSchema<T>,
-> = {
-  [K in keyof S]?: S[K]["dataType"] extends keyof FilterSchemaMap
-    ? z.infer<FilterSchemaMap[S[K]["dataType"]]>
-    : never;
+export type FilterInput<T extends DatatableDefinition> = {
+  [K in keyof T]?: z.infer<FilterSchemaMap[T[K]]>;
 };
 
-export type FilterSchema<
-  T extends FieldSelection,
-  S extends DatatableSchema<T> = DatatableSchema<T>,
-> = z.ZodOptional<
+export type FilterSchema<T extends DatatableDefinition> = z.ZodOptional<
   z.ZodObject<{
-    [K in keyof S]: S[K]["dataType"] extends keyof FilterSchemaMap
-      ? FilterSchemaMap[S[K]["dataType"]]
-      : never;
+    [K in keyof T]: z.ZodOptional<FilterSchemaMap[T[K]]>;
   }>
 >;
 
-export const buildFilterSchema = <
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
->(
-  schema: S,
-): FilterSchema<T, S> => {
+export const buildFilterSchema = <T extends DatatableDefinition>(
+  definition: T,
+): FilterSchema<T> => {
   const filterSchema: Record<string, z.ZodType> = {};
-  for (const key in schema) {
-    const field = schema[key];
-    const dataType = field.dataType as FieldDataType;
+  for (const key in definition) {
+    const dataType = definition[key];
     if (dataType === "string") {
       filterSchema[key] = stringFilterSchema;
-    } else if (dataType === "number" || dataType === "bigint") {
+    } else if (
+      dataType === "number" ||
+      dataType === "bigint" ||
+      dataType === "decimal"
+    ) {
       filterSchema[key] = numberFilterSchema;
     } else if (dataType === "date") {
       filterSchema[key] = dateFilterSchema;
@@ -102,24 +105,21 @@ export const buildFilterSchema = <
     }
   }
 
-  return z.object(filterSchema).optional() as FilterSchema<T, S>;
+  return z.object(filterSchema).optional() as FilterSchema<T>;
 };
 
-export const buildFilterClause = <
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
->(
-  schema: S,
-  filter?: FilterInput<T, S>,
+export const buildFilterClause = <T extends DatatableDefinition>(
+  fields: Fields<T>,
+  filter?: FilterInput<T>,
 ): SQL | undefined => {
   if (!filter) return undefined;
 
   const whereClause: SQL[] = [];
-  for (const key in schema) {
+  for (const key in fields) {
     const columnFilter = filter[key];
-    const definition = schema[key];
+    const dataType = fields[key].type;
 
-    const field = definition.field.getSQL();
+    const field = fields[key].sql;
 
     if (!columnFilter) continue;
 
@@ -132,15 +132,16 @@ export const buildFilterClause = <
     }
 
     // Type-specific filters
-    switch (definition.dataType) {
+    switch (dataType) {
       case "number":
       case "bigint":
+      case "decimal":
       case "date": {
         const f = columnFilter as z.infer<
           typeof numberFilterSchema | typeof dateFilterSchema
         >;
         if (f?.neq !== undefined) {
-          whereClause.push(not(eq(field, f.neq)));
+          whereClause.push(ne(field, f.neq));
         }
         if (f?.gt !== undefined) {
           whereClause.push(gt(field, f.gt));

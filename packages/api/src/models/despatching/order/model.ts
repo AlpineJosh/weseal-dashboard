@@ -1,9 +1,7 @@
-import type { SQL } from "@repo/db";
-import { and, count, eq, ne, publicSchema, sum } from "@repo/db";
+import { and, count, eq, ne, publicSchema, sql, sum } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 import { coalesce } from "../../../lib/operators";
 
 const {
@@ -18,11 +16,7 @@ const despatchItems = db
   .select({
     orderId: salesDespatch.orderId,
     componentId: salesDespatchItem.componentId,
-    quantity: as(
-      coalesce(sum(salesDespatchItem.quantity), 0),
-      "quantity",
-      "number",
-    ),
+    quantity: coalesce(sum(salesDespatchItem.quantity), 0).as("quantity"),
   })
   .from(salesDespatchItem)
   .leftJoin(salesDespatch, eq(salesDespatchItem.despatchId, salesDespatch.id))
@@ -33,17 +27,13 @@ const items = db
   .select({
     orderId: salesOrderItem.orderId,
     componentId: salesOrderItem.componentId,
-    totalItems: as(count(), "total_items", "number"),
-    incompleteItems: as(
-      count(
-        ne(
-          coalesce(sum(salesOrderItem.quantityOrdered), 0),
-          coalesce(sum(despatchItems.quantity), 0),
-        ),
+    totalItems: count().as("total_items"),
+    incompleteItems: count(
+      ne(
+        coalesce(sum(salesOrderItem.quantityOrdered), 0),
+        coalesce(sum(despatchItems.quantity), 0),
       ),
-      "incomplete_items",
-      "number",
-    ),
+    ).as("incomplete_items"),
   })
   .from(salesOrderItem)
   .leftJoin(
@@ -64,15 +54,11 @@ const overview = db
     isQuote: salesOrder.isQuote,
     isCancelled: salesOrder.isCancelled,
     isComplete: salesOrder.isComplete,
-    isOpen: as(
-      and(
-        eq(salesOrder.isQuote, false),
-        eq(salesOrder.isCancelled, false),
-        eq(salesOrder.isComplete, false),
-      ) as SQL<boolean>,
-      "isOpen",
-      "boolean",
-    ),
+    isOpen: sql<boolean>`${and(
+      eq(salesOrder.isQuote, false),
+      eq(salesOrder.isCancelled, false),
+      eq(salesOrder.isComplete, false),
+    )}`.as("is_open"),
     createdAt: salesOrder.createdAt,
     lastModified: salesOrder.lastModified,
     isDeleted: salesOrder.isDeleted,
@@ -85,4 +71,21 @@ const overview = db
   .leftJoin(items, eq(salesOrder.id, items.orderId))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    customerId: "string",
+    orderDate: "string",
+    isQuote: "boolean",
+    isCancelled: "boolean",
+    isComplete: "boolean",
+    isOpen: "boolean",
+    createdAt: "string",
+    lastModified: "string",
+    isDeleted: "boolean",
+    customerName: "string",
+    totalItems: "number",
+    incompleteItems: "number",
+  },
+  overview,
+);

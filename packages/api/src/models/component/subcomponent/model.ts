@@ -2,7 +2,6 @@ import { eq, publicSchema, sql, sum } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 import { coalesce } from "../../../lib/operators";
 
 const { subcomponent, component, inventory } = publicSchema;
@@ -10,13 +9,15 @@ const { subcomponent, component, inventory } = publicSchema;
 const quantities = db
   .select({
     componentId: inventory.componentId,
-    totalQuantity: as(sum(inventory.totalQuantity), "total_quantity", "number"),
-    allocatedQuantity: as(
-      sum(inventory.allocatedQuantity),
-      "allocated_quantity",
-      "number",
-    ),
-    freeQuantity: as(sum(inventory.freeQuantity), "free_quantity", "number"),
+    totalQuantity: sum(inventory.totalQuantity)
+      .mapWith(inventory.totalQuantity)
+      .as("total_quantity"),
+    allocatedQuantity: sum(inventory.allocatedQuantity)
+      .mapWith(inventory.allocatedQuantity)
+      .as("allocated_quantity"),
+    freeQuantity: sum(inventory.freeQuantity)
+      .mapWith(inventory.freeQuantity)
+      .as("free_quantity"),
   })
   .from(inventory)
   .groupBy(inventory.componentId)
@@ -34,29 +35,40 @@ const overview = db
     unit: component.unit,
     isStockTracked: component.isStockTracked,
     isBatchTracked: component.isBatchTracked,
-    totalQuantity: as(
-      coalesce(quantities.totalQuantity, 0),
-      "total_quantity",
-      "number",
-    ),
-    allocatedQuantity: as(
-      coalesce(quantities.allocatedQuantity, 0),
-      "allocated_quantity",
-      "number",
-    ),
-    freeQuantity: as(
-      coalesce(quantities.freeQuantity, 0),
-      "free_quantity",
-      "number",
-    ),
-    sageDiscrepancy: as(
-      sql<number>`${coalesce(component.sageQuantity, 0)} - ${coalesce(quantities.totalQuantity, 0)}`,
-      "sage_discrepancy",
-      "number",
-    ),
+    totalQuantity: coalesce(quantities.totalQuantity, 0)
+      .mapWith(inventory.totalQuantity)
+      .as("total_quantity"),
+    allocatedQuantity: coalesce(quantities.allocatedQuantity, 0)
+      .mapWith(inventory.allocatedQuantity)
+      .as("allocated_quantity"),
+    freeQuantity: coalesce(quantities.freeQuantity, 0)
+      .mapWith(inventory.freeQuantity)
+      .as("free_quantity"),
+    sageDiscrepancy:
+      sql<number>`${coalesce(component.sageQuantity, 0)} - ${coalesce(quantities.totalQuantity, 0)}`
+        .mapWith(component.sageQuantity)
+        .as("sage_discrepancy"),
   })
   .from(subcomponent)
   .leftJoin(component, eq(subcomponent.subcomponentId, component.id))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    componentId: "string",
+    subcomponentId: "string",
+    quantityRequired: "number",
+    description: "string",
+    hasSubcomponents: "boolean",
+    sageQuantity: "decimal",
+    unit: "string",
+    isStockTracked: "boolean",
+    isBatchTracked: "boolean",
+    totalQuantity: "decimal",
+    allocatedQuantity: "decimal",
+    freeQuantity: "decimal",
+    sageDiscrepancy: "decimal",
+  },
+  overview,
+);

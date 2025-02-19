@@ -1,9 +1,7 @@
-import type { SQL } from "@repo/db";
-import { and, count, eq, ne, publicSchema, sum } from "@repo/db";
+import { and, count, eq, ne, publicSchema, sql, sum } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 import { coalesce } from "../../../lib/operators";
 
 const {
@@ -18,11 +16,9 @@ const receiptItems = db
   .select({
     orderId: purchaseReceipt.orderId,
     componentId: purchaseReceiptItem.componentId,
-    quantity: as(
-      coalesce(sum(purchaseReceiptItem.quantity), 0),
-      "quantity",
-      "number",
-    ),
+    quantity: coalesce(sum(purchaseReceiptItem.quantity), 0)
+      .mapWith(purchaseReceiptItem.quantity)
+      .as("quantity"),
   })
   .from(purchaseReceiptItem)
   .leftJoin(
@@ -35,20 +31,16 @@ const receiptItems = db
 const items = db
   .select({
     orderId: purchaseOrderItem.orderId,
-    componentId: purchaseOrderItem.componentId,
-    totalItems: as(count(), "total_items", "number"),
-    incompleteItems: as(
-      count(
-        ne(
-          coalesce(sum(purchaseOrderItem.quantityOrdered), 0),
-          coalesce(sum(receiptItems.quantity), 0),
-        ),
+    totalItems: count().as("total_items"),
+    incompleteItems: count(
+      ne(
+        coalesce(purchaseOrderItem.quantityOrdered, 0),
+        coalesce(receiptItems.quantity, 0),
       ),
-      "incomplete_items",
-      "number",
-    ),
+    ).as("incomplete_items"),
   })
   .from(purchaseOrderItem)
+  .leftJoin(receiptItems, eq(purchaseOrderItem.orderId, receiptItems.orderId))
   .groupBy(purchaseOrderItem.orderId)
   .as("items");
 
@@ -61,23 +53,35 @@ const overview = db
     isQuote: purchaseOrder.isQuote,
     isCancelled: purchaseOrder.isCancelled,
     isComplete: purchaseOrder.isComplete,
-    isOpen: as(
-      and(
-        eq(purchaseOrder.isQuote, false),
-        eq(purchaseOrder.isCancelled, false),
-        eq(purchaseOrder.isComplete, false),
-      ) as SQL<boolean>,
-      "isOpen",
-      "boolean",
-    ),
+    isOpen: sql<boolean>`${and(
+      eq(purchaseOrder.isQuote, false),
+      eq(purchaseOrder.isCancelled, false),
+      eq(purchaseOrder.isComplete, false),
+    )}`.as("is_open"),
     createdAt: purchaseOrder.createdAt,
     lastModified: purchaseOrder.lastModified,
-    totalItems: items.totalItems,
-    incompleteItems: items.incompleteItems,
+    totalItems: coalesce(items.totalItems, 0).as("total_items"),
+    incompleteItems: coalesce(items.incompleteItems, 0).as("incomplete_items"),
   })
   .from(purchaseOrder)
   .leftJoin(supplier, eq(purchaseOrder.supplierId, supplier.id))
   .leftJoin(items, eq(purchaseOrder.id, items.orderId))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "number",
+    supplierId: "string",
+    supplierName: "string",
+    orderDate: "string",
+    isQuote: "boolean",
+    isCancelled: "boolean",
+    isComplete: "boolean",
+    isOpen: "boolean",
+    createdAt: "string",
+    lastModified: "string",
+    totalItems: "number",
+    incompleteItems: "number",
+  },
+  overview,
+);

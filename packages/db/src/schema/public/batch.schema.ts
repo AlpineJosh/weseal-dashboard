@@ -2,7 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 
 import { component } from "./component.schema";
-import { batchMovement } from "./inventory.schema";
+import { inventory } from "./inventory.schema";
 import { productionJob } from "./production.schema";
 
 export const batch = pgTable("batch", {
@@ -25,6 +25,6 @@ export const batchRelations = relations(batch, ({ one, many }) => ({
     fields: [batch.componentId],
     references: [component.id],
   }),
-  movements: many(batchMovement),
+  movements: many(inventory),
   productionJobs: many(productionJob),
 }));

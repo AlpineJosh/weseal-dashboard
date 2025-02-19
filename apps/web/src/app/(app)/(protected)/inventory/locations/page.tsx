@@ -45,10 +45,7 @@ export default function LocationOverview() {
     <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
       <Heading level={1}>Locations</Heading>
 
-      <DatatableQueryProvider
-        endpoint={api.inventory.locations.list}
-        defaultInput={{}}
-      >
+      <DatatableQueryProvider endpoint={api.location.list} defaultInput={{}}>
         {(props) => (
           <Datatable className="grow overflow-hidden" {...props}>
             <Datatable.Head>
@@ -84,7 +81,7 @@ export default function LocationOverview() {
                     {data.groupName}
                   </Datatable.Cell>
                   <Datatable.Cell id="typeName">
-                    <Badge color={getBadgeColor(data.typeId ?? 0)}>
+                    <Badge color={getBadgeColor(data.typeId)}>
                       {data.typeName}
                     </Badge>
                   </Datatable.Cell>

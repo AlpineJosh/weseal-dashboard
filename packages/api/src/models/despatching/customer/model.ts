@@ -2,7 +2,6 @@ import { and, count, eq, min, publicSchema } from "@repo/db";
 
 import { db } from "../../../db";
 import { datatable } from "../../../lib/datatables";
-import { as } from "../../../lib/datatables/types";
 
 const { customer, salesOrder } = publicSchema;
 
@@ -10,8 +9,8 @@ const orders = db
   .select({
     id: salesOrder.id,
     customerId: salesOrder.customerId,
-    openOrders: as(count(), "openOrders", "number"),
-    nextOrderDate: as(min(salesOrder.orderDate), "nextOrderDate", "date"),
+    openOrders: count().as("open_orders"),
+    nextOrderDate: min(salesOrder.orderDate).as("next_order_date"),
   })
   .from(salesOrder)
   .where(
@@ -35,4 +34,12 @@ const overview = db
   .leftJoin(orders, eq(customer.id, orders.customerId))
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "string",
+    name: "string",
+    createdAt: "string",
+    openOrders: "number",
+  },
+  overview,
+);

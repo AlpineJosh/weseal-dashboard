@@ -1,17 +1,17 @@
-import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
+import type Decimal from "decimal.js";
+import type { z } from "zod";
 
 import type { Column, SQL } from "@repo/db";
 
-export type SQLAliased<T = unknown> = SQL.Aliased<T> & {
-  dataType: FieldDataType;
-};
-export type Field = Column | SQLAliased;
-
-export type FieldSelection = Record<string, Field>;
+import type { FilterInput, FilterSchema } from "./filter";
+import type { PaginationInput, PaginationOutput } from "./pagination";
+import type { SearchInput, SearchSchema } from "./search";
+import type { SortInput, SortSchema } from "./sort";
 
 export type FieldDataType =
   | "string"
   | "number"
+  | "decimal"
   | "bigint"
   | "boolean"
   | "date"
@@ -20,9 +20,10 @@ export type FieldDataType =
   | "custom"
   | "buffer";
 
-export interface DataTypeMap {
+interface DataTypeMap {
   string: string;
   number: number;
+  decimal: Decimal;
   bigint: bigint;
   boolean: boolean;
   date: Date;
@@ -32,87 +33,47 @@ export interface DataTypeMap {
   buffer: Buffer;
 }
 
-export function as<T>(
-  sql: SQL<T>,
-  alias: string,
-  dataType: FieldDataType,
-): SQLAliased<T> {
-  return Object.assign(sql.as(alias), { dataType });
+export type Field = Column | SQL.Aliased;
+
+export type DatatableDefinition = Record<string, FieldDataType>;
+
+export type FieldSelection<T extends DatatableDefinition> = Record<
+  keyof T,
+  Field
+>;
+
+export type Fields<T extends DatatableDefinition> = Record<
+  keyof T,
+  { sql: SQL; type: FieldDataType }
+>;
+
+export type DatatableInputSchema<T extends DatatableDefinition> = z.ZodObject<{
+  pagination: z.ZodOptional<z.ZodType<PaginationInput>>;
+  sort: z.ZodOptional<SortSchema<T>>;
+  filter: FilterSchema<T>;
+  search: z.ZodOptional<SearchSchema<T>>;
+}>;
+
+export interface DatatableInput<T extends DatatableDefinition> {
+  pagination?: PaginationInput;
+  sort?: SortInput<T>;
+  filter?: FilterInput<T>;
+  search?: SearchInput<T>;
 }
 
-export type InferFieldDataType<T extends Field> =
-  T extends SQL.Aliased<infer R>
-    ? R extends string
-      ? "string"
-      : R extends number
-        ? "number"
-        : R extends Date
-          ? "date"
-          : R extends boolean
-            ? "boolean"
-            : R extends bigint
-              ? "bigint"
-              : R extends Buffer
-                ? "buffer"
-                : R extends object[]
-                  ? "array"
-                  : R extends object
-                    ? "json"
-                    : "custom"
-    : T extends Column
-      ? T["_"]["dataType"]
-      : never;
-
-export type InferFieldType<T extends Field> =
-  T extends SQL.Aliased<infer U>
-    ? U
-    : T extends Column
-      ? T["_"]["data"] | (T["_"]["notNull"] extends true ? null : never)
-      : never;
-
-export const getFieldDataType = <T extends Field>(
-  field: T,
-): InferFieldType<T> => {
-  if (!("fieldAlias" in field)) {
-    return field.dataType as InferFieldType<T>;
-  } else {
-    return field.dataType as InferFieldType<T>;
-  }
+export type DatatableData<T extends DatatableDefinition> = {
+  [K in keyof T]: DataTypeMap[T[K]];
 };
 
-interface DatatableFieldDefinition<T extends Field> {
-  field: T;
-  dataType: InferFieldDataType<T>;
-  notNull: T extends Column
-    ? T["_"]["notNull"]
-    : T extends SQL.Aliased<infer R>
-      ? R extends null
-        ? false
-        : true
-      : never;
+export interface DatatableOutput<T extends DatatableDefinition> {
+  rows: DatatableData<T>[];
+  pagination: PaginationOutput;
 }
 
-export type DatatableSchema<T extends FieldSelection> = {
-  [K in keyof T]: DatatableFieldDefinition<T[K]>;
-};
+export type DatatableManyQuery<T extends DatatableDefinition> = (
+  input: DatatableInput<T>,
+) => Promise<DatatableOutput<T>>;
 
-export const getDatatableSchema = <T extends FieldSelection>(
-  view: SubqueryWithSelection<T, string>,
-): DatatableSchema<T> => {
-  const schema: Record<string, DatatableFieldDefinition<T[keyof T]>> = {};
-  for (const key in view._.selectedFields) {
-    const field = view._.selectedFields[key] as Field;
-    schema[key] = {
-      field: field,
-      dataType: getFieldDataType(field),
-    } as DatatableFieldDefinition<T[keyof T]>;
-  }
-  return schema as DatatableSchema<T>;
-};
-
-export type DatatableData<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = {
-  [K in keyof S]: InferFieldType<S[K]["field"]>;
-};
+export type DatatableFirstQuery<T extends DatatableDefinition> = (
+  input: DatatableInput<T>,
+) => Promise<DatatableData<T>>;

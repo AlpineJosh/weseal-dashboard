@@ -14,4 +14,11 @@ const overview = db
   .from(profile)
   .as("overview");
 
-export default datatable(overview);
+export default datatable(
+  {
+    id: "string",
+    name: "string",
+    email: "string",
+  },
+  overview,
+);

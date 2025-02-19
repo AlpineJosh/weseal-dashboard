@@ -15,6 +15,34 @@
       "when": 1738846735450,
       "tag": "0001_young_young_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738948921732,
+      "tag": "0002_tough_sebastian_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1738949686231,
+      "tag": "0003_mean_bloodaxe",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1739458424202,
+      "tag": "0004_remarkable_annihilus",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1739944936593,
+      "tag": "0005_curvy_overlord",
+      "breakpoints": true
     }
   ]
 }

@@ -17,7 +17,7 @@ export default function ComponentLayout({
 }: ComponentLayoutProps) {
   const id = +params.orderId;
 
-  const { data } = api.receiving.orders.get.useQuery({
+  const { data } = api.receiving.order.get.useQuery({
     id,
   });
 

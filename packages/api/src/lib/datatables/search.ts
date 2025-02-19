@@ -3,50 +3,37 @@ import { z } from "zod";
 import type { SQL } from "@repo/db";
 import { and, or, sql } from "@repo/db";
 
-import type { DatatableSchema, FieldSelection } from "./types";
+import type { DatatableDefinition, Fields } from "./types";
 
-export interface SearchInput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> {
+export interface SearchInput<T extends DatatableDefinition> {
   query: string;
-  fields?: [keyof S, ...(keyof S)[]];
+  fields?: (keyof T)[];
 }
 
-export interface SearchOutput<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> {
+export interface SearchOutput<T extends DatatableDefinition> {
   query: string;
-  fields?: [keyof S, ...(keyof S)[]];
+  fields?: (keyof T)[];
 }
 
-export type SearchSchema<
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
-> = z.ZodType<SearchInput<T, S>>;
+export type SearchSchema<T extends DatatableDefinition> = z.ZodType<
+  SearchInput<T>
+>;
 
-export const buildSearchSchema = <
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
->(
-  schema: S,
-): z.ZodOptional<SearchSchema<T, S>> => {
-  const fieldEnum = z.enum(Object.keys(schema) as [string, ...string[]]);
+export const buildSearchSchema = <T extends DatatableDefinition>(
+  definition: T,
+): z.ZodOptional<SearchSchema<T>> => {
+  const fieldEnum = z.enum(Object.keys(definition) as [string, ...string[]]);
   return z
     .object({
       query: z.string(),
-      fields: fieldEnum.optional(),
+      fields: z.array(fieldEnum).min(1).optional(),
     })
-    .optional() as z.ZodOptional<SearchSchema<T, S>>;
+    .optional();
 };
 
-export const buildSearchClause = <
-  T extends FieldSelection,
-  S extends DatatableSchema<T>,
->(
-  schema: S,
-  input?: SearchInput<T, S>,
+export const buildSearchClause = <T extends DatatableDefinition>(
+  availableFields: Fields<T>,
+  input?: SearchInput<T>,
 ): SQL | undefined => {
   if (!input) return undefined;
 
@@ -56,9 +43,9 @@ export const buildSearchClause = <
     const parts = query.trim().split(/\s+/);
     parts.forEach((part) => {
       const partWhere: SQL[] = [];
-      for (const key of fields ?? []) {
-        const field = schema[key].field.getSQL();
-        partWhere.push(sql`${field} ilike ${`%${part}%`}`);
+      for (const key of fields ?? Object.keys(availableFields)) {
+        const field = availableFields[key];
+        partWhere.push(sql`${field}::text ilike ${`%${part}%`}`);
       }
       whereClause.push(or(...partWhere));
     });
