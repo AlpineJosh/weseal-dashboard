@@ -1,1 +1,0 @@
-ALTER TABLE "component" ADD COLUMN "tracked" boolean DEFAULT true;

@@ -16,7 +16,7 @@ export default function ReceivingPage({
   return (
     <>
       <DatatableQueryProvider
-        endpoint={api.receiving.receipts.list}
+        endpoint={api.receiving.receipt.list}
         defaultInput={{
           filter: {
             orderId: {

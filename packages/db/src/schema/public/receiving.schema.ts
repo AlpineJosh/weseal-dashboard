@@ -10,7 +10,6 @@ import {
 
 import { numericDecimal } from "../../lib/numeric";
 import { component } from "./component.schema";
-import { batch } from "./inventory.schema";
 
 export const supplier = pgTable("supplier", {
   id: varchar("id").primaryKey(),
@@ -37,7 +36,7 @@ export const purchaseOrder = pgTable("purchase_order", {
   isQuote: boolean("is_quote").notNull().default(false),
   isComplete: boolean("is_complete").notNull().default(false),
   isCancelled: boolean("is_cancelled").notNull().default(false),
-  orderDate: timestamp("order_date"),
+  orderDate: timestamp("order_date").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -68,8 +67,8 @@ export const purchaseOrderItem = pgTable("purchase_order_item", {
   componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
-  quantityOrdered: numericDecimal("quantity_ordered"),
-  sageQuantityReceived: numericDecimal("sage_quantity_received"),
+  quantityOrdered: numericDecimal("quantity_ordered").notNull(),
+  sageQuantityReceived: numericDecimal("sage_quantity_received").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -99,9 +98,7 @@ export const purchaseReceipt = pgTable("purchase_receipt", {
   orderId: integer("order_id")
     .notNull()
     .references(() => purchaseOrder.id),
-  expectedReceiptDate: timestamp("expected_receipt_date"),
-  receiptDate: timestamp("receipt_date"),
-  isReceived: boolean("is_received").notNull().default(false),
+  receiptDate: timestamp("receipt_date").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -127,10 +124,10 @@ export const purchaseReceiptItem = pgTable("purchase_receipt_item", {
   receiptId: integer("receipt_id")
     .notNull()
     .references(() => purchaseReceipt.id),
-  batchId: integer("batch_id")
+  componentId: varchar("component_id")
     .notNull()
-    .references(() => batch.id),
-  quantity: numericDecimal("quantity"),
+    .references(() => component.id),
+  quantity: numericDecimal("quantity").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -147,9 +144,9 @@ export const purchaseReceiptItemRelations = relations(
       fields: [purchaseReceiptItem.receiptId],
       references: [purchaseReceipt.id],
     }),
-    batch: one(batch, {
-      fields: [purchaseReceiptItem.batchId],
-      references: [batch.id],
+    component: one(component, {
+      fields: [purchaseReceiptItem.componentId],
+      references: [component.id],
     }),
   }),
 );

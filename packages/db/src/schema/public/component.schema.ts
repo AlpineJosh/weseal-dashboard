@@ -10,7 +10,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { numericDecimal } from "../../lib/numeric";
-import { batch, location } from "./inventory.schema";
+import { batch } from "./batch.schema";
+import { location } from "./location.schema";
 
 export const department = pgTable("department", {
   id: integer("id").primaryKey(),
@@ -57,7 +58,8 @@ export const component = pgTable("component", {
   unit: varchar("unit"),
   categoryId: smallint("category_id").references(() => componentCategory.id),
   departmentId: integer("department_id").references(() => department.id),
-  isTraceable: boolean("traceable").default(false),
+  isStockTracked: boolean("stock_tracked").default(true),
+  isBatchTracked: boolean("batch_tracked").default(false),
   defaultLocationId: integer("default_location_id").references(
     () => location.id,
   ),

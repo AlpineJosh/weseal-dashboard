@@ -16,11 +16,11 @@ export default function StockPage({
 
   return (
     <DatatableQueryProvider
-      endpoint={api.inventory.quantity}
+      endpoint={api.inventory.list}
       defaultInput={{
         filter: {
           componentId: { eq: id },
-          total: { neq: 0 },
+          totalQuantity: { neq: 0 },
         },
       }}
     >
@@ -33,7 +33,7 @@ export default function StockPage({
             <Datatable.Column id="locationName" isSortable>
               Location
             </Datatable.Column>
-            <Datatable.Column id="total" isSortable>
+            <Datatable.Column id="totalQuantity" isSortable>
               Quantity
             </Datatable.Column>
           </Datatable.Head>
@@ -41,14 +41,14 @@ export default function StockPage({
             {({ data }) => (
               <Datatable.Row key={`${data.batchId}-${data.locationId}`}>
                 <Datatable.Cell id="batchReference">
-                  {batch.getDisplayId(data.batchReference, data.batchEntryDate)}
+                  {batch.getDisplayId(data.batchReference, data.entryDate)}
                 </Datatable.Cell>
                 <Datatable.Cell id="locationName">
                   {data.locationName}
                 </Datatable.Cell>
                 <Datatable.DecimalCell
-                  id="total"
-                  value={data.total}
+                  id="totalQuantity"
+                  value={data.totalQuantity}
                   unit={data.componentUnit}
                 />
               </Datatable.Row>

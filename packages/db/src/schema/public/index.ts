@@ -1,15 +1,9 @@
-import * as component from "./component.schema";
-import * as despatching from "./despatching.schema";
-import * as inventory from "./inventory.schema";
-import * as production from "./production.schema";
-import * as profile from "./profile.schema";
-import * as receiving from "./receiving.schema";
-
-export default {
-  ...component,
-  ...despatching,
-  ...inventory,
-  ...production,
-  ...receiving,
-  ...profile,
-};
+export * from "./batch.schema";
+export * from "./component.schema";
+export * from "./despatching.schema";
+export * from "./inventory.schema";
+export * from "./location.schema";
+export * from "./production.schema";
+export * from "./profile.schema";
+export * from "./receiving.schema";
+export * from "./task.schema";

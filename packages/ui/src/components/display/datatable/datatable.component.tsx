@@ -1,7 +1,7 @@
 "use client";
 
-import type Decimal from "decimal.js";
 import { format } from "date-fns";
+import Decimal from "decimal.js";
 
 import { faFilter } from "@repo/pro-light-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
@@ -137,20 +137,30 @@ export type DecimalCellProps = CellProps & {
 };
 
 const DecimalCell = ({
-  precision = 2,
+  precision,
   unit,
   value,
   className,
   ...props
 }: DecimalCellProps) => {
+  if (precision === undefined) {
+    if (value.eq(0)) {
+      precision = 2;
+    } else if (value.lt(new Decimal(0.01))) {
+      precision = 6;
+    } else if (value.lt(new Decimal(0.1))) {
+      precision = 4;
+    } else {
+      precision = 2;
+    }
+  }
+  const formattedValue = value.toFixed(precision);
   return (
     <Table.Cell
       {...props}
       className={cn("flex flex-row items-baseline space-x-1", className)}
     >
-      <span className="grow text-right tabular-nums">
-        {value.toFixed(precision)}
-      </span>
+      <span className="grow text-right tabular-nums">{formattedValue}</span>
       {unit !== undefined && (
         <span className="flex-0 w-12 truncate text-left text-xs text-content-muted">
           {unit}

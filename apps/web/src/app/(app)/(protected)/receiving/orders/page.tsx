@@ -13,7 +13,7 @@ export default function ReceivingOrdersOverview() {
       <Heading level={1}>Purchase Orders</Heading>
 
       <DatatableQueryProvider
-        endpoint={api.receiving.orders.list}
+        endpoint={api.receiving.order.list}
         defaultInput={{
           sort: [{ field: "orderDate", order: "desc" }],
         }}
@@ -31,14 +31,11 @@ export default function ReceivingOrdersOverview() {
               <Datatable.Column id="orderDate" isSortable>
                 Order Date
               </Datatable.Column>
-              <Datatable.Column id="nextExpectedReceipt" isSortable>
-                Next Due Date
+              <Datatable.Column id="totalItems" isSortable>
+                Total Items
               </Datatable.Column>
-              <Datatable.Column id="receiptCount" isSortable>
-                Deliveries Received
-              </Datatable.Column>
-              <Datatable.Column id="remainingItemCount" isSortable>
-                Items Remaining
+              <Datatable.Column id="incompleteItems" isSortable>
+                Incomplete Items
               </Datatable.Column>
             </Datatable.Head>
             <Datatable.Body data={props.data}>
@@ -61,31 +58,28 @@ export default function ReceivingOrdersOverview() {
                           ? "orange"
                           : data.isCancelled
                             ? "red"
-                            : data.remainingItemCount === 0
-                              ? "green"
-                              : "yellow"
+                            : data.isOpen
+                              ? "yellow"
+                              : "green"
                       }
                     >
                       {data.isQuote
                         ? "Quoted"
                         : data.isCancelled
                           ? "Cancelled"
-                          : data.remainingItemCount === 0
-                            ? "Received"
-                            : "Pending"}
+                          : data.isOpen
+                            ? "Pending"
+                            : "Received"}
                     </Badge>
                   </Datatable.Cell>
                   <Datatable.Cell id="orderDate">
-                    {data.orderDate?.toLocaleDateString()}
+                    {data.orderDate.toLocaleDateString()}
                   </Datatable.Cell>
-                  <Datatable.Cell id="nextExpectedReceipt">
-                    {data.nextExpectedReceipt?.toLocaleDateString()}
+                  <Datatable.Cell id="totalItems">
+                    {data.totalItems}
                   </Datatable.Cell>
-                  <Datatable.Cell id="receiptCount">
-                    {data.receiptCount}
-                  </Datatable.Cell>
-                  <Datatable.Cell id="remainingItemCount">
-                    {data.remainingItemCount}
+                  <Datatable.Cell id="incompleteItems">
+                    {data.incompleteItems}
                   </Datatable.Cell>
                 </Datatable.Row>
               )}

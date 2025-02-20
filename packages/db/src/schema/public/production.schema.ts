@@ -10,20 +10,26 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { numericDecimal } from "../../lib/numeric";
+import { batch } from "./batch.schema";
 import { component } from "./component.schema";
-import { batch, location } from "./inventory.schema";
+import { location } from "./location.schema";
 
 export const productionJob = pgTable("production_job", {
   id: serial("id").notNull().primaryKey(),
-  outputComponentId: varchar("output_component_id")
+  componentId: varchar("component_id")
     .notNull()
     .references(() => component.id),
-  batchNumber: varchar("batch_number"),
+  batchId: integer("batch_id").references(() => batch.id),
   outputLocationId: integer("output_location_id")
     .notNull()
     .references(() => location.id),
-  targetQuantity: integer("target_quantity").notNull().default(0),
-  isActive: boolean("is_active").notNull().default(true),
+  targetQuantity: numericDecimal("target_quantity")
+    .notNull()
+    .default(new Decimal(0)),
+  quantityProduced: numericDecimal("quantity_produced")
+    .notNull()
+    .default(new Decimal(0)),
+  isComplete: boolean("is_complete").notNull().default(false),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -36,34 +42,37 @@ export const productionJob = pgTable("production_job", {
 export const productionJobRelations = relations(
   productionJob,
   ({ one, many }) => ({
-    outputComponent: one(component, {
-      fields: [productionJob.outputComponentId],
+    component: one(component, {
+      fields: [productionJob.componentId],
       references: [component.id],
     }),
     outputLocation: one(location, {
       fields: [productionJob.outputLocationId],
       references: [location.id],
     }),
-    inputs: many(productionBatchInput),
-    outputs: many(productionBatchOutput),
+    allocations: many(productionJobAllocation),
   }),
 );
 
-export const productionBatchInput = pgTable("production_batch_input", {
+export const productionJobAllocation = pgTable("production_job_allocation", {
   id: serial("id").notNull().primaryKey(),
-  jobId: integer("job_id")
+  productionJobId: integer("production_job_id")
     .notNull()
     .references(() => productionJob.id),
-  batchId: integer("batch_id")
+  componentId: varchar("component_id")
     .notNull()
-    .references(() => batch.id),
-  quantityAllocated: numericDecimal("quantity_allocated")
-    .notNull()
-    .default(new Decimal(0)),
+    .references(() => component.id),
+  batchId: integer("batch_id").references(() => batch.id),
   locationId: integer("location_id")
     .notNull()
     .references(() => location.id),
-  quantityUsed: numericDecimal("quantity_used")
+  totalQuantity: numericDecimal("total_quantity")
+    .notNull()
+    .default(new Decimal(0)),
+  remainingQuantity: numericDecimal("remaining_quantity")
+    .notNull()
+    .default(new Decimal(0)),
+  usedQuantity: numericDecimal("used_quantity")
     .notNull()
     .default(new Decimal(0)),
   createdAt: timestamp("created_at")
@@ -75,57 +84,52 @@ export const productionBatchInput = pgTable("production_batch_input", {
     .$onUpdate(() => new Date()),
 });
 
-export const productionBatchInputRelations = relations(
-  productionBatchInput,
+export const productionJobAllocationRelations = relations(
+  productionJobAllocation,
   ({ one }) => ({
     job: one(productionJob, {
-      fields: [productionBatchInput.jobId],
+      fields: [productionJobAllocation.productionJobId],
       references: [productionJob.id],
     }),
+    component: one(component, {
+      fields: [productionJobAllocation.componentId],
+      references: [component.id],
+    }),
     batch: one(batch, {
-      fields: [productionBatchInput.batchId],
+      fields: [productionJobAllocation.batchId],
       references: [batch.id],
     }),
     location: one(location, {
-      fields: [productionBatchInput.locationId],
+      fields: [productionJobAllocation.locationId],
       references: [location.id],
     }),
   }),
 );
 
-export const productionBatchOutput = pgTable("production_batch_output", {
-  id: serial("id").notNull().primaryKey(),
-  jobId: integer("job_id")
-    .notNull()
-    .references(() => productionJob.id),
-  batchId: integer("batch_id")
-    .notNull()
-    .references(() => batch.id),
-  productionQuantity: numericDecimal("production_quantity")
-    .notNull()
-    .default(new Decimal(0)),
-  productionDate: timestamp("production_date")
-    .notNull()
-    .default(sql`now()`),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`now()`),
-  lastModified: timestamp("last_modified")
-    .notNull()
-    .default(sql`now()`)
-    .$onUpdate(() => new Date()),
-});
+export const productionJobAllocationLot = pgTable(
+  "production_job_allocation_lot",
+  {
+    id: serial("id").notNull().primaryKey(),
+    productionJobAllocationId: integer("production_job_allocation_id")
+      .notNull()
+      .references(() => productionJobAllocation.id),
+    quantity: numericDecimal("quantity").notNull().default(new Decimal(0)),
+    createdAt: timestamp("created_at")
+      .notNull()
+      .default(sql`now()`),
+    lastModified: timestamp("last_modified")
+      .notNull()
+      .default(sql`now()`)
+      .$onUpdate(() => new Date()),
+  },
+);
 
-export const productionBatchOutputRelations = relations(
-  productionBatchOutput,
+export const productionJobAllocationLotRelations = relations(
+  productionJobAllocationLot,
   ({ one }) => ({
-    job: one(productionJob, {
-      fields: [productionBatchOutput.jobId],
-      references: [productionJob.id],
-    }),
-    batch: one(batch, {
-      fields: [productionBatchOutput.batchId],
-      references: [batch.id],
+    allocation: one(productionJobAllocation, {
+      fields: [productionJobAllocationLot.productionJobAllocationId],
+      references: [productionJobAllocation.id],
     }),
   }),
 );

@@ -1,9 +1,9 @@
 "use client";
 
-import { ProductionTaskForm } from "@/components/flows/ProductionTaskFlow";
-import { PurchaseReceiptTaskForm } from "@/components/flows/PurchaseReceiptTask";
-import { SalesDespatchTaskForm } from "@/components/flows/SalesDespatchTask";
-import { StockTransferTaskForm } from "@/components/flows/StockTransferTask";
+import { ProductionTaskForm } from "@/components/forms/ProductionInTask";
+import { PurchaseReceiptTaskForm } from "@/components/forms/PurchaseReceiptActivity";
+import { SalesDespatchTaskForm } from "@/components/forms/SalesDespatchTask";
+import { StockTransferTaskForm } from "@/components/forms/StockTransferTask";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
@@ -26,12 +26,11 @@ export const runtime = "edge";
 
 export default function DashboardPage() {
   const utils = api.useUtils();
-  const { mutate: completeTaskItem } =
-    api.inventory.tasks.items.complete.useMutation({
-      onSuccess: async () => {
-        await utils.inventory.tasks.items.list.invalidate();
-      },
-    });
+  const { mutate: completeTaskItem } = api.task.item.complete.useMutation({
+    onSuccess: async () => {
+      await utils.task.item.list.invalidate();
+    },
+  });
 
   return (
     <div className="flex flex-col space-y-2">
@@ -84,7 +83,7 @@ export default function DashboardPage() {
       <Subheading level={2}>Tasks</Subheading>
 
       <DatatableQueryProvider
-        endpoint={api.inventory.tasks.items.list}
+        endpoint={api.task.item.list}
         defaultInput={{
           filter: {
             isComplete: { eq: false },
@@ -152,7 +151,10 @@ export default function DashboardPage() {
       <DatatableQueryProvider
         endpoint={api.component.list}
         defaultInput={{
-          filter: { sageDiscrepancy: { neq: 0 }, isTracked: { eq: true } },
+          filter: {
+            sageDiscrepancy: { neq: 0 },
+            isTracked: { eq: true },
+          },
         }}
       >
         {(props) => (

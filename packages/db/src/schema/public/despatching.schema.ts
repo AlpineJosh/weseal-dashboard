@@ -9,8 +9,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { numericDecimal } from "../../lib/numeric";
+import { batch } from "./batch.schema";
 import { component } from "./component.schema";
-import { batch } from "./inventory.schema";
 
 export const customer = pgTable("customer", {
   id: varchar("id").primaryKey(),
@@ -122,9 +122,10 @@ export const salesDespatchItem = pgTable("sales_despatch_item", {
   despatchId: integer("despatch_id")
     .notNull()
     .references(() => salesDespatch.id),
-  batchId: integer("batch_id")
+  componentId: varchar("component_id")
     .notNull()
-    .references(() => batch.id),
+    .references(() => component.id),
+  batchId: integer("batch_id").references(() => batch.id),
   quantity: numericDecimal("quantity").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
@@ -141,6 +142,10 @@ export const salesDespatchItemRelations = relations(
     despatch: one(salesDespatch, {
       fields: [salesDespatchItem.despatchId],
       references: [salesDespatch.id],
+    }),
+    component: one(component, {
+      fields: [salesDespatchItem.componentId],
+      references: [component.id],
     }),
     batch: one(batch, {
       fields: [salesDespatchItem.batchId],

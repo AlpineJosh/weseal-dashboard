@@ -17,7 +17,7 @@ export default function ReceivingPage({
   return (
     <>
       <DatatableQueryProvider
-        endpoint={api.receiving.orders.items.list}
+        endpoint={api.receiving.order.item.list}
         defaultInput={{
           filter: {
             orderId: {
@@ -54,11 +54,11 @@ export default function ReceivingPage({
                   />
                   <Datatable.DecimalCell
                     id="quantityReceived"
-                    value={item.quantityReceived ?? 0}
+                    value={item.quantityReceived}
                   />
                   <Datatable.DecimalCell
                     id="sageQuantityReceived"
-                    value={item.sageQuantityReceived ?? 0}
+                    value={item.sageQuantityReceived}
                   />
                 </Datatable.Row>
               )}

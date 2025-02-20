@@ -1,9 +1,3 @@
-import base from "./schema/public";
-import * as sage from "./schema/sage"
-import * as bitSystems from "./schema/bit-systems"
-
-export default {
-    ...base,
-    ...sage,
-    ...bitSystems
-} as Record<string, unknown>
+export * from "./schema/bit-systems";
+export * from "./schema/public";
+export * from "./schema/sage";
