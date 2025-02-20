@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 
-import { and, eq, ne, schema, sql } from "@repo/db";
+import { eq, schema, sql } from "@repo/db";
 
 import { db } from "../../../db";
 import { InventoryBatchProcessor } from "./inventory";
@@ -85,154 +85,87 @@ const getTransactions = async (): Promise<StockTransaction[]> => {
   });
 };
 
-// const getBitSystemsComponentId = async (componentId: string) => {
-//   return await db.query.stockItem
-//     .findFirst({
-//       where: eq(stockItem.Code, componentId),
-//     })
-//     .then((item) => {
-//       if (!item) return undefined;
-//       return item.pk_StockItem_ID;
-//     });
-// };
+interface InventoryItem {
+  locationId: number;
+  quantity: Decimal;
+  batchReference?: string;
+  createdAt: Date;
+}
 
-interface Inventory {
+interface TargetInventory {
+  componentId: string;
   totalQuantity: Decimal;
   batchTracked: boolean;
-  items: {
-    locationId: number;
-    quantity: Decimal;
-    batchReference?: string;
-    createdAt?: Date;
-  }[];
+  items: InventoryItem[];
 }
-const getCurrentInventory = async (componentId: string) => {
-  const sageQuantity = await db.query.STOCK.findFirst({
-    where: and(eq(schema.STOCK.STOCK_CODE, componentId)),
-  });
-  if (!(sageQuantity && sageQuantity.QTY_IN_STOCK !== null)) {
-    throw new Error("Sage quantity not found");
-  }
 
-  const inventory: Inventory = {
-    totalQuantity: new Decimal(sageQuantity.QTY_IN_STOCK).toDP(6),
-    batchTracked: false,
-    items: [],
-  };
-
-  const bitSystemsStock = await db.query.stockItem.findFirst({
-    where: eq(schema.stockItem.Code, componentId),
-  });
-
-  if (bitSystemsStock) {
-    const hasTraceableItem = await db.query.traceableItem.findFirst({
-      where: eq(
-        schema.traceableItem.fk_StockItem_ID,
-        bitSystemsStock.pk_StockItem_ID,
-      ),
+const getCurrentInventory = async (): Promise<TargetInventory[]> => {
+  return await db
+    .select({
+      componentId: schema.STOCK.STOCK_CODE,
+      totalQuantity: schema.STOCK.QTY_IN_STOCK,
+      batchTracked: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${schema.traceableItem} ti 
+        WHERE ti."fk_StockItem_ID" = ${schema.stockItem.pk_StockItem_ID}
+      )`,
+      items: sql<InventoryItem[]>`
+        COALESCE(
+          CASE 
+            WHEN EXISTS (
+              SELECT 1 FROM ${schema.traceableItem} ti 
+              WHERE ti."fk_StockItem_ID" = ${schema.stockItem.pk_StockItem_ID}
+            ) THEN (
+              SELECT json_agg(
+                json_build_object(
+                  'locationId', b."pk_Bin_ID",
+                  'quantity', tbi."QuantityInStock",
+                  'batchReference', ti."IdentificationNo",
+                  'createdAt', ti."DateTimeCreated"
+                )
+              )
+              FROM ${schema.traceableItem} ti
+              LEFT JOIN ${schema.traceableBinItem} tbi ON ti."pk_TraceableItem_ID" = tbi."fk_TraceableItem_ID"
+              LEFT JOIN ${schema.binItem} bi ON tbi."fk_BinItem_ID" = bi."pk_BinItem_ID"
+              LEFT JOIN ${schema.bin} b ON bi."fk_Bin_ID" = b."pk_Bin_ID"
+              WHERE ti."fk_StockItem_ID" = ${schema.stockItem.pk_StockItem_ID}
+              AND tbi."QuantityInStock" != 0
+              AND b."fk_Warehouse_ID" != 1
+            )
+            ELSE (
+              SELECT json_agg(
+                json_build_object(
+                  'locationId', b."pk_Bin_ID",
+                  'quantity', bi."QuantityInStock"
+                )
+              )
+              FROM ${schema.binItem} bi
+              LEFT JOIN ${schema.bin} b ON bi."fk_Bin_ID" = b."pk_Bin_ID"
+              WHERE bi."fk_StockItem_ID" = ${schema.stockItem.pk_StockItem_ID}
+              AND bi."QuantityInStock" != 0
+              AND b."fk_Warehouse_ID" != 1
+            )
+          END,
+          '[]'
+        )`,
+    })
+    .from(schema.STOCK)
+    .leftJoin(
+      schema.stockItem,
+      eq(schema.stockItem.Code, schema.STOCK.STOCK_CODE),
+    )
+    .then((inventory) => {
+      return inventory.map((item) => {
+        return {
+          ...item,
+          totalQuantity: new Decimal(item.totalQuantity ?? 0).toDP(6),
+          items: item.items.map((i) => ({
+            ...i,
+            quantity: new Decimal(i.quantity).toDP(6),
+            createdAt: i.createdAt ? new Date(i.createdAt) : new Date(),
+          })),
+        };
+      });
     });
-
-    if (hasTraceableItem) {
-      inventory.batchTracked = true;
-      inventory.items = await db
-        .select({
-          locationId: schema.bin.pk_Bin_ID,
-          quantity: schema.traceableBinItem.QuantityInStock,
-          batchReference: schema.traceableItem.IdentificationNo,
-          createdAt: schema.traceableItem.DateTimeCreated,
-        })
-        .from(schema.traceableItem)
-        .leftJoin(
-          schema.traceableBinItem,
-          eq(
-            schema.traceableItem.pk_TraceableItem_ID,
-            schema.traceableBinItem.fk_TraceableItem_ID,
-          ),
-        )
-        .leftJoin(
-          schema.binItem,
-          eq(
-            schema.traceableBinItem.fk_BinItem_ID,
-            schema.binItem.pk_BinItem_ID,
-          ),
-        )
-        .leftJoin(
-          schema.bin,
-          eq(schema.binItem.fk_Bin_ID, schema.bin.pk_Bin_ID),
-        )
-        .where(
-          and(
-            eq(
-              schema.traceableItem.fk_StockItem_ID,
-              bitSystemsStock.pk_StockItem_ID,
-            ),
-            ne(schema.traceableBinItem.QuantityInStock, 0),
-            ne(schema.bin.fk_Warehouse_ID, 1),
-          ),
-        )
-        .then((items) => {
-          return items
-            .filter(
-              (
-                item,
-              ): item is typeof item & {
-                locationId: number;
-                quantity: number;
-                batchReference: string | null;
-              } => {
-                return item.locationId !== null && item.quantity !== null;
-              },
-            )
-            .map((item) => {
-              return {
-                locationId: item.locationId,
-                quantity: new Decimal(item.quantity).toDP(6),
-                batchReference: item.batchReference ?? undefined,
-              };
-            });
-        });
-    } else {
-      inventory.items = await db
-        .select({
-          locationId: schema.bin.pk_Bin_ID,
-          quantity: schema.binItem.QuantityInStock,
-        })
-        .from(schema.binItem)
-        .leftJoin(
-          schema.bin,
-          eq(schema.binItem.fk_Bin_ID, schema.bin.pk_Bin_ID),
-        )
-        .where(
-          and(
-            eq(schema.binItem.fk_StockItem_ID, bitSystemsStock.pk_StockItem_ID),
-            ne(schema.binItem.QuantityInStock, 0),
-            ne(schema.bin.fk_Warehouse_ID, 1),
-          ),
-        )
-        .then((items) => {
-          return items
-            .filter(
-              (
-                item,
-              ): item is typeof item & {
-                locationId: number;
-                quantity: number;
-                batchReference: string | null;
-              } => {
-                return item.locationId !== null && item.quantity !== null;
-              },
-            )
-            .map((item) => {
-              return {
-                locationId: item.locationId,
-                quantity: new Decimal(item.quantity).toDP(6),
-              };
-            });
-        });
-    }
-  }
-
-  return inventory;
 };
 
 const handleReceiptTransaction = (
@@ -336,9 +269,10 @@ const handleDespatchTransaction = (
 const handleProductionTransaction = (
   transaction: StockTransaction,
   processor: InventoryBatchProcessor,
+  inventory: TargetInventory[],
 ) => {
   if (transaction.quantity.isPositive()) {
-    handleJobOutputTransaction(transaction, processor);
+    handleJobOutputTransaction(transaction, processor, inventory);
   } else {
     handleJobInputTransaction(transaction, processor);
   }
@@ -395,13 +329,43 @@ const handleJobInputTransaction = (
 const handleJobOutputTransaction = (
   transaction: StockTransaction,
   processor: InventoryBatchProcessor,
+  inventory: TargetInventory[],
 ) => {
+  const inventoryItems = inventory
+    .find((i) => i.componentId === transaction.componentId)
+    ?.items.sort((a, b) => {
+      // Calculate absolute time difference from transaction date
+      const aDiff = Math.abs(
+        a.createdAt.getTime() - transaction.date.getTime(),
+      );
+      const bDiff = Math.abs(
+        b.createdAt.getTime() - transaction.date.getTime(),
+      );
+      return aDiff - bDiff; // Closest dates first
+    });
+
+  const item = inventoryItems?.[0];
+
+  let batchId = null;
+
+  if (item?.batchReference) {
+    const batch = processor.batches.upsert({
+      id: 0,
+      componentId: transaction.componentId,
+      batchReference: item.batchReference,
+      createdAt: item.createdAt,
+      lastModified: item.createdAt,
+    });
+
+    batchId = batch.id;
+  }
+
   const job = processor.productionJobRepository.upsert({
     id: 0,
     componentId: transaction.componentId,
     createdAt: transaction.createdAt,
     lastModified: transaction.date,
-    batchId: null,
+    batchId,
     outputLocationId: 1,
     targetQuantity: new Decimal(0),
     quantityProduced: new Decimal(0),
@@ -411,7 +375,7 @@ const handleJobOutputTransaction = (
   const entry = processor.createInboundEntry(
     {
       componentId: transaction.componentId,
-      batchId: null,
+      batchId,
     },
     1,
     transaction.quantity,
@@ -475,6 +439,115 @@ const handleCorrectionTransaction = (
   }
 };
 
+const balanceInventory = (
+  processor: InventoryBatchProcessor,
+  current: (typeof schema.inventory.$inferSelect)[],
+  target: (typeof schema.inventory.$inferSelect)[],
+) => {
+  const initial = current[0] ?? target[0];
+  if (!initial) {
+    return;
+  }
+  const componentId = initial.componentId;
+  const batchId = initial.batchId;
+  const locations = new Map<number, { target: Decimal; current: Decimal }>();
+
+  for (const location of target) {
+    locations.set(location.locationId, {
+      target: new Decimal(location.totalQuantity),
+      current: new Decimal(0),
+    });
+  }
+
+  for (const location of current) {
+    const entry = locations.get(location.locationId) ?? {
+      target: new Decimal(0),
+      current: new Decimal(0),
+    };
+    entry.current = entry.current.plus(location.totalQuantity);
+    locations.set(location.locationId, entry);
+  }
+
+  for (const [locationId, amounts] of locations) {
+    if (amounts.current.gt(amounts.target)) {
+      let excess = amounts.current.minus(amounts.target);
+
+      // Find locations that need more inventory
+      for (const [putLocationId, putAmounts] of locations) {
+        if (putLocationId === locationId) continue;
+
+        const shortage = putAmounts.target.minus(putAmounts.current);
+        if (shortage.lte(0)) continue;
+
+        const moveQuantity = Decimal.min(excess, shortage);
+        if (moveQuantity.gt(0)) {
+          // Calculate and process the transfer
+          const entry = processor.calculateOutboundEntry(
+            { componentId, batchId },
+            locationId,
+            moveQuantity,
+          );
+
+          processor.updateInventory(entry, "outbound");
+          processor.logToLedger("outbound", entry, {
+            type: "transfer",
+            userId: USER_ID,
+            date: new Date(),
+          });
+
+          entry.locationId = putLocationId;
+          processor.updateInventory(entry, "inbound");
+          processor.logToLedger("inbound", entry, {
+            type: "transfer",
+            userId: USER_ID,
+            date: new Date(),
+          });
+
+          // Update our tracking
+          excess = excess.minus(moveQuantity);
+          amounts.current = amounts.current.minus(moveQuantity);
+          putAmounts.current = putAmounts.current.plus(moveQuantity);
+
+          if (amounts.current.eq(amounts.target)) break;
+        }
+      }
+    }
+  }
+
+  // for (const [locationId, amounts] of locations) {
+  //   if (amounts.current.lt(amounts.target)) {
+  //     const entry = processor.createInboundEntry(
+  //       { componentId, batchId },
+  //       locationId,
+  //       amounts.target.minus(amounts.current),
+  //       new Date(),
+  //       new Date(),
+  //       new Date(),
+  //     );
+
+  //     processor.updateInventory(entry, "inbound");
+  //     processor.logToLedger("inbound", entry, {
+  //       type: "correction",
+  //       userId: USER_ID,
+  //       date: new Date(),
+  //     });
+  //   } else if (amounts.current.gt(amounts.target)) {
+  //     const entry = processor.calculateOutboundEntry(
+  //       { componentId, batchId },
+  //       locationId,
+  //       amounts.current.minus(amounts.target),
+  //     );
+
+  //     processor.updateInventory(entry, "outbound");
+  //     processor.logToLedger("outbound", entry, {
+  //       type: "correction",
+  //       userId: USER_ID,
+  //       date: new Date(),
+  //     });
+  //   }
+  // }
+};
+
 export const resetInventory = async () => {
   console.log("Resetting inventory");
   await db.execute(
@@ -494,9 +567,25 @@ export const resetInventory = async () => {
     RESTART IDENTITY CASCADE`,
   );
 
+  // await db
+  //   .update(schema.component)
+  //   .set({
+  //     isBatchTracked: true,
+  //   })
+  //   .where(
+  //     inArray(
+  //       schema.component.id,
+  //       currentInventory
+  //         .filter((i) => i.batchTracked)
+  //         .map((i) => i.componentId),
+  //     ),
+  //   );
+
   const processor = new InventoryBatchProcessor();
 
   console.log("Getting transactions");
+
+  const targetInventory = await getCurrentInventory();
 
   const transactions = await getTransactions();
   const purchaseOrderIds = await db.query.purchaseOrder
@@ -533,7 +622,7 @@ export const resetInventory = async () => {
           handleDespatchTransaction(transaction, processor, salesOrderIds);
           break;
         case "production":
-          handleProductionTransaction(transaction, processor);
+          handleProductionTransaction(transaction, processor, targetInventory);
           break;
         case "correction":
           handleCorrectionTransaction(transaction, processor);
@@ -551,6 +640,125 @@ export const resetInventory = async () => {
       console.log(`Processed ${index} transactions`);
     }
   }
+
+  console.log("Getting components");
+
+  const components = await db
+    .select({
+      id: schema.component.id,
+      isBatchTracked: schema.component.isBatchTracked,
+      isStockTracked: schema.component.isStockTracked,
+    })
+    .from(schema.component);
+
+  console.log("Getting target inventory");
+
+  const currentInventory = processor.inventories.getAllInventories();
+
+  console.log("Balancing inventory");
+
+  // Balance each component's inventory
+  for (const component of components) {
+    if (!component.isStockTracked) {
+      continue;
+    }
+    if (component.isBatchTracked) {
+      const batches = targetInventory
+        .filter((i) => i.componentId === component.id)
+        .flatMap((i) => i.items)
+        .reduce(
+          (acc, item) => {
+            const batchReference = item.batchReference ?? "undefined";
+
+            if (!acc[batchReference]) {
+              acc[batchReference] = [];
+            }
+
+            acc[batchReference].push({
+              locationId: item.locationId,
+              quantity: item.quantity,
+            });
+
+            return acc;
+          },
+          {} as Record<string, { locationId: number; quantity: Decimal }[]>,
+        );
+
+      for (const batchReference in batches) {
+        const batch = processor.batches.getBatch(component.id, batchReference);
+
+        const targetBatches =
+          batches[batchReference]?.map((item) => {
+            return {
+              id: 0,
+              componentId: component.id,
+              batchId: batch?.id ?? null,
+              locationId: item.locationId,
+              totalQuantity: item.quantity,
+              allocatedQuantity: new Decimal(0),
+              freeQuantity: item.quantity,
+              entryDate: new Date(),
+              createdAt: new Date(),
+              lastModified: new Date(),
+            };
+          }) ?? [];
+
+        balanceInventory(
+          processor,
+          currentInventory.filter(
+            (i) => i.componentId === component.id && i.batchId === batch?.id,
+          ),
+          targetBatches,
+        );
+      }
+    }
+    balanceInventory(
+      processor,
+      currentInventory.filter((i) => i.componentId === component.id),
+      targetInventory
+        .filter((i) => i.componentId === component.id)
+        .flatMap((item) => {
+          return item.items.map((i) => {
+            return {
+              id: 0,
+              componentId: component.id,
+              batchId: null,
+              locationId: i.locationId,
+              totalQuantity: i.quantity,
+              allocatedQuantity: new Decimal(0),
+              freeQuantity: i.quantity,
+              entryDate: new Date(),
+              createdAt: new Date(),
+              lastModified: new Date(),
+            };
+          });
+        }),
+    );
+  }
+  // console.log("Testing inventory");
+
+  // const testCurrent = processor.inventories.getAllInventories();
+
+  // for (const component of components) {
+  //   if (!component.isStockTracked) {
+  //     continue;
+  //   }
+  //   const testItem = testCurrent
+  //     .filter((i) => i.componentId === component.id)
+  //     .reduce((acc, item) => {
+  //       return acc.plus(item.totalQuantity);
+  //     }, new Decimal(0));
+
+  //   const testTarget = targetInventory
+  //     .filter((i) => i.componentId === component.id)
+  //     .reduce((acc, item) => {
+  //       return acc.plus(item.totalQuantity);
+  //     }, new Decimal(0));
+
+  //   if (!testItem.eq(testTarget)) {
+  //     console.log(component.id, testItem, testTarget);
+  //   }
+  // }
 
   try {
     await processor.saveAll();

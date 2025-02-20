@@ -15,7 +15,9 @@ const quantities = db
     allocatedQuantity: sum(inventory.allocatedQuantity)
       .mapWith(inventory.allocatedQuantity)
       .as("allocated_quantity"),
-    freeQuantity: sum(inventory.freeQuantity).as("free_quantity"),
+    freeQuantity: sum(inventory.freeQuantity)
+      .mapWith(inventory.freeQuantity)
+      .as("free_quantity"),
   })
   .from(inventory)
   .groupBy(inventory.componentId)
@@ -67,15 +69,15 @@ export default datatable(
     hasSubcomponents: "boolean",
     sageQuantity: "decimal",
     unit: "string",
-    categoryId: "string",
-    departmentId: "string",
+    categoryId: "number",
+    departmentId: "number",
     isStockTracked: "boolean",
     isBatchTracked: "boolean",
-    defaultLocationId: "string",
+    defaultLocationId: "number",
     requiresQualityCheck: "boolean",
     qualityCheckDetails: "string",
-    createdAt: "string",
-    lastModified: "string",
+    createdAt: "date",
+    lastModified: "date",
     isDeleted: "boolean",
     totalQuantity: "decimal",
     allocatedQuantity: "decimal",

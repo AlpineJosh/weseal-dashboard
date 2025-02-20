@@ -10,10 +10,9 @@ import { Input, Switch } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
-type TaskItem =
-  RouterInputs["inventory"]["tasks"]["create"]["items"][number] & {
-    componentId: string;
-  };
+type TaskItem = RouterInputs["task"]["create"]["items"][number] & {
+  componentId: string;
+};
 
 export interface LocationPickerItemProps {
   id: string;
@@ -58,8 +57,8 @@ export const LocationPicker = ({
   );
 };
 
-type LocationsType = NonNullable<
-  RouterOutputs["inventory"]["quantity"]["rows"][number]
+type InventoryType = NonNullable<
+  RouterOutputs["inventory"]["list"]["rows"][number]
 > & {
   blocked: boolean;
   using: Decimal;
@@ -73,32 +72,32 @@ const LocationPickerItem = ({
   onChange,
 }: LocationPickerItemProps) => {
   const [quantity, setQuantity] = useImmer(defaultQuantity);
-  const [locations, setLocations] = useImmer<LocationsType[]>([]);
+  const [inventory, setInventory] = useImmer<InventoryType[]>([]);
 
   const { data: component } = api.component.get.useQuery({
     id,
   });
 
   const totalAvailable = useMemo(() => {
-    return locations.reduce(
-      (acc, location) => location.free.add(acc),
+    return inventory.reduce(
+      (acc, location) => location.freeQuantity.add(acc),
       new Decimal(0),
     );
-  }, [locations]);
+  }, [inventory]);
 
-  const { data: quantities } = api.inventory.quantity.useQuery({
+  const { data: quantities } = api.inventory.list.useQuery({
     filter: {
       componentId: {
         eq: id,
       },
-      free: {
+      freeQuantity: {
         gt: 0,
         null: false,
       },
     },
     sort: [
       {
-        field: "batchEntryDate",
+        field: "entryDate",
         order: "asc",
       },
     ],
@@ -119,9 +118,9 @@ const LocationPickerItem = ({
           overridden: false,
         });
       }
-      setLocations(locs);
+      setInventory(locs);
     }
-  }, [quantities, setLocations]);
+  }, [quantities, setInventory]);
 
   useEffect(() => {
     setQuantity(defaultQuantity);
@@ -131,7 +130,7 @@ const LocationPickerItem = ({
     const batches = [];
     let remaining = quantity;
 
-    for (const location of locations) {
+    for (const location of inventory) {
       if (location.overridden && !location.blocked && location.using.gt(0)) {
         batches.push({
           pickLocationId: location.locationId,
@@ -144,9 +143,9 @@ const LocationPickerItem = ({
     }
 
     if (remaining.gt(0)) {
-      for (const location of locations) {
+      for (const location of inventory) {
         if (!location.blocked && !location.overridden && remaining.gt(0)) {
-          const use = Decimal.min(location.free, remaining);
+          const use = Decimal.min(location.freeQuantity, remaining);
           if (use.gt(0)) {
             remaining = remaining.sub(use);
             batches.push({
@@ -174,23 +173,23 @@ const LocationPickerItem = ({
     if (hasChanges) {
       onChange(batches);
     }
-  }, [locations, quantity, id]);
+  }, [inventory, quantity, id, onChange, value]);
 
-  const getUsing = (location: LocationsType) => {
+  const getUsing = (inventory: InventoryType) => {
     const existing = value.find(
       (batch) =>
-        batch.pickLocationId === location.locationId &&
-        batch.batchId === location.batchId,
+        batch.pickLocationId === inventory.locationId &&
+        batch.batchId === inventory.batchId,
     );
     return existing?.quantity ?? 0;
   };
 
-  const updateUsing = (location: LocationsType, quantity: Decimal) => {
-    setLocations((draft) => {
+  const updateUsing = (inventory: InventoryType, quantity: Decimal) => {
+    setInventory((draft) => {
       const loc = draft.find(
         (l) =>
-          l.locationId === location.locationId &&
-          l.batchId === location.batchId,
+          l.locationId === inventory.locationId &&
+          l.batchId === inventory.batchId,
       );
       if (loc) {
         loc.using = quantity;
@@ -230,13 +229,13 @@ const LocationPickerItem = ({
         </span>
       </div>
       <div className="grid grid-cols-[auto_1fr_1fr_1fr_2fr] items-center gap-4">
-        {locations.map((location, index) => (
+        {inventory.map((inventory, index) => (
           <>
             <Switch
               key={index}
-              isSelected={!location.blocked}
+              isSelected={!inventory.blocked}
               onChange={() => {
-                setLocations((draft) => {
+                setInventory((draft) => {
                   const loc = draft[index];
                   if (loc) {
                     loc.blocked = !loc.blocked;
@@ -248,19 +247,14 @@ const LocationPickerItem = ({
             />
             <span className="flex flex-row items-center space-x-2 text-content-muted">
               <Icon icon={faShelves} />
-              <Text>{location.locationName}</Text>
+              <Text>{inventory.locationName}</Text>
             </span>
             <span className="flex flex-row items-center space-x-2 text-content-muted">
               <Icon icon={faHashtag} />
-              <Text>
-                {location.batchReference ??
-                  (location.batchEntryDate
-                    ? location.batchEntryDate.toLocaleDateString()
-                    : "")}
-              </Text>
+              <Text>{inventory.batchReference}</Text>
             </span>
             <Text>
-              Available: <Strong>{location.free.toFixed(6)}</Strong>
+              Available: <Strong>{inventory.freeQuantity.toFixed(6)}</Strong>
             </Text>
             <span className="flex flex-row items-center justify-end space-x-2 text-content-muted">
               <Text>Using:</Text>
@@ -268,10 +262,10 @@ const LocationPickerItem = ({
                 type="number"
                 className="flex-1"
                 min={0}
-                max={location.free.toFixed(6)}
-                value={getUsing(location).toFixed(6)}
+                max={inventory.freeQuantity.toFixed(6)}
+                value={getUsing(inventory).toFixed(6)}
                 onChange={(e) => {
-                  updateUsing(location, new Decimal(e.target.value));
+                  updateUsing(inventory, new Decimal(e.target.value));
                 }}
               />
             </span>

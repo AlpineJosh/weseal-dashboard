@@ -51,6 +51,7 @@ const overview = db
   })
   .from(subcomponent)
   .leftJoin(component, eq(subcomponent.subcomponentId, component.id))
+  .leftJoin(quantities, eq(subcomponent.subcomponentId, quantities.componentId))
   .as("overview");
 
 export default datatable(
@@ -58,7 +59,7 @@ export default datatable(
     id: "number",
     componentId: "string",
     subcomponentId: "string",
-    quantityRequired: "number",
+    quantityRequired: "decimal",
     description: "string",
     hasSubcomponents: "boolean",
     sageQuantity: "decimal",

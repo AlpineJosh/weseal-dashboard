@@ -37,6 +37,9 @@ export const buildSearchClause = <T extends DatatableDefinition>(
 ): SQL | undefined => {
   if (!input) return undefined;
 
+  console.log(availableFields);
+  console.log(input);
+
   const { query, fields } = input;
   const whereClause: (SQL | undefined)[] = [];
   if (query.length > 0) {
@@ -45,7 +48,20 @@ export const buildSearchClause = <T extends DatatableDefinition>(
       const partWhere: SQL[] = [];
       for (const key of fields ?? Object.keys(availableFields)) {
         const field = availableFields[key];
-        partWhere.push(sql`${field}::text ilike ${`%${part}%`}`);
+        switch (field.type) {
+          case "string":
+            partWhere.push(sql`${field.sql} ilike ${`%${part}%`}`);
+            break;
+          case "number":
+          case "bigint":
+          case "decimal":
+            partWhere.push(
+              sql`cast(${field.sql} as text) ilike ${`%${part}%`}`,
+            );
+            break;
+          default:
+            continue;
+        }
       }
       whereClause.push(or(...partWhere));
     });

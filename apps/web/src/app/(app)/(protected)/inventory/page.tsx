@@ -19,6 +19,9 @@ export default function InventoryOverview() {
             totalQuantity: {
               neq: 0,
             },
+            isStockTracked: {
+              eq: true,
+            },
           },
         }}
       >
@@ -31,16 +34,13 @@ export default function InventoryOverview() {
               <Datatable.Column id="description" isSortable>
                 Description
               </Datatable.Column>
-              <Datatable.Column id="batch" isSortable>
-                Batch
-              </Datatable.Column>
               <Datatable.Column id="location" isSortable>
                 Location
               </Datatable.Column>
-              <Datatable.Column id="quantity" isSortable>
+              <Datatable.Column id="totalQuantity" isSortable>
                 Total Quantity
               </Datatable.Column>
-              <Datatable.Column id="allocated" isSortable>
+              <Datatable.Column id="allocatedQuantity" isSortable>
                 Allocated
               </Datatable.Column>
             </Datatable.Head>
@@ -63,13 +63,13 @@ export default function InventoryOverview() {
                     </TextLink>
                   </Datatable.Cell>
                   <Datatable.DecimalCell
-                    id="quantity"
+                    id="totalQuantity"
                     value={data.totalQuantity}
                     unit={data.componentUnit}
                     className="flex flex-row items-baseline space-x-1"
                   />
                   <Datatable.DecimalCell
-                    id="allocated"
+                    id="allocatedQuantity"
                     value={data.allocatedQuantity}
                     unit={data.componentUnit}
                     className="flex flex-row items-baseline space-x-1"

@@ -1,9 +1,9 @@
 "use client";
 
-import { ProductionTaskForm } from "@/components/flows/ProductionTaskFlow";
-import { PurchaseReceiptTaskForm } from "@/components/flows/PurchaseReceiptTask";
-import { SalesDespatchTaskForm } from "@/components/flows/SalesDespatchTask";
-import { StockTransferTaskForm } from "@/components/flows/StockTransferTask";
+import { ProductionTaskForm } from "@/components/forms/ProductionInTask";
+import { PurchaseReceiptTaskForm } from "@/components/forms/PurchaseReceiptActivity";
+import { SalesDespatchTaskForm } from "@/components/forms/SalesDespatchTask";
+import { StockTransferTaskForm } from "@/components/forms/StockTransferTask";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 

@@ -64,6 +64,10 @@ class BatchRepository {
     return `${componentId}-${batchReference}`;
   }
 
+  getBatch(componentId: string, batchReference?: string) {
+    return this.batches.get(this.getKey(componentId, batchReference ?? ""));
+  }
+
   upsert(data: typeof schema.batch.$inferSelect) {
     const key = this.getKey(data.componentId, data.batchReference ?? "");
     let batch = this.batches.get(key);
@@ -120,8 +124,8 @@ class ComponentLotRepository {
     return `${componentId}-${batchId ?? "unbatched"}-${entryDate.toLocaleDateString("en-GB")}`;
   }
 
-  private getComponentKey(componentId: string, batchId: number | null) {
-    return `${componentId}-${batchId ?? "unbatched"}`;
+  private getComponentKey(componentId: string) {
+    return `${componentId}`;
   }
 
   upsert(data: typeof schema.componentLot.$inferSelect) {
@@ -136,17 +140,33 @@ class ComponentLotRepository {
 
       this.componentLots.set(key, lot);
 
-      const componentKey = this.getComponentKey(data.componentId, data.batchId);
+      const componentKey = this.getComponentKey(data.componentId);
       const lots = this.componentLotsByComponent.get(componentKey) ?? [];
       lots.push(key);
       this.componentLotsByComponent.set(componentKey, lots);
+    } else {
+      // Update the existing lot with new data
+      lot = {
+        ...lot,
+        ...data,
+        // Preserve the original ID
+        id: lot.id,
+        // Update timestamps if needed
+        lastModified:
+          data.lastModified > lot.lastModified
+            ? data.lastModified
+            : lot.lastModified,
+        createdAt:
+          data.createdAt < lot.createdAt ? data.createdAt : lot.createdAt,
+      };
+      this.componentLots.set(key, lot);
     }
 
     return lot;
   }
 
-  getLotsForComponent(componentId: string, batchId: number | null) {
-    const key = this.getComponentKey(componentId, batchId);
+  getLotsForComponent(componentId: string) {
+    const key = this.getComponentKey(componentId);
 
     const lotIds = this.componentLotsByComponent.get(key) ?? [];
 
@@ -427,13 +447,13 @@ export interface LedgerEntryDetails {
 
 export interface InventoryEntry {
   componentId: string;
-  batchId: number | null;
   locationId: number;
   quantity: Decimal;
   entryDate: Date;
   lots: {
     id: number;
     quantity: Decimal;
+    batchId: number | null;
   }[];
 }
 
@@ -802,9 +822,7 @@ export class PurchaseReceiptItemRepository {
         item.createdAt = data.createdAt;
       }
 
-      if (data.quantity) {
-        item.quantity = item.quantity?.plus(data.quantity) ?? data.quantity;
-      }
+      item.quantity = item.quantity.plus(data.quantity);
     } else {
       item = { ...data, id: this.identities.create() };
       this.items.set(key, item);
@@ -890,7 +908,6 @@ export class InventoryBatchProcessor {
 
     const componentLots = this.componentLots.getLotsForComponent(
       reference.componentId,
-      reference.batchId,
     );
 
     if (componentLots.length === 0) {
@@ -919,11 +936,23 @@ export class InventoryBatchProcessor {
     }
 
     const lots = componentLots.flatMap((lot) =>
-      this.inventoryLots.getForId(lot.id),
+      this.inventoryLots.getForId(lot.id).map((l) =>
+        l === undefined
+          ? undefined
+          : {
+              componentId: lot.componentId,
+              batchId: lot.batchId,
+              ...l,
+            },
+      ),
     );
 
     let remainingQuantity = quantity;
-    const assignedLots: { id: number; quantity: Decimal }[] = [];
+    const assignedLots: {
+      id: number;
+      quantity: Decimal;
+      batchId: number | null;
+    }[] = [];
 
     for (const lot of lots) {
       if (!lot || lot.freeQuantity.isZero()) {
@@ -934,6 +963,7 @@ export class InventoryBatchProcessor {
       assignedLots.push({
         id: lot.componentLotId,
         quantity: lotQuantity,
+        batchId: lot.batchId,
       });
 
       remainingQuantity = remainingQuantity.sub(lotQuantity);
@@ -949,6 +979,7 @@ export class InventoryBatchProcessor {
         assignedLots.push({
           id: lot.componentLotId,
           quantity: remainingQuantity,
+          batchId: lot.batchId,
         });
       } else {
         throw new Error("Not enough inventory available");
@@ -957,7 +988,6 @@ export class InventoryBatchProcessor {
 
     return {
       componentId: reference.componentId,
-      batchId: reference.batchId,
       locationId,
       entryDate: new Date(),
       quantity,
@@ -988,11 +1018,10 @@ export class InventoryBatchProcessor {
 
     return {
       componentId: reference.componentId,
-      batchId: reference.batchId,
       locationId,
       entryDate,
       quantity,
-      lots: [{ id: lot.id, quantity }],
+      lots: [{ id: lot.id, quantity, batchId: lot.batchId }],
     };
   }
 
@@ -1010,7 +1039,6 @@ export class InventoryBatchProcessor {
 
     const componentLots = this.componentLots.getLotsForComponent(
       reference.componentId,
-      reference.batchId,
     );
 
     if (componentLots.length === 0) {
@@ -1036,11 +1064,10 @@ export class InventoryBatchProcessor {
 
     return {
       componentId: reference.componentId,
-      batchId: reference.batchId,
       locationId,
       quantity,
       entryDate,
-      lots: [{ id: lot.componentLotId, quantity }],
+      lots: [{ id: lot.componentLotId, quantity, batchId: reference.batchId }],
     };
   }
 
@@ -1049,8 +1076,17 @@ export class InventoryBatchProcessor {
     entry: InventoryEntry,
     details: LedgerEntryDetails,
   ) {
+    const batches = new Map<number, Decimal>();
     // Log lot-level entries
     for (const lot of entry.lots) {
+      const batch = batches.get(lot.batchId ?? 0);
+
+      if (!batch) {
+        batches.set(lot.batchId ?? 0, lot.quantity);
+      } else {
+        batches.set(lot.batchId ?? 0, batch.plus(lot.quantity));
+      }
+
       this.inventoryLotLedger.addEntry({
         componentLotId: lot.id,
         locationId: entry.locationId,
@@ -1062,13 +1098,16 @@ export class InventoryBatchProcessor {
     }
 
     // Log inventory-level entry
-    this.inventoryLedger.addEntry(
-      entry.componentId,
-      entry.batchId,
-      entry.locationId,
-      direction === "inbound" ? entry.quantity : entry.quantity.negated(),
-      details,
-    );
+
+    for (const [batchId, quantity] of batches.entries()) {
+      this.inventoryLedger.addEntry(
+        entry.componentId,
+        batchId,
+        entry.locationId,
+        direction === "inbound" ? quantity : quantity.negated(),
+        details,
+      );
+    }
   }
 
   updateInventory(
@@ -1112,8 +1151,17 @@ export class InventoryBatchProcessor {
       }
     };
 
+    const batches = new Map<number, Decimal>();
     // Update inventory lots
     for (const lot of entry.lots) {
+      const batch = batches.get(lot.batchId ?? 0);
+
+      if (!batch) {
+        batches.set(lot.batchId ?? 0, lot.quantity);
+      } else {
+        batches.set(lot.batchId ?? 0, batch.plus(lot.quantity));
+      }
+
       this.inventoryLots.upsert({
         componentLotId: lot.id,
         locationId: entry.locationId,
@@ -1126,17 +1174,19 @@ export class InventoryBatchProcessor {
     }
 
     // Update inventory
-    this.inventories.upsert({
-      id: 0,
-      componentId: entry.componentId,
-      batchId: entry.batchId,
-      locationId: entry.locationId,
-      totalQuantity: getTotal(entry.quantity),
-      allocatedQuantity: getAllocated(entry.quantity),
-      freeQuantity: getFree(entry.quantity),
-      entryDate: entry.entryDate,
-      createdAt: new Date(),
-      lastModified: new Date(),
-    });
+    for (const [batchId, quantity] of batches.entries()) {
+      this.inventories.upsert({
+        id: 0,
+        componentId: entry.componentId,
+        batchId: batchId,
+        locationId: entry.locationId,
+        totalQuantity: getTotal(quantity),
+        allocatedQuantity: getAllocated(quantity),
+        freeQuantity: getFree(quantity),
+        entryDate: entry.entryDate,
+        createdAt: new Date(),
+        lastModified: new Date(),
+      });
+    }
   }
 }
