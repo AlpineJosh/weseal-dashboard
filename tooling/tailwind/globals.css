@@ -1,8 +1,48 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@import "./colors.css";
+@import "./colors.css" layer(utilities);
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-*: initial;
+  --color-transparent: hsla(0, 0%, 0%, 0);
+  --color-white: hsl(var(--white));
+  --color-ring: hsl(var(--ring));
+
+  --color-content: hsl(var(--content));
+  --color-content-muted: hsl(var(--content-muted));
+
+  --color-background: hsl(var(--background));
+  --color-background-muted: hsl(var(--background-muted));
+  --color-background-popover: hsl(var(--background-popover));
+
+  --color-icon: hsl(var(--icon));
+  --color-icon-muted: hsl(var(--icon-muted));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-border: hsl(var(--primary-border));
+  --color-primary-text: hsl(var(--primary-text));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-border: hsl(var(--destructive-border));
+  --color-destructive-text: hsl(var(--destructive-text));
+
+  --color-color: hsl(var(--color));
+  --color-color-border: hsl(var(--color-border));
+  --color-color-text: hsl(var(--color-text));
+
+  --radius-*: initial;
+  --radius-xl: var(--radius) + 2px;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-full: 9999px;
+
+  --outline-color: hsl(var(--ring));
+
+  --font-sans: var(--font-inter);
+}
 
 @layer base {
   :root {
