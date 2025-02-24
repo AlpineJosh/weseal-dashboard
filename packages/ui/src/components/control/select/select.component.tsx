@@ -12,8 +12,6 @@ import { Icon } from "@repo/ui/components/element";
 import { Popover } from "@repo/ui/components/utility";
 import { cn } from "@repo/ui/lib/class-merge";
 
-import type { ControlRenderProps } from "../../form/field/field.component";
-
 const variants = {
   root: cva(),
   button: cva([
@@ -21,15 +19,15 @@ const variants = {
     "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
     "dark:before:hidden",
     "focus:outline-none",
-    "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:data-[focus]:ring-2 after:data-[focus]:ring-ring",
-    "data-[disabled]:opacity-50 before:data-[disabled]:bg-content/5 before:data-[disabled]:shadow-none",
+    "after:data-[focus]:ring-ring after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-transparent after:ring-inset after:data-[focus]:ring-2",
+    "before:data-[disabled]:bg-content/5 data-[disabled]:opacity-50 before:data-[disabled]:shadow-none",
   ]),
   value: cva([
     "relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
     "min-h-11 sm:min-h-9",
-    "pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.7)-1px)] sm:pl-[calc(theme(spacing.3)-1px)]",
-    "text-left text-base/6 text-content data-[placeholder]:text-content-muted sm:text-sm/6 forced-colors:text-[CanvasText]",
-    "border border-content/10 group-data-[active]:border-content/20 group-data-[hovered]:border-content/20",
+    "pr-[calc(theme(spacing.7)-1px)] pl-[calc(theme(spacing[3.5])-1px)] sm:pl-[calc(theme(spacing.3)-1px)]",
+    "text-content data-[placeholder]:text-content-muted text-left text-base/6 sm:text-sm/6 forced-colors:text-[CanvasText]",
+    "border-content/10 group-data-[active]:border-content/20 group-data-[hovered]:border-content/20 border",
     "bg-transparent dark:bg-white/5",
     "group-data-[invalid]:border-red-500 group-data-[invalid]:group-data-[hovered]:border-red-500 group-data-[invalid]:dark:border-red-600 group-data-[invalid]:data-[hovered]:dark:border-red-600",
     "group-data-[disabled]:border-content/20 group-data-[disabled]:opacity-100 group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hovered]:group-data-[disabled]:border-white/15",
@@ -69,14 +67,14 @@ const Root = <T extends object>({
           <Icon
             icon={faAnglesUpDown}
             aria-hidden
-            className="size-3 stroke-content-muted group-data-[disabled]:stroke-content/20 sm:size-3"
+            className="stroke-content-muted group-data-[disabled]:stroke-content/20 size-3 sm:size-3"
           />
         </span>
       </Aria.Button>
       <Popover className="min-w-[--trigger-width]">
         <Listbox
           items={items}
-          className="max-h-[inherit] overflow-auto p-1 outline-none [clip-path:inset(0_0_0_0_round_.75rem)]"
+          className="max-h-[inherit] overflow-auto p-1 [clip-path:inset(0_0_0_0_round_.75rem)] outline-none"
         >
           {children}
         </Listbox>

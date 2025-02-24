@@ -1,10 +1,9 @@
-import { useCallback } from "react";
-import { useImmer } from "use-immer";
+import { useCallback, useMemo } from "react";
 
 interface UseControllableProps<T> {
   value?: T;
   onChange?: (value: T | undefined) => void;
-  defaultValue: T;
+  defaultValue?: T;
 }
 
 export function useControllable<T>(
@@ -16,10 +15,12 @@ export function useControllable<T>(
   ) => void,
 ] {
   const { value, onChange, defaultValue } = props;
-  const [uncontrolledValue, setUncontrolledValue] = useImmer(defaultValue);
 
   const isControlled = value !== undefined;
-  const currentValue = isControlled ? value : uncontrolledValue;
+  const currentValue = useMemo(
+    () => (isControlled ? value : defaultValue),
+    [isControlled, value, defaultValue],
+  );
 
   const setValue = useCallback(
     (next: T | undefined | ((prev: T | undefined) => T | undefined)) => {
@@ -28,12 +29,9 @@ export function useControllable<T>(
           ? (next as (prev: T | undefined) => T | undefined)(currentValue)
           : next;
 
-      if (!isControlled) {
-        setUncontrolledValue(nextValue ?? defaultValue);
-      }
       onChange?.(nextValue);
     },
-    [isControlled, onChange, currentValue, setUncontrolledValue, defaultValue],
+    [onChange, currentValue],
   );
 
   return [currentValue, setValue];

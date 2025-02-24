@@ -19,13 +19,10 @@ const variants = {
 export type TextInputProps = InputTypeProps<string>;
 
 export const TextInput = ({
-  name,
+  className,
   value,
   onChange,
-  onBlur,
   defaultValue = "",
-  disabled,
-  invalid,
   ...props
 }: TextInputProps) => {
   const [controlledValue, setControlledValue] = useControllable({
@@ -33,17 +30,14 @@ export const TextInput = ({
     onChange,
     defaultValue,
   });
+
   return (
-    <Input {...props}>
+    <Input className={className}>
       <input
-        name={name}
+        {...props}
         type="text"
         value={controlledValue}
         onChange={(event) => setControlledValue(event.target.value)}
-        onBlur={onBlur}
-        disabled={disabled}
-        data-disabled={disabled}
-        data-invalid={invalid}
         className={cn(variants.input())}
       />
     </Input>

@@ -23,5 +23,5 @@ export const Disabled: Story = {
 
 export const Invalid: Story = {
   ...Default,
-  args: { invalid: true },
+  args: { "data-invalid": true },
 };

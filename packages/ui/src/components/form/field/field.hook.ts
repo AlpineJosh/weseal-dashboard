@@ -12,7 +12,7 @@ export interface FieldIds {
 interface FieldContextValue<TValue> extends UseControllerReturn {
   ids: FieldIds;
   setIds: (fn: (draft: FieldIds) => void) => void;
-  field: UseControllerReturn["field"] & {
+  field: Omit<UseControllerReturn["field"], "value"> & {
     value: TValue | undefined;
   };
 }

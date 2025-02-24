@@ -13,7 +13,7 @@ export type ControlTypeProps<TValue> = Omit<
 >;
 
 export function Control<TValue>({ children, ...props }: ControlProps<TValue>) {
-  const inputProps = useControl();
+  const inputProps = useControl<TValue>();
 
   return children({ ...props, ...inputProps });
 }

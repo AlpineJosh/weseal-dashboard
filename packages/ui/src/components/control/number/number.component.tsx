@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { Decimal } from "decimal.js";
+import { useImmer } from "use-immer";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
@@ -13,40 +14,44 @@ import { useControllable } from "../../utility/hooks/useControllable.hook";
 
 const variants = {
   input: cva([
-    "relative block w-full appearance-none rounded-lg focus:outline-none",
+    "relative block w-full appearance-none text-right tabular-nums focus:outline-none",
   ]),
 };
 
-export type NumberInputProps = InputTypeProps<Decimal>;
+export type NumberInputProps = InputTypeProps<Decimal | null>;
 
 export const NumberInput = ({
-  name,
+  className,
   value,
   onChange,
-  onBlur,
-  defaultValue = new Decimal(0),
-  disabled,
-  invalid,
+  defaultValue = null,
   ...props
 }: NumberInputProps) => {
+  const [precision, setPrecision] = useImmer(defaultValue?.precision() ?? 1);
+
   const [controlledValue, setControlledValue] = useControllable({
     value,
     onChange,
     defaultValue,
   });
+
   return (
-    <Input {...props}>
+    <Input className={className}>
       <input
-        name={name}
+        {...props}
         type="number"
-        value={controlledValue?.toString()}
-        onChange={(event) =>
-          setControlledValue(new Decimal(event.target.value))
-        }
-        onBlur={onBlur}
-        disabled={disabled}
-        data-disabled={disabled}
-        data-invalid={invalid}
+        value={controlledValue?.toPrecision(precision)}
+        onChange={(event) => {
+          const value = event.target.value;
+          if (value === "" || !isFinite(Number(value))) {
+            setControlledValue(null);
+            setPrecision(1);
+          } else {
+            const inputPrecision = value.replace(".", "").length;
+            setPrecision(inputPrecision);
+            setControlledValue(new Decimal(value));
+          }
+        }}
         className={cn(variants.input())}
       />
     </Input>

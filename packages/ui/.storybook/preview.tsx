@@ -42,7 +42,7 @@ const preview: Preview = {
         inter.variable,
         inter.className,
         "text-content",
-        "bg-background",
+        "bg-page",
         "font-sans",
       ];
 

@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 
+import type { InputTypeProps } from "../input/input.component";
 import { useField } from "../field/field.hook";
 
-export const useControl = <T = unknown>(id?: string) => {
-  const { field, fieldState, ids, setIds } = useField<T>();
+export const useControl = <TValue>(id?: string): InputTypeProps<TValue> => {
+  const { field, fieldState, ids, setIds } = useField<TValue>();
 
   useEffect(() => {
     if (id && id !== ids.controlId) {
@@ -15,6 +16,17 @@ export const useControl = <T = unknown>(id?: string) => {
 
   return {
     id: ids.controlId,
+    name: field.name,
+    disabled: field.disabled,
+    value: field.value,
+    onChange: (value?: TValue) => {
+      field.onChange({
+        target: {
+          value,
+        },
+      });
+    },
+
     // Core ARIA attributes
     "aria-labelledby": ids.labelId,
     "aria-describedby": fieldState.error
@@ -23,7 +35,6 @@ export const useControl = <T = unknown>(id?: string) => {
     // State-based ARIA attributes
     "aria-invalid": fieldState.invalid,
     "aria-errormessage": fieldState.error ? ids.messageId : undefined,
-    invalid: fieldState.invalid,
-    ...field,
+    "data-invalid": fieldState.invalid,
   };
 };

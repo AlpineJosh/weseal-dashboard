@@ -13,15 +13,13 @@ export default meta;
 type Story = StoryObj<TextInputProps>;
 
 export const Default: Story = {
-  args: { className: "w-[200px]" },
+  args: { className: "w-[200px]", placeholder: "Enter text" },
 };
 
 export const Disabled: Story = {
-  ...Default,
-  args: { disabled: true },
+  args: { ...Default.args, disabled: true },
 };
 
 export const Invalid: Story = {
-  ...Default,
-  args: { invalid: true },
+  args: { ...Default.args, "data-invalid": true },
 };

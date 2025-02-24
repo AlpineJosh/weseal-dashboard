@@ -3,8 +3,8 @@ import { Children, isValidElement, useEffect, useMemo, useState } from "react";
 import { cva } from "class-variance-authority";
 import { useImmer } from "use-immer";
 
+import type { InputTypeProps } from "../../form/input";
 import type { OptionProps } from "../option";
-import type { ControlInputProps } from "../types";
 import { useControllable } from "../../utility/hooks/useControllable.hook";
 import { ListboxProvider } from "./listbox.context";
 
@@ -16,7 +16,7 @@ export interface OptionSelectProps<TValue, TOption> {
 }
 
 export type ListboxProps<TValue, TOption> = Omit<
-  ControlInputProps<TValue>,
+  InputTypeProps<TValue>,
   "children"
 > &
   OptionSelectProps<TValue, TOption>;
@@ -30,6 +30,7 @@ export const Listbox = <TValue, TOption>({
   onChange,
 }: ListboxProps<TValue, TOption>) => {
   const [values, setValues] = useImmer<TValue[]>([]);
+
   const [selectedValue, setSelectedValue] = useControllable({
     value,
     onChange,
@@ -50,12 +51,10 @@ export const Listbox = <TValue, TOption>({
   };
 
   const renderedChildren = useMemo(() => {
-    return (
-      typeof children === "function" && options
-        ? options.map((option) => children(option))
-        : children
-    ) as ReactElement<OptionProps<TValue>>[];
-  }, [children, options, selectedValue, highlightedValue]);
+    return typeof children === "function"
+      ? options.map((option) => children(option))
+      : children;
+  }, [children, options]);
 
   useEffect(() => {
     const renderedValues = Children.map(renderedChildren, (child) => {
