@@ -18,7 +18,7 @@ export default function HistoryPage({
 
   return (
     <DatatableQueryProvider
-      endpoint={api.inventory.movements.list}
+      endpoint={api.inventory.list}
       defaultInput={{
         filter: {
           componentId: { eq: id },

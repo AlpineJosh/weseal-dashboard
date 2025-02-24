@@ -43,17 +43,19 @@ export default function ComponentLayout({
         <TabBar.Tab href={`/components/${component.encodeURLId(id)}/stock`}>
           Stock
         </TabBar.Tab>
-        <TabBar.Tab href={`/components/${component.encodeURLId(id)}/batches`}>
-          Batches
-        </TabBar.Tab>
+        {data?.isBatchTracked && (
+          <TabBar.Tab href={`/components/${component.encodeURLId(id)}/batches`}>
+            Batches
+          </TabBar.Tab>
+        )}
         <TabBar.Tab
           href={`/components/${component.encodeURLId(id)}/subcomponents`}
         >
           Subcomponents
         </TabBar.Tab>
-        <TabBar.Tab href={`/components/${component.encodeURLId(id)}/history`}>
+        {/* <TabBar.Tab href={`/components/${component.encodeURLId(id)}/history`}>
           History
-        </TabBar.Tab>
+        </TabBar.Tab> */}
       </TabBar>
       <div>{children}</div>
     </div>

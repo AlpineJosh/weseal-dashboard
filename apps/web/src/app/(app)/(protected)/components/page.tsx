@@ -17,7 +17,7 @@ export default function ComponentsPage() {
         endpoint={api.component.list}
         defaultInput={{
           filter: {
-            sageDiscrepancy: { neq: 0 },
+            isStockTracked: { eq: true },
           },
         }}
       >

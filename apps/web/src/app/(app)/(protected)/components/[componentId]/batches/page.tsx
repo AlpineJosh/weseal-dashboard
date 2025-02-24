@@ -16,7 +16,7 @@ export default function BatchesPage({
 
   return (
     <DatatableQueryProvider
-      endpoint={api.inventory.batches.list}
+      endpoint={api.batch.list}
       defaultInput={{
         filter: {
           componentId: { eq: id },
@@ -42,7 +42,7 @@ export default function BatchesPage({
                 </Datatable.Cell>
                 <Datatable.DecimalCell
                   id="totalQuantity"
-                  value={data.totalQuantity ?? 0}
+                  value={data.totalQuantity}
                   unit={data.componentUnit}
                 />
               </Datatable.Row>
