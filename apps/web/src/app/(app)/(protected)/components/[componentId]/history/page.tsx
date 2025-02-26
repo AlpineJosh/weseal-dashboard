@@ -18,7 +18,7 @@ export default function HistoryPage({
 
   return (
     <DatatableQueryProvider
-      endpoint={api.inventory.list}
+      endpoint={api.inventory.ledger.list}
       defaultInput={{
         filter: {
           componentId: { eq: id },
@@ -60,12 +60,12 @@ export default function HistoryPage({
                   includeTime
                 />
                 <Datatable.Cell id="type">
-                  <Badge color={movementType[data.type].color}>
-                    {movementType[data.type].label}
+                  <Badge color={movementType[data.type]?.color}>
+                    {movementType[data.type]?.label}
                   </Badge>
                 </Datatable.Cell>
                 <Datatable.Cell id="batchReference">
-                  {batch.getDisplayId(data.batchReference, data.batchEntryDate)}
+                  #{data.batchReference}
                 </Datatable.Cell>
                 <Datatable.Cell id="locationName">
                   {data.locationName}

@@ -1,6 +1,5 @@
 "use client";
 
-import { batch } from "@/models/batch";
 import { component } from "@/models/component";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
@@ -38,7 +37,7 @@ export default function BatchesPage({
             {({ data }) => (
               <Datatable.Row key={`${data.id}`}>
                 <Datatable.Cell id="batchReference">
-                  {batch.getDisplayId(data.batchReference, data.entryDate)}
+                  #{data.batchReference}
                 </Datatable.Cell>
                 <Datatable.DecimalCell
                   id="totalQuantity"

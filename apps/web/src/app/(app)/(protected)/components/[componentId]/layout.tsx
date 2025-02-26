@@ -53,9 +53,9 @@ export default function ComponentLayout({
         >
           Subcomponents
         </TabBar.Tab>
-        {/* <TabBar.Tab href={`/components/${component.encodeURLId(id)}/history`}>
+        <TabBar.Tab href={`/components/${component.encodeURLId(id)}/history`}>
           History
-        </TabBar.Tab> */}
+        </TabBar.Tab>
       </TabBar>
       <div>{children}</div>
     </div>

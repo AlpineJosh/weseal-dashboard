@@ -153,7 +153,7 @@ export default function DashboardPage() {
         defaultInput={{
           filter: {
             sageDiscrepancy: { neq: 0 },
-            isTracked: { eq: true },
+            isStockTracked: { eq: true },
           },
         }}
       >

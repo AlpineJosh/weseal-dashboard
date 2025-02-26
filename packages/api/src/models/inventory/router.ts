@@ -2,6 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { publicProcedure } from "../../trpc";
+import { ledgerRouter } from "./ledger";
 import overview from "./model";
 import { resetInventory } from "./reset/model";
 
@@ -24,6 +25,7 @@ export const inventoryRouter = {
   list: publicProcedure.input(overview.$schema).query(async ({ input }) => {
     return overview.findMany(input);
   }),
+  ledger: ledgerRouter,
   reset: publicProcedure.mutation(async () => {
     return resetInventory();
   }),

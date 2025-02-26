@@ -1,6 +1,5 @@
 "use client";
 
-import { batch } from "@/models/batch";
 import { component } from "@/models/component";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
@@ -27,28 +26,50 @@ export default function StockPage({
       {(props) => (
         <Datatable {...props}>
           <Datatable.Head>
-            <Datatable.Column id="batchReference" isSortable>
-              Batch
-            </Datatable.Column>
             <Datatable.Column id="locationName" isSortable>
               Location
             </Datatable.Column>
+            <Datatable.Column id="batchReference" isSortable>
+              Batch
+            </Datatable.Column>
+            <Datatable.Column id="entryDate" isSortable>
+              Entry Date
+            </Datatable.Column>
+            <Datatable.Column id="age">Age</Datatable.Column>
             <Datatable.Column id="totalQuantity" isSortable>
-              Quantity
+              Total Quantity
+            </Datatable.Column>
+            <Datatable.Column id="allocatedQuantity" isSortable>
+              Allocated Quantity
             </Datatable.Column>
           </Datatable.Head>
           <Datatable.Body data={props.data}>
             {({ data }) => (
               <Datatable.Row key={`${data.batchId}-${data.locationId}`}>
-                <Datatable.Cell id="batchReference">
-                  {batch.getDisplayId(data.batchReference, data.entryDate)}
-                </Datatable.Cell>
                 <Datatable.Cell id="locationName">
                   {data.locationName}
+                </Datatable.Cell>
+                <Datatable.Cell id="batchReference">
+                  {data.batchReference}
+                </Datatable.Cell>
+                <Datatable.Cell id="entryDate">
+                  {data.entryDate.toLocaleDateString()}
+                </Datatable.Cell>
+                <Datatable.Cell id="age">
+                  {Math.floor(
+                    (new Date().getTime() - data.entryDate.getTime()) /
+                      (1000 * 60 * 60 * 24),
+                  )}{" "}
+                  days
                 </Datatable.Cell>
                 <Datatable.DecimalCell
                   id="totalQuantity"
                   value={data.totalQuantity}
+                  unit={data.componentUnit}
+                />
+                <Datatable.DecimalCell
+                  id="allocatedQuantity"
+                  value={data.allocatedQuantity}
                   unit={data.componentUnit}
                 />
               </Datatable.Row>

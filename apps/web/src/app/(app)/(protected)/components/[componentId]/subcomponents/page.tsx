@@ -1,6 +1,7 @@
 "use client";
 
 import { component } from "@/models/component";
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
@@ -13,38 +14,51 @@ export default function SubcomponentsPage({
 }) {
   const id = component.decodeURLId(params.componentId);
 
-  const { data: subcomponents } = api.component.subcomponents.useQuery({
-    componentId: id,
-  });
-
   return (
-    <Datatable>
-      <Datatable.Head>
-        <Datatable.Column id="subcomponentId">Component</Datatable.Column>
-        <Datatable.Column id="description">Description</Datatable.Column>
-        <Datatable.Column id="total">Quantity</Datatable.Column>
-      </Datatable.Head>
-      <Datatable.Body data={subcomponents}>
-        {({ data }) => (
-          <Datatable.Row key={data.id}>
-            <Datatable.Cell id="subcomponentId">
-              <TextLink
-                href={`/components/${component.encodeURLId(data.subcomponentId)}`}
-              >
-                {data.subcomponentId}
-              </TextLink>
-            </Datatable.Cell>
-            <Datatable.Cell id="description">
-              {data.subcomponent.description}
-            </Datatable.Cell>
-            <Datatable.DecimalCell
-              id="total"
-              value={data.quantity}
-              unit={data.subcomponent.unit}
-            />
-          </Datatable.Row>
-        )}
-      </Datatable.Body>
-    </Datatable>
+    <DatatableQueryProvider
+      endpoint={api.component.subcomponent.list}
+      defaultInput={{
+        filter: {
+          componentId: { eq: id },
+        },
+      }}
+    >
+      {(props) => (
+        <Datatable {...props}>
+          <Datatable.Head>
+            <Datatable.Column id="subcomponentId" isSortable>
+              Component
+            </Datatable.Column>
+            <Datatable.Column id="description" isSortable>
+              Description
+            </Datatable.Column>
+            <Datatable.Column id="quantityRequired" isSortable>
+              Quantity
+            </Datatable.Column>
+          </Datatable.Head>
+          <Datatable.Body data={props.data}>
+            {({ data }) => (
+              <Datatable.Row key={data.id}>
+                <Datatable.Cell id="subcomponentId">
+                  <TextLink
+                    href={`/components/${component.encodeURLId(data.subcomponentId)}`}
+                  >
+                    {data.subcomponentId}
+                  </TextLink>
+                </Datatable.Cell>
+                <Datatable.Cell id="description">
+                  {data.description}
+                </Datatable.Cell>
+                <Datatable.DecimalCell
+                  id="quantityRequired"
+                  value={data.quantityRequired}
+                  unit={data.unit}
+                />
+              </Datatable.Row>
+            )}
+          </Datatable.Body>
+        </Datatable>
+      )}
+    </DatatableQueryProvider>
   );
 }

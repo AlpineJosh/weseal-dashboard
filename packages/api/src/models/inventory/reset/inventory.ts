@@ -3,7 +3,7 @@ import Decimal from "decimal.js";
 import type { Schema } from "@repo/db";
 import { schema, sql } from "@repo/db";
 
-import { db } from "../../../db";
+import { serverDb as db } from "../../../db";
 
 interface InventoryReference {
   componentId: string;

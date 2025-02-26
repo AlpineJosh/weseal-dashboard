@@ -1,4 +1,4 @@
-import { eq, isNotNull, min, not, publicSchema, sum } from "@repo/db";
+import { eq, isNotNull, min, publicSchema, sum } from "@repo/db";
 
 import { db } from "../../db";
 import { datatable } from "../../lib/datatables";
@@ -23,7 +23,7 @@ const quantities = db
       .as("free_quantity"),
   })
   .from(inventory)
-  .where(not(isNotNull(inventory.batchId)))
+  .where(isNotNull(inventory.batchId))
   .groupBy(inventory.batchId)
   .as("quantities");
 

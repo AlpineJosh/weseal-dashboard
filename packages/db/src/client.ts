@@ -13,7 +13,7 @@ export function createServerlessClient(
   connectionString: string,
 ): ServerlessClient {
   const pool = new Pool({ connectionString });
-  return drizzleServerless(pool, { schema: schema, logger: false });
+  return drizzleServerless(pool, { schema: schema, logger: true });
 }
 
 export type ServerClient = PostgresJsDatabase<Schema>;
