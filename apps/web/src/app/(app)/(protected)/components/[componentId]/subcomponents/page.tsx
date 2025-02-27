@@ -33,7 +33,13 @@ export default function SubcomponentsPage({
               Description
             </Datatable.Column>
             <Datatable.Column id="quantityRequired" isSortable>
-              Quantity
+              Quantity Required
+            </Datatable.Column>
+            <Datatable.Column id="freeQuantity" isSortable>
+              Free Quantity
+            </Datatable.Column>
+            <Datatable.Column id="buildCapacity">
+              Build Capacity
             </Datatable.Column>
           </Datatable.Head>
           <Datatable.Body data={props.data}>
@@ -53,6 +59,17 @@ export default function SubcomponentsPage({
                   id="quantityRequired"
                   value={data.quantityRequired}
                   unit={data.unit}
+                />
+                <Datatable.DecimalCell
+                  id="freeQuantity"
+                  value={data.freeQuantity}
+                  unit={data.unit}
+                />
+                <Datatable.DecimalCell
+                  id="buildCapacity"
+                  value={data.freeQuantity.div(data.quantityRequired).floor()}
+                  unit={"Units"}
+                  precision={0}
                 />
               </Datatable.Row>
             )}

@@ -73,7 +73,7 @@ export default datatable(
     id: "number",
     supplierId: "string",
     supplierName: "string",
-    orderDate: "string",
+    orderDate: "date",
     isQuote: "boolean",
     isCancelled: "boolean",
     isComplete: "boolean",

@@ -1,6 +1,7 @@
 import type { ColorVariants } from "@repo/ui/lib/colors";
+import { Badge } from "@repo/ui/components/element";
 
-interface MovementType {
+interface LedgerDetail {
   type:
     | "production"
     | "despatch"
@@ -14,7 +15,7 @@ interface MovementType {
   color: ColorVariants;
 }
 
-export const movementType: Record<MovementType["type"], MovementType> = {
+export const LedgerDetails: Record<LedgerDetail["type"], LedgerDetail> = {
   receipt: {
     type: "receipt",
     label: "Receipt",
@@ -54,5 +55,17 @@ export const movementType: Record<MovementType["type"], MovementType> = {
     type: "found",
     label: "Found",
     color: "emerald",
+  },
+};
+
+export const Ledger = {
+  Badge: ({ type }: { type: string }) => {
+    let badge = <Badge color="default">{type}</Badge>;
+
+    if (type in LedgerDetails) {
+      const entry = LedgerDetails[type as LedgerDetail["type"]];
+      badge = <Badge color={entry.color}>{entry.label}</Badge>;
+    }
+    return badge;
   },
 };

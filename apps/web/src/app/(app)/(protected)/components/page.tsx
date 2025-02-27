@@ -24,7 +24,9 @@ export default function ComponentsPage() {
         {(props) => (
           <Datatable {...props}>
             <Datatable.Head>
-              <Datatable.Column id="id">ID</Datatable.Column>
+              <Datatable.Column id="id" isSortable>
+                Stock Code
+              </Datatable.Column>
               <Datatable.Column id="description" isSortable>
                 Description
               </Datatable.Column>

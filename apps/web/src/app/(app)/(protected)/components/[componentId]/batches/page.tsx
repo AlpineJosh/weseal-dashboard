@@ -32,6 +32,9 @@ export default function BatchesPage({
             <Datatable.Column id="totalQuantity" isSortable>
               Quantity
             </Datatable.Column>
+            <Datatable.Column id="allocatedQuantity" isSortable>
+              Allocated
+            </Datatable.Column>
           </Datatable.Head>
           <Datatable.Body data={props.data}>
             {({ data }) => (
@@ -42,6 +45,11 @@ export default function BatchesPage({
                 <Datatable.DecimalCell
                   id="totalQuantity"
                   value={data.totalQuantity}
+                  unit={data.componentUnit}
+                />
+                <Datatable.DecimalCell
+                  id="allocatedQuantity"
+                  value={data.allocatedQuantity}
                   unit={data.componentUnit}
                 />
               </Datatable.Row>

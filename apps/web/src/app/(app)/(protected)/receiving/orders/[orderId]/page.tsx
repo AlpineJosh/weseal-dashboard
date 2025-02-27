@@ -30,6 +30,7 @@ export default function ReceivingPage({
           <Datatable {...props}>
             <Datatable.Head>
               <Datatable.Column id="componentId">Component</Datatable.Column>
+              <Datatable.Column id="description">Description</Datatable.Column>
               <Datatable.Column id="quantityOrdered">Ordered</Datatable.Column>
               <Datatable.Column id="quantityReceived">
                 Received
@@ -48,17 +49,23 @@ export default function ReceivingPage({
                       {item.componentId}
                     </TextLink>
                   </Datatable.Cell>
+                  <Datatable.Cell id="description">
+                    {item.componentDescription}
+                  </Datatable.Cell>
                   <Datatable.DecimalCell
                     id="quantityOrdered"
                     value={item.quantityOrdered}
+                    unit={item.componentUnit}
                   />
                   <Datatable.DecimalCell
                     id="quantityReceived"
                     value={item.quantityReceived}
+                    unit={item.componentUnit}
                   />
                   <Datatable.DecimalCell
                     id="sageQuantityReceived"
                     value={item.sageQuantityReceived}
+                    unit={item.componentUnit}
                   />
                 </Datatable.Row>
               )}

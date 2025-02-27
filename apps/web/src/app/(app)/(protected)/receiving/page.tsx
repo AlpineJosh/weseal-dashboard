@@ -24,12 +24,10 @@ export default function ReceivingPage() {
               <Datatable.Column id="id" isSortable>
                 Order Number
               </Datatable.Column>
-              <Datatable.Column id="supplier" isSortable>
+              <Datatable.Column id="supplierName" isSortable>
                 Supplier
               </Datatable.Column>
-              <Datatable.Column id="status" isSortable>
-                Status
-              </Datatable.Column>
+              <Datatable.Column id="status">Status</Datatable.Column>
               <Datatable.Column id="orderDate" isSortable>
                 Order Date
               </Datatable.Column>
@@ -45,10 +43,10 @@ export default function ReceivingPage() {
                 <Datatable.Row key={data.id}>
                   <Datatable.Cell id="id">
                     <TextLink href={`/receiving/orders/${data.id}`}>
-                      {data.id}
+                      #{data.id}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="supplier">
+                  <Datatable.Cell id="supplierName">
                     <TextLink href={`/suppliers/${data.supplierId}`}>
                       {data.supplierName}
                     </TextLink>
@@ -62,9 +60,10 @@ export default function ReceivingPage() {
                           : "Pending"}
                     </Badge>
                   </Datatable.Cell>
-                  <Datatable.Cell id="orderDate">
-                    {data.orderDate.toLocaleDateString()}
-                  </Datatable.Cell>
+                  <Datatable.DateTimeCell
+                    id="orderDate"
+                    value={data.orderDate}
+                  />
                   <Datatable.Cell id="totalItems">
                     {data.totalItems}
                   </Datatable.Cell>

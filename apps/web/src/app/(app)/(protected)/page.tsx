@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 <Datatable.Row key={data.id}>
                   <Datatable.Cell id="id">
                     <TextLink
-                      href={`/inventory/components/${encodeURIComponent(data.id)}`}
+                      href={`/components/${encodeURIComponent(data.id)}`}
                     >
                       {data.id}
                     </TextLink>

@@ -28,13 +28,13 @@ export default function InventoryOverview() {
         {(props) => (
           <Datatable className="grow overflow-hidden" {...props}>
             <Datatable.Head>
-              <Datatable.Column id="component" isSortable>
+              <Datatable.Column id="componentId" isSortable>
                 Stock Code
               </Datatable.Column>
               <Datatable.Column id="description" isSortable>
                 Description
               </Datatable.Column>
-              <Datatable.Column id="location" isSortable>
+              <Datatable.Column id="locationName" isSortable>
                 Location
               </Datatable.Column>
               <Datatable.Column id="totalQuantity" isSortable>
@@ -49,7 +49,7 @@ export default function InventoryOverview() {
                 <Datatable.Row
                   key={`${data.componentId}-${data.batchId}-${data.locationId}`}
                 >
-                  <Datatable.Cell id="component">
+                  <Datatable.Cell id="componentId">
                     <TextLink href={`/components/${data.componentId}`}>
                       {data.componentId}
                     </TextLink>
@@ -57,7 +57,7 @@ export default function InventoryOverview() {
                   <Datatable.Cell id="description">
                     {data.componentDescription}
                   </Datatable.Cell>
-                  <Datatable.Cell id="location">
+                  <Datatable.Cell id="locationName">
                     <TextLink href={`/inventory/locations/${data.locationId}`}>
                       {data.locationName}
                     </TextLink>

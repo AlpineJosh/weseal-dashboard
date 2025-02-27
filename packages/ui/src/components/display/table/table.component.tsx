@@ -41,15 +41,15 @@ const variants = {
     },
   }),
   head: cva([
-    "sticky top-0 hidden h-[var(--row-height)] bg-background/80 backdrop-blur-sm",
+    "bg-background/80 sticky top-0 hidden h-[var(--row-height)] backdrop-blur-sm",
     "lg:col-span-full lg:grid lg:grid-cols-subgrid lg:items-stretch lg:justify-stretch",
   ]),
   column: cva(
-    "flex flex-row items-center border-content/5 px-2 font-light text-content-muted lg:border-b lg:px-4",
+    "border-content/5 text-content-muted flex flex-row items-center px-2 font-light lg:border-b lg:px-4",
     {
       variants: {
         sortable: {
-          true: "appearance-none justify-between text-left outline-none hover:bg-content/5",
+          true: "hover:bg-content/5 appearance-none justify-between text-left outline-none",
         },
       },
     },
@@ -65,7 +65,7 @@ const variants = {
     },
   ),
   row: cva(
-    "grid grid-cols-[auto_1fr] border-b border-content/5 lg:col-span-full lg:grid-cols-subgrid lg:items-center",
+    "border-content/5 grid grid-cols-[auto_1fr] border-b lg:col-span-full lg:grid-cols-subgrid lg:items-center",
   ),
   cell: cva("truncate px-2 py-1 lg:px-4", {
     variants: {
@@ -235,7 +235,9 @@ const Root = ({
   const columnSizes = useMemo(() => {
     const sizes: string[] = [];
 
-    columns.forEach(({ width }) => {
+    columns.forEach(({ width, hidden }) => {
+      if (hidden) return;
+
       if (!width) {
         sizes.push("minmax(50px, 1fr)");
       } else if (typeof width === "string") {
@@ -352,6 +354,10 @@ const Column: React.FC<ColumnProps> = ({
 
   const { sort } = useColumn(column);
 
+  if (hidden) {
+    return null;
+  }
+
   return isSortable ? (
     <Aria.Button
       className={cn(
@@ -413,7 +419,7 @@ const Body = <TData,>({
           <Row key={rowIndex}>
             {columns.map((column) => (
               <Cell key={column.id} id={column.id}>
-                <div className="h-4 w-full animate-pulse rounded-sm bg-content/5" />
+                <div className="bg-content/5 h-4 w-full animate-pulse rounded-sm" />
               </Cell>
             ))}
           </Row>
@@ -421,7 +427,7 @@ const Body = <TData,>({
       ) : (data?.length ?? 0) > 0 ? (
         data?.map((value) => children({ data: value, isSelected: false }))
       ) : (
-        <div className="col-span-full row-span-3 flex flex-col items-center justify-center text-center text-content-muted">
+        <div className="text-content-muted col-span-full row-span-3 flex flex-col items-center justify-center text-center">
           {emptyMessage}
         </div>
       )}
@@ -463,7 +469,7 @@ const Cell: React.FC<CellProps> = ({
 }: CellProps) => {
   const { column } = useCell(id);
 
-  if (!column) {
+  if (!column || column.hidden) {
     return null;
   }
 

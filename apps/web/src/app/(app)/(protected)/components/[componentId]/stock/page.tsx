@@ -5,6 +5,7 @@ import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
+import { TextLink } from "@repo/ui/components/typography";
 
 export default function StockPage({
   params,
@@ -47,10 +48,14 @@ export default function StockPage({
             {({ data }) => (
               <Datatable.Row key={`${data.batchId}-${data.locationId}`}>
                 <Datatable.Cell id="locationName">
-                  {data.locationName}
+                  <TextLink href={`/inventory/locations/${data.locationId}`}>
+                    {data.locationName}
+                  </TextLink>
                 </Datatable.Cell>
                 <Datatable.Cell id="batchReference">
-                  {data.batchReference}
+                  <TextLink href={`/inventory/batches/${data.batchId}`}>
+                    #{data.batchReference}
+                  </TextLink>
                 </Datatable.Cell>
                 <Datatable.Cell id="entryDate">
                   {data.entryDate.toLocaleDateString()}

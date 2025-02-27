@@ -1,13 +1,11 @@
 "use client";
 
-import { batch } from "@/models/batch";
 import { component } from "@/models/component";
-import { movementType } from "@/models/movement";
+import { Ledger } from "@/models/ledger";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
 import { Datatable } from "@repo/ui/components/display";
-import { Badge } from "@repo/ui/components/element";
 
 export default function HistoryPage({
   params,
@@ -15,6 +13,8 @@ export default function HistoryPage({
   params: { componentId: string };
 }) {
   const id = component.decodeURLId(params.componentId);
+
+  const { data: componentDetails } = api.component.get.useQuery({ id });
 
   return (
     <DatatableQueryProvider
@@ -40,7 +40,11 @@ export default function HistoryPage({
             <Datatable.Column id="type" isSortable>
               Type
             </Datatable.Column>
-            <Datatable.Column id="batchReference" isSortable>
+            <Datatable.Column
+              id="batchReference"
+              isSortable
+              hidden={!componentDetails?.isBatchTracked}
+            >
               Batch
             </Datatable.Column>
 
@@ -60,9 +64,7 @@ export default function HistoryPage({
                   includeTime
                 />
                 <Datatable.Cell id="type">
-                  <Badge color={movementType[data.type]?.color}>
-                    {movementType[data.type]?.label}
-                  </Badge>
+                  <Ledger.Badge type={data.type} />
                 </Datatable.Cell>
                 <Datatable.Cell id="batchReference">
                   #{data.batchReference}
