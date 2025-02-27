@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 
 import { faQuestionCircle } from "@repo/pro-solid-svg-icons";
 import { Button } from "@repo/ui/components/element";
 
 import type { PopoverProps } from "./popover.component";
 import { Icon } from "../../element/icon";
-import { Dialog } from "../dialog";
+import { Sheet } from "../sheet/sheet.component";
+import { Trigger } from "../trigger";
 import { Popover } from "./popover.component";
 
 const meta: Meta<PopoverProps> = {
-  title: "Utility/Popover",
+  title: "Overlay/Popover",
   component: Popover,
 };
 
@@ -20,18 +20,19 @@ type Story = StoryObj<PopoverProps>;
 
 export const Default: Story = {
   render: (args) => (
-    <Dialog.Trigger>
-      <Button variant="outline" aria-label="Help">
-        <Icon icon={faQuestionCircle} />
-      </Button>
-      <Popover {...args} className="max-w-[250px]">
-        <Dialog.Content>
-          <p className="text-sm">
-            For help accessing your account, please contact support.
-          </p>
-        </Dialog.Content>
-      </Popover>
-    </Dialog.Trigger>
+    <Popover placement="top" strategy="fixed">
+      <Trigger>
+        <Button variant="outline" aria-label="Help">
+          <Icon icon={faQuestionCircle} />
+        </Button>
+      </Trigger>
+      <Sheet {...args} className="min-w-[250px]">
+        <p className="text-sm">
+          For help accessing your account, please contact support.
+        </p>
+      </Sheet>
+    </Popover>
   ),
+
   args: {},
 };

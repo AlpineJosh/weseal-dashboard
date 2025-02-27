@@ -1,9 +1,10 @@
 "use client";
 
 import type { VariantProps } from "class-variance-authority";
-import React from "react";
+import type { ComponentPropsWithRef } from "react";
+import type * as Aria from "react-aria-components";
+import React, { forwardRef } from "react";
 import { cva } from "class-variance-authority";
-import * as Aria from "react-aria-components";
 
 import type { LinkProps } from "../link";
 import { cn } from "../../../lib/class-merge";
@@ -28,11 +29,11 @@ const variants = cva(
       variant: {
         solid: [
           // Optical border, implemented as the button background to avoid corner artifacts
-          "border-transparent bg-color-border text-background",
+          "bg-color-border text-background border-transparent",
           // Dark mode: border is rendered on `after` so background is set to button background
           "dark:bg-color",
           // Button background, implemented as foreground layer to stack on top of pseudo-border layer
-          "before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-color",
+          "before:bg-color before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)]",
           // Drop shadow, applied to the inset `before` layer so it blends with the border
           "before:shadow",
           // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
@@ -60,7 +61,7 @@ const variants = cva(
         ],
         plain: [
           // Base
-          "border-transparent text-color-text data-[active]:bg-color/5 data-[hovered]:bg-color/5",
+          "text-color-text data-[active]:bg-color/5 data-[hovered]:bg-color/5 border-transparent",
           // Dark mode
           "dark:text-white dark:data-[active]:bg-white/10 dark:data-[hovered]:bg-white/10",
           // Icon
@@ -68,11 +69,11 @@ const variants = cva(
         ],
         input: [
           // Optical border, implemented as the button background to avoid corner artifacts
-          "border-transparent bg-background-muted font-normal text-content-muted",
+          "bg-background-muted text-content-muted border-transparent font-normal",
           // Dark mode: border is rendered on `after` so background is set to button background
           "dark:bg-color",
           // Button background, implemented as foreground layer to stack on top of pseudo-border layer
-          "before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-background",
+          "before:bg-background before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)]",
           // Drop shadow, applied to the inset `before` layer so it blends with the border
           "before:shadow",
           // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
@@ -90,7 +91,7 @@ const variants = cva(
           // Disabled
           "before:data-[disabled]:shadow-none after:data-[disabled]:shadow-none",
           "[&>[data-slot=icon]]:text-[--btn-icon]",
-          "border border-content/5 data-[hovered]:border-content/10",
+          "border-content/5 data-[hovered]:border-content/10 border",
         ],
       },
       color: colorVariants,
@@ -135,27 +136,26 @@ const variants = cva(
 //   },
 // );
 
-type ButtonProps = VariantProps<typeof variants> &
+type ButtonProps = ComponentPropsWithRef<"button"> &
+  VariantProps<typeof variants> &
   (Aria.ButtonProps | LinkProps);
 
-const Button = ({
-  variant,
-  color,
-  className,
-  ...props
-}: ButtonProps): React.ReactElement => {
-  return "href" in props && props.href ? (
-    <Link
-      className={cn(variants({ variant, color }), className)}
-      {...(props as LinkProps)}
-    />
-  ) : (
-    <Aria.Button
-      className={cn(variants({ variant, color }), className)}
-      {...(props as Aria.ButtonProps)}
-    />
-  );
-};
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant, color, className, ...props }, ref) => {
+    return "href" in props && props.href ? (
+      <Link
+        className={cn(variants({ variant, color }), className)}
+        {...(props as LinkProps)}
+      />
+    ) : (
+      <button
+        ref={ref}
+        className={cn(variants({ variant, color }), className)}
+        {...(props as Aria.ButtonProps)}
+      />
+    );
+  },
+);
 
 export { Button };
 export type { ButtonProps };

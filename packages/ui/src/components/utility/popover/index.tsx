@@ -1,2 +1,2 @@
-export type { PopoverProps } from "./popover.component";
-export { Popover } from "./popover.component";
+export type { PopoverProps } from "../../../../../../scratch/popover.component";
+export { Popover } from "../../../../../../scratch/popover.component";

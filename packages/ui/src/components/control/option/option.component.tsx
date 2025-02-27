@@ -22,7 +22,7 @@ export const variants = cva([
   "disabled:opacity-50",
 
   "highlighted:bg-primary-strong highlighted:text-inverse",
-  "selected:bg-primary-strong selected:text-inverse",
+  // "selected:bg-primary-strong selected:text-inverse",
 ]);
 
 export const Option = <TValue,>({

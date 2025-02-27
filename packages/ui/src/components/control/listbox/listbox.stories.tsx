@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import type { ListboxProps } from "./listbox.new";
+import type { ListboxProps } from "./listbox.component";
 import { Option } from "../option/option.component";
-import { Listbox } from "./listbox.new";
+import { Listbox } from "./listbox.component";
 
 const meta: Meta<ListboxProps<string, { id: string; name: string }>> = {
   title: "Control/Listbox",

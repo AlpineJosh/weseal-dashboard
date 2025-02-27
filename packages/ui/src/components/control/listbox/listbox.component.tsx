@@ -1,137 +1,135 @@
-import type { FieldValues } from "react-hook-form";
+import type { ReactElement } from "react";
+import { Children, isValidElement, useEffect, useMemo, useState } from "react";
 import { cva } from "class-variance-authority";
-import * as Aria from "react-aria-components";
+import { useImmer } from "use-immer";
 
-import { faCheck } from "@repo/pro-light-svg-icons";
-import { Icon } from "@repo/ui/components/element";
-import { cn } from "@repo/ui/lib/class-merge";
+import type { InputTypeProps } from "../../form/input";
+import type { OptionProps } from "../option";
+// import { withControl } from "../../form/control/control.component";
+// import { withField } from "../../form/field/with-field.hoc";
+import { useControllable } from "../../utility/hooks/useControllable.hook";
+import { ListboxProvider } from "./listbox.context";
 
-import { renderChildren } from "../../../lib/helpers";
+const variants = cva(["bg-white shadow-md", "focus-within:bg-secondary"]);
 
-const variants = {
-  root: cva("space-y-0.5 p-1 outline-0"),
-  option: cva(
-    [
-      // Basic layout
-      "group/option grid cursor-default grid-cols-[theme(spacing.5),1fr] items-baseline gap-x-2 rounded-lg py-2.5 pl-2 pr-3.5 sm:grid-cols-[theme(spacing.4),1fr] sm:py-1.5 sm:pl-1.5 sm:pr-3",
-      // Typography
-      "text-base/6 text-content sm:text-sm/6",
-      // Focus
-      "outline-none data-[hovered]:bg-ring data-[hovered]:text-background",
-      // Disabled
-      "data-[disabled]:opacity-50",
-    ],
-    {
-      variants: {
-        isDisabled: {
-          true: "",
-        },
-        isSelected: {
-          true: "",
-        },
-        defaultVariants: {
-          isDisabled: false,
-          isSelected: false,
-        },
-      },
-    },
-  ),
-  icon: cva(
-    ["pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"],
-    {
-      variants: {
-        isSelected: {
-          true: "",
-          false: "hidden",
-        },
-      },
-      defaultVariants: {
-        isSelected: false,
-      },
-    },
-  ),
-  section: cva(),
+export type ListboxProps<TValue, TOption> = Omit<
+  InputTypeProps<TValue>,
+  "children"
+> & {
+  options: TOption[];
+  children:
+    | ReactElement<OptionProps<TValue>>[]
+    | ((option: TOption) => ReactElement<OptionProps<TValue>>);
 };
 
-type ListboxProps<T extends FieldValues> = Aria.ListBoxProps<T>;
-
-const Root = <T extends FieldValues>({
-  layout = "stack",
-  orientation = "vertical",
-  className,
+export const Listbox = <TValue, TOption>({
   children,
-  ...props
-}: ListboxProps<T>) => {
-  return (
-    <Aria.ListBox
-      layout={layout}
-      orientation={orientation}
-      className={cn(variants.root(), className)}
-      {...props}
-    >
-      {children}
-    </Aria.ListBox>
+  className,
+  options,
+  value,
+  defaultValue,
+  onChange,
+}: ListboxProps<TValue, TOption>) => {
+  const [values, setValues] = useImmer<TValue[]>([]);
+
+  const [selectedValue, setSelectedValue] = useControllable({
+    value,
+    onChange,
+    defaultValue,
+    requiresState: true,
+  });
+
+  const [highlightedValue, setHighlightedValue] = useState<TValue | undefined>(
+    undefined,
   );
-};
 
-type ListboxOptionProps<T> = Omit<Aria.ListBoxItemProps<T>, "id"> & {
-  id: Aria.Key;
-};
+  const select = (value?: TValue) => {
+    setSelectedValue(value);
+  };
 
-export function Option<T extends object>({
-  children,
-  className,
-  textValue,
-  ...props
-}: ListboxOptionProps<T>) {
-  textValue ??= typeof children === "string" ? children : textValue;
-  return (
-    <Aria.ListBoxItem
-      {...props}
-      aria-label={textValue}
-      textValue={textValue}
-      className={({ isSelected }) =>
-        cn(
-          variants.option({
-            isDisabled: props.isDisabled,
-            isSelected,
-          }),
-          className,
-        )
+  const highlight = (value?: TValue) => {
+    setHighlightedValue(value);
+  };
+
+  const renderedChildren = useMemo(() => {
+    return typeof children === "function"
+      ? options.map((option) => children(option))
+      : children;
+  }, [children, options]);
+
+  useEffect(() => {
+    const renderedValues = Children.map(renderedChildren, (child) => {
+      if (isValidElement(child) && !child.props.disabled) {
+        return child.props.value;
       }
-    >
-      {(props) => (
-        <>
-          <Icon
-            icon={faCheck}
-            className="relative hidden size-5 self-center text-content group-data-[selected]/option:inline sm:size-4"
-          />
-          <span className={cn(className, "col-start-2")}>
-            {renderChildren(children, props)}
-          </span>
-        </>
-      )}
-    </Aria.ListBoxItem>
-  );
-}
+    });
 
-type ListboxSectionProps<T> = Aria.SectionProps<T> & {
-  title?: string;
-};
+    setValues(renderedValues);
+  }, [renderedChildren, setValues]);
 
-const Section = <T extends object>(props: ListboxSectionProps<T>) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    const highlightedIndex = values.findIndex(
+      (value) => value === highlightedValue,
+    );
+    switch (event.key) {
+      case "ArrowDown":
+        if (highlightedIndex < options.length - 1) {
+          event.preventDefault();
+          setHighlightedValue(
+            highlightedValue !== undefined
+              ? values[highlightedIndex + 1]
+              : values[0],
+          );
+        }
+        break;
+      case "ArrowUp":
+        if (highlightedIndex > 0) {
+          event.preventDefault();
+          setHighlightedValue(
+            highlightedValue !== undefined
+              ? values[highlightedIndex - 1]
+              : values[values.length - 1],
+          );
+        }
+        break;
+      case "Enter":
+      case " ":
+        if (highlightedValue) {
+          event.preventDefault();
+          setSelectedValue(highlightedValue);
+          setHighlightedValue(undefined);
+        }
+        break;
+      case "Home":
+        event.preventDefault();
+        setHighlightedValue(values[0]);
+        break;
+      case "End":
+        event.preventDefault();
+        setHighlightedValue(values[values.length - 1]);
+        break;
+    }
+  };
+
   return (
-    <Aria.Section {...props}>
-      <Aria.Header className="sticky -top-[5px] z-10 -mx-1 -mt-px truncate border-y bg-background-muted px-4 py-1 text-sm font-semibold text-content-muted backdrop-blur-md supports-[-moz-appearance:none]:bg-background-muted [&+*]:mt-1">
-        {props.title}
-      </Aria.Header>
-      <Aria.Collection items={props.items}>{props.children}</Aria.Collection>
-    </Aria.Section>
+    <div
+      role="listbox"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      className={variants({ className })}
+    >
+      <ListboxProvider
+        selectedValue={selectedValue}
+        setSelectedValue={select}
+        highlightedValue={highlightedValue}
+        setHighlightedValue={highlight}
+      >
+        {renderedChildren}
+      </ListboxProvider>
+    </div>
   );
 };
 
-export const Listbox = Object.assign(Root, {
-  Option,
-  Section,
-});
-export type { ListboxProps, ListboxSectionProps, ListboxOptionProps };
+// export const ListboxControl = withControl(ListboxInput);
+
+// export const ListboxField = withField(ListboxControl);

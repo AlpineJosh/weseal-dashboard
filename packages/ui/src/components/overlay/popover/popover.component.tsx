@@ -1,11 +1,13 @@
+import type { Placement, Strategy } from "@floating-ui/react-dom";
+import type { MutableRefObject } from "react";
 import React from "react";
+import { useFloating } from "@floating-ui/react-dom";
 import { cva } from "class-variance-authority";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
-import type { DialogProps } from "../dialog/dialog.component";
-import { Dialog } from "../dialog/dialog.component";
-import { usePopover } from "./popover.context";
+import type { OverlayChildren } from "../overlay/overlay.component";
+import { Overlay } from "../overlay/overlay.component";
 
 const variants = cva(
   cn(
@@ -16,12 +18,12 @@ const variants = cva(
     // Handle scrolling when menu won't fit in viewport
     "overflow-y-auto",
     // Popover background
-    "bg-background-popover/75 backdrop-blur-xl",
+    // "bg-background-popover/75 backdrop-blur-xl",
     // Shadows
     "ring-content/10 ring-1 shadow-lg dark:ring-inset",
     // Define grid at the menu level if subgrid is supported
     // Transitions
-    "transition data-[leave]:duration-100 data-[leave]:ease-in data-[closed]:data-[leave]:opacity-0",
+    "backdrop:bg-content/10 transition data-[leave]:duration-100 data-[leave]:ease-in data-[closed]:data-[leave]:opacity-0",
   ),
   {
     variants: {
@@ -44,20 +46,34 @@ const variants = cva(
   },
 );
 
-type PopoverProps = Omit<DialogProps, "modal">;
+interface PopoverProps {
+  children: OverlayChildren;
+  placement?: Placement;
+  strategy?: Strategy;
+}
 
-const Popover = ({ children, className, ...props }: PopoverProps) => {
-  const { popover } = usePopover();
+const Popover = ({ children, placement, strategy }: PopoverProps) => {
+  const { refs, floatingStyles } = useFloating({
+    placement,
+    strategy,
+  });
+
   return (
-    <Dialog
-      ref={popover.ref}
-      modal={false}
-      {...props}
-      className={cn(variants(), className)}
-      style={{ ...props.style, ...popover.styles }}
+    <Overlay
+      isModal={false}
+      trigger={{
+        ref: refs.reference,
+        setReference: refs.setReference,
+      }}
+      sheet={{
+        ref: refs.floating as MutableRefObject<HTMLDialogElement | null>,
+        setReference: refs.setFloating,
+        styles: floatingStyles,
+        className: variants({ isEntering: true, isExiting: false }),
+      }}
     >
       {children}
-    </Dialog>
+    </Overlay>
   );
 };
 

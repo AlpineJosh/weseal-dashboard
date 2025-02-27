@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 
 import type { ComboboxProps } from "./combobox.component";
 import { Option } from "../option/option.component";
@@ -24,7 +23,7 @@ type Story = StoryObj<ComboboxProps<string, { id: string; name: string }>>;
 export const Default: Story = {
   render: (args) => {
     return (
-      <Combobox options={options} {...args}>
+      <Combobox {...args}>
         {(item) => (
           <Option key={item.id} value={item.id}>
             {item.name}

@@ -1,26 +1,60 @@
-"use client";
+import type { ComponentPropsWithRef } from "react";
+import { useEffect, useRef } from "react";
 
-import React from "react";
-import * as Aria from "react-aria-components";
+import type { DialogContextValue } from "./dialog.context";
+import { useDialog } from "./dialog.context";
 
-import { cn } from "@repo/ui/lib/class-merge";
+type DialogProps = ComponentPropsWithRef<"dialog"> & {
+  closeOnClickOutside?: boolean;
+  closeOnEscape?: boolean;
+  modal?: boolean;
+  children:
+    | React.ReactNode
+    | ((controls: DialogContextValue) => React.ReactNode);
+};
 
-type DialogTriggerProps = Aria.DialogTriggerProps;
-const Trigger = Aria.DialogTrigger;
+const Dialog = ({
+  children,
+  modal = false,
+  closeOnClickOutside = true,
+  closeOnEscape = true,
+  ...props
+}: DialogProps) => {
+  const controls = useDialog();
+  const ref = useRef<HTMLDialogElement>(null);
 
-type DialogProps = Aria.DialogProps;
-const Content = ({ className, ...props }: Aria.DialogProps) => {
+  useEffect(() => {
+    if (controls.isOpen) {
+      if (modal) {
+        ref.current?.showModal();
+      } else {
+        ref.current?.show();
+      }
+    } else {
+      ref.current?.close();
+    }
+  }, [modal, controls.isOpen]);
+
   return (
-    <Aria.Dialog
-      className={cn(
-        // "relative max-h-[inherit] overflow-auto p-6 outline outline-0 [[data-placement]>&]:p-4",
-        className,
-      )}
+    <dialog
       {...props}
-    />
+      ref={ref}
+      onClick={(e) => {
+        if (closeOnClickOutside && e.target === ref.current) {
+          controls.close();
+        }
+        props.onClick?.(e);
+      }}
+      onKeyDown={(e) => {
+        if (closeOnEscape && e.key === "Escape") {
+          controls.close();
+        }
+      }}
+    >
+      {typeof children === "function" ? children(controls) : children}
+    </dialog>
   );
 };
 
-export const Dialog = { Trigger, Content };
-
-export type { DialogTriggerProps, DialogProps };
+export type { DialogProps };
+export { Dialog };
