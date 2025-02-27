@@ -39,9 +39,10 @@ export default function ReceivingPage({
                       {item.id}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="receiptDate">
-                    {item.receiptDate?.toLocaleDateString()}
-                  </Datatable.Cell>
+                  <Datatable.DateTimeCell
+                    id="receiptDate"
+                    value={item.receiptDate}
+                  />
                 </Datatable.Row>
               )}
             </Datatable.Body>
