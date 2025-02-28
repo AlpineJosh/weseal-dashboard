@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/element";
 
 import type { PopoverProps } from "./popover.component";
 import { Icon } from "../../element/icon";
-import { Sheet } from "../sheet/sheet.component";
+import { Sheet } from "../pane/pane.component";
 import { Trigger } from "../trigger";
 import { Popover } from "./popover.component";
 

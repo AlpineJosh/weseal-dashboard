@@ -82,6 +82,36 @@
   }
 }
 
+@custom-variant ending {
+  &[data-ending="true"] {
+    @slot;
+  }
+}
+
+@custom-variant placement-top {
+  &[data-placement^="top"] {
+    @slot;
+  }
+}
+
+@custom-variant placement-bottom {
+  &[data-placement^="bottom"] {
+    @slot;
+  }
+}
+
+@custom-variant placement-left {
+  &[data-placement^="left"] {
+    @slot;
+  }
+}
+
+@custom-variant placement-right {
+  &[data-placement^="right"] {
+    @slot;
+  }
+}
+
 @layer base {
   :root {
     --radius: 0.5rem;

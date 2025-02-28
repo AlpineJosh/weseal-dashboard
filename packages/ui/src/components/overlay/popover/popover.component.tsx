@@ -3,10 +3,12 @@ import type { MutableRefObject } from "react";
 import React from "react";
 import { useFloating } from "@floating-ui/react-dom";
 import { cva } from "class-variance-authority";
+import { useImmer } from "use-immer";
 
 import { cn } from "@repo/ui/lib/class-merge";
 
 import type { OverlayChildren } from "../overlay/overlay.component";
+import { Floating } from "../floating/floating.context";
 import { Overlay } from "../overlay/overlay.component";
 
 const variants = cva(
@@ -52,28 +54,56 @@ interface PopoverProps {
   strategy?: Strategy;
 }
 
+// const Popover = ({ children, placement, strategy }: PopoverProps) => {
+//   const { refs, floatingStyles } = useFloating({
+//     placement,
+//     strategy,
+//   });
+
+//   return (
+//     <Overlay
+//       isModal={false}
+//       trigger={{
+//         ref: refs.reference,
+//         setReference: refs.setReference,
+//       }}
+//       sheet={{
+//         ref: refs.floating as MutableRefObject<HTMLDialogElement | null>,
+//         setReference: refs.setFloating,
+//         styles: floatingStyles,
+//         className: variants({ isEntering: true, isExiting: false }),
+//       }}
+//     >
+//       {children}
+//     </Overlay>
+//   );
+// };
+
 const Popover = ({ children, placement, strategy }: PopoverProps) => {
-  const { refs, floatingStyles } = useFloating({
-    placement,
-    strategy,
-  });
+  const [isOpen, setIsOpen] = useImmer(false);
+
+  const controls = {
+    isOpen,
+    open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
+  };
 
   return (
-    <Overlay
-      isModal={false}
-      trigger={{
-        ref: refs.reference,
-        setReference: refs.setReference,
+    <Floating
+      placement={placement}
+      strategy={strategy}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      click={{
+        enabled: true,
+        toggle: false,
       }}
-      sheet={{
-        ref: refs.floating as MutableRefObject<HTMLDialogElement | null>,
-        setReference: refs.setFloating,
-        styles: floatingStyles,
-        className: variants({ isEntering: true, isExiting: false }),
+      dismiss={{
+        enabled: true,
       }}
     >
-      {children}
-    </Overlay>
+      {typeof children === "function" ? children(controls) : children}
+    </Floating>
   );
 };
 
