@@ -450,6 +450,10 @@ const balanceInventory = (
   current: (typeof schema.inventory.$inferSelect)[],
   target: (typeof schema.inventory.$inferSelect)[],
 ) => {
+  if (current.length === 0 && target.length === 0) {
+    return;
+  }
+
   const initial = target[0] ?? current[0];
   if (!initial) {
     return;
@@ -472,6 +476,20 @@ const balanceInventory = (
     };
     entry.current = entry.current.plus(location.totalQuantity);
     locations.set(location.locationId, entry);
+  }
+
+  if (componentId === "WS051RD012003000EB090") {
+    console.log(
+      JSON.stringify(
+        Array.from(locations.entries()).map(([locationId, amounts]) => {
+          return {
+            locationId,
+            current: amounts.current.toFixed(2),
+            target: amounts.target.toFixed(2),
+          };
+        }),
+      ),
+    );
   }
 
   for (const [locationId, amounts] of locations) {
@@ -669,30 +687,25 @@ export const resetInventory = async () => {
       continue;
     }
     if (component.isBatchTracked) {
-      const unbatched = currentInventory.filter(
-        (i) => i.componentId === component.id && !i.batchId,
-      );
-
-      balanceInventory(processor, unbatched, []);
-
+      // First handle all batched inventory
       const targetBatches = targetInventory
         .filter((i) => i.componentId === component.id)
         .flatMap((i) => i.items)
         .reduce(
           (acc, item) => {
-            const batchReference = item.batchReference ?? "undefined";
+            if (!item.batchReference) return acc;
 
             let batch = processor.batches.getBatch(
               component.id,
-              batchReference,
+              item.batchReference,
             );
             if (!batch) {
               batch = processor.batches.upsert({
                 id: 0,
                 componentId: component.id,
-                batchReference,
-                createdAt: new Date(),
-                lastModified: new Date(),
+                batchReference: item.batchReference,
+                createdAt: item.createdAt,
+                lastModified: item.createdAt,
               });
             }
 
@@ -701,19 +714,20 @@ export const resetInventory = async () => {
               quantity: item.quantity,
             };
 
-            if (batch.id in acc) {
-              acc[batch.id]!.push(inventoryItem);
-            } else {
-              acc[batch.id] = [inventoryItem];
-            }
+            const items = acc[batch.id] ?? [];
+            items.push(inventoryItem);
+            acc[batch.id] = items;
 
             return acc;
           },
           {} as Record<number, { locationId: number; quantity: Decimal }[]>,
         );
+      if (component.id === "WS051RD012003000EB090") {
+        console.log(JSON.stringify(targetBatches));
+      }
 
       const currentBatches = currentInventory
-        .filter((i) => i.componentId === component.id)
+        .filter((i) => i.componentId === component.id && i.batchId !== null)
         .reduce(
           (acc, item) => {
             if (item.batchId) {
@@ -730,67 +744,78 @@ export const resetInventory = async () => {
           {} as Record<number, { locationId: number; quantity: Decimal }[]>,
         );
 
-      const batches = new Set<number>([
+      if (component.id === "WS051RD012003000EB090") {
+        console.log(JSON.stringify(currentBatches));
+      }
+
+      // Process each batch separately
+      const batches = new Set([
         ...Object.keys(currentBatches).map(Number),
         ...Object.keys(targetBatches).map(Number),
       ]);
 
       for (const batchId of batches) {
         const targetItems =
-          targetBatches[batchId]?.map((item) => {
-            return {
-              id: 0,
-              componentId: component.id,
-              batchId: batchId,
-              locationId: item.locationId,
-              totalQuantity: item.quantity,
-              allocatedQuantity: new Decimal(0),
-              freeQuantity: item.quantity,
-              entryDate: new Date(),
-              createdAt: new Date(),
-              lastModified: new Date(),
-            };
-          }) ?? [];
+          targetBatches[batchId]?.map((item) => ({
+            id: 0,
+            componentId: component.id,
+            batchId: batchId,
+            locationId: item.locationId,
+            totalQuantity: item.quantity,
+            allocatedQuantity: new Decimal(0),
+            freeQuantity: item.quantity,
+            entryDate: new Date(),
+            createdAt: new Date(),
+            lastModified: new Date(),
+          })) ?? [];
 
         const currentItems =
-          currentBatches[batchId]?.map((item) => {
-            return {
-              id: 0,
-              componentId: component.id,
-              batchId: batchId,
-              locationId: item.locationId,
-              totalQuantity: item.quantity,
-              allocatedQuantity: new Decimal(0),
-              freeQuantity: item.quantity,
-              entryDate: new Date(),
-              createdAt: new Date(),
-              lastModified: new Date(),
-            };
-          }) ?? [];
+          currentBatches[batchId]?.map((item) => ({
+            id: 0,
+            componentId: component.id,
+            batchId: batchId,
+            locationId: item.locationId,
+            totalQuantity: item.quantity,
+            allocatedQuantity: new Decimal(0),
+            freeQuantity: item.quantity,
+            entryDate: new Date(),
+            createdAt: new Date(),
+            lastModified: new Date(),
+          })) ?? [];
 
         balanceInventory(processor, currentItems, targetItems);
       }
+
+      // Clear any unbatched inventory since this is a batch-tracked item
+      const unbatchedCurrent = currentInventory.filter(
+        (i) => i.componentId === component.id && i.batchId === null,
+      );
+
+      if (component.id === "WS051RD012003000EB090") {
+        console.log(JSON.stringify(unbatchedCurrent));
+      }
+
+      balanceInventory(processor, unbatchedCurrent, []);
     } else {
+      // Handle non-batch-tracked items normally
       balanceInventory(
         processor,
         currentInventory.filter((i) => i.componentId === component.id),
         targetInventory
           .filter((i) => i.componentId === component.id)
           .flatMap((item) => {
-            return item.items.map((i) => {
-              return {
-                id: 0,
-                componentId: component.id,
-                batchId: null,
-                locationId: i.locationId,
-                totalQuantity: i.quantity,
-                allocatedQuantity: new Decimal(0),
-                freeQuantity: i.quantity,
-                entryDate: new Date(),
-                createdAt: new Date(),
-                lastModified: new Date(),
-              };
-            });
+            return item.items.map((i) => ({
+              id: 0,
+              componentId: component.id,
+              batchId: null,
+              locationId: i.locationId,
+              totalQuantity: i.quantity,
+              allocatedQuantity: new Decimal(0),
+              freeQuantity: i.quantity,
+              entryDate: new Date(),
+              createdAt: new Date(),
+              lastModified: new Date(),
+            }));
           }),
       );
     }
