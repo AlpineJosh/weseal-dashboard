@@ -43,6 +43,13 @@
       "when": 1739944936593,
       "tag": "0005_curvy_overlord",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1741595735393,
+      "tag": "0006_supreme_miracleman",
+      "breakpoints": true
     }
   ]
 }
