@@ -32,6 +32,7 @@ interface DataTypeMap {
   json: unknown;
   custom: unknown;
   buffer: Buffer;
+  uuid: string;
 }
 
 export type Field = Column | SQL.Aliased;
