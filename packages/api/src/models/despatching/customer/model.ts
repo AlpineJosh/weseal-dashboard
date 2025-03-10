@@ -7,7 +7,6 @@ const { customer, salesOrder } = publicSchema;
 
 const orders = db
   .select({
-    id: salesOrder.id,
     customerId: salesOrder.customerId,
     openOrders: count().as("open_orders"),
     nextOrderDate: min(salesOrder.orderDate).as("next_order_date"),

@@ -95,7 +95,7 @@ export const NavigationMenu = () => {
         </SidebarMenu.SubItems>
       </SidebarMenu.ItemGroup>
 
-      <SidebarMenu.ItemGroup>
+      {/* <SidebarMenu.ItemGroup>
         <SidebarMenu.Item href="/production">
           <Icon icon={faIndustry} />
           <SidebarMenu.Label>Production</SidebarMenu.Label>
@@ -106,7 +106,7 @@ export const NavigationMenu = () => {
             <SidebarMenu.Label>Jobs</SidebarMenu.Label>
           </SidebarMenu.Item>
         </SidebarMenu.SubItems>
-      </SidebarMenu.ItemGroup>
+      </SidebarMenu.ItemGroup> */}
     </SidebarMenu>
   );
 };

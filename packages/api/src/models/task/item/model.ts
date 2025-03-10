@@ -21,7 +21,7 @@ const overview = db
     taskId: schema.taskAllocation.taskId,
     batchId: schema.taskAllocation.batchId,
     batchReference: schema.batch.batchReference,
-    componentId: schema.batch.componentId,
+    componentId: schema.taskAllocation.componentId,
     componentDescription: schema.component.description,
     componentUnit: schema.component.unit,
     // Pick location info
@@ -50,7 +50,10 @@ const overview = db
   })
   .from(schema.taskAllocation)
   .leftJoin(schema.batch, eq(schema.taskAllocation.batchId, schema.batch.id))
-  .leftJoin(schema.component, eq(schema.batch.componentId, schema.component.id))
+  .leftJoin(
+    schema.component,
+    eq(schema.taskAllocation.componentId, schema.component.id),
+  )
   // Pick location joins
   .leftJoin(
     pickLocation,

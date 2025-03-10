@@ -137,7 +137,7 @@ const LocationPickerItem = ({
       if (location.overridden && !location.blocked && location.using.gt(0)) {
         batches.push({
           locationId: location.locationId,
-          batchId: location.batchId,
+          batchId: location.batchId ?? undefined,
           quantity: location.using,
           componentId: id,
         });
@@ -153,7 +153,7 @@ const LocationPickerItem = ({
             remaining = remaining.sub(use);
             batches.push({
               locationId: location.locationId,
-              batchId: location.batchId,
+              batchId: location.batchId ?? undefined,
               quantity: use,
               componentId: id,
             });

@@ -18,7 +18,7 @@ export default function DespatchingPage({
   return (
     <>
       <DatatableQueryProvider
-        endpoint={api.despatching.order.items.list}
+        endpoint={api.despatching.order.item.list}
         defaultInput={{
           filter: {
             orderId: {
@@ -31,6 +31,9 @@ export default function DespatchingPage({
           <Datatable {...props}>
             <Datatable.Head>
               <Datatable.Column id="componentId">Component</Datatable.Column>
+              <Datatable.Column id="componentDescription">
+                Description
+              </Datatable.Column>
               <Datatable.Column id="quantityOrdered">Ordered</Datatable.Column>
               <Datatable.Column id="quantityDespatched">
                 Despatched
@@ -49,17 +52,23 @@ export default function DespatchingPage({
                       {item.componentId}
                     </TextLink>
                   </Datatable.Cell>
+                  <Datatable.Cell id="componentDescription">
+                    {item.componentDescription}
+                  </Datatable.Cell>
                   <Datatable.DecimalCell
                     id="quantityOrdered"
                     value={item.quantityOrdered}
+                    unit={item.componentUnit}
                   />
                   <Datatable.DecimalCell
                     id="quantityDespatched"
                     value={item.quantityDespatched ?? new Decimal(0)}
+                    unit={item.componentUnit}
                   />
                   <Datatable.DecimalCell
                     id="sageQuantityDespatched"
                     value={item.sageQuantityDespatched ?? new Decimal(0)}
+                    unit={item.componentUnit}
                   />
                 </Datatable.Row>
               )}

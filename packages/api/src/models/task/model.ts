@@ -308,6 +308,8 @@ export const completeTaskAllocation = async (
     })),
   };
 
+  console.log(entry);
+
   await updateInventory(
     tx,
     { locationId: allocation.pickLocationId, ...entry },
@@ -352,11 +354,6 @@ export const completeTaskAllocation = async (
         ...entry,
         locationId: allocation.putLocationId,
       },
-    );
-    await updateInventory(
-      tx,
-      { locationId: allocation.pickLocationId, ...entry },
-      "allocation",
     );
   }
 

@@ -21,7 +21,7 @@ import {
   faAngleDown,
   faAnglesUpDown,
   faAngleUp,
-} from "@repo/pro-light-svg-icons";
+} from "@repo/pro-solid-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
 
 import { Checkbox } from "../../control";
@@ -41,15 +41,15 @@ const variants = {
     },
   }),
   head: cva([
-    "bg-background/80 sticky top-0 hidden h-[var(--row-height)] backdrop-blur-sm",
+    "sticky top-0 hidden h-[var(--row-height)] bg-background/80 backdrop-blur-sm",
     "lg:col-span-full lg:grid lg:grid-cols-subgrid lg:items-stretch lg:justify-stretch",
   ]),
   column: cva(
-    "border-content/5 text-content-muted flex flex-row items-center px-2 font-light lg:border-b lg:px-4",
+    "flex flex-row items-center border-content/5 px-2 font-light text-content-muted lg:border-b lg:px-4",
     {
       variants: {
         sortable: {
-          true: "hover:bg-content/5 appearance-none justify-between text-left outline-none",
+          true: "appearance-none justify-between text-left outline-none hover:bg-content/5",
         },
       },
     },
@@ -65,7 +65,7 @@ const variants = {
     },
   ),
   row: cva(
-    "border-content/5 grid grid-cols-[auto_1fr] border-b lg:col-span-full lg:grid-cols-subgrid lg:items-center",
+    "grid grid-cols-[auto_1fr] border-b border-content/5 lg:col-span-full lg:grid-cols-subgrid lg:items-center",
   ),
   cell: cva("truncate px-2 py-1 lg:px-4", {
     variants: {
@@ -358,24 +358,32 @@ const Column: React.FC<ColumnProps> = ({
     return null;
   }
 
+  const isSorted = sort.direction !== undefined;
+
   return isSortable ? (
     <Aria.Button
       className={cn(
         variants.column({ sortable: true }),
-        "space-x-2",
+        "group space-x-2",
         className,
       )}
       onPress={sort.handleSort}
     >
-      <span className="truncate">{children}</span>
+      <span className={cn("truncate", isSorted && "font-medium text-primary")}>
+        {children}
+      </span>
       <Icon
         icon={
-          sort.direction === undefined
-            ? faAnglesUpDown
-            : sort.direction === "asc"
+          isSorted
+            ? sort.direction === "asc"
               ? faAngleDown
               : faAngleUp
+            : faAnglesUpDown
         }
+        className={cn(
+          "size-3 transition-opacity",
+          isSorted ? "text-primary" : "opacity-50 group-hover:opacity-100",
+        )}
       />
     </Aria.Button>
   ) : (
@@ -419,7 +427,7 @@ const Body = <TData,>({
           <Row key={rowIndex}>
             {columns.map((column) => (
               <Cell key={column.id} id={column.id}>
-                <div className="bg-content/5 h-4 w-full animate-pulse rounded-sm" />
+                <div className="h-4 w-full animate-pulse rounded-sm bg-content/5" />
               </Cell>
             ))}
           </Row>
@@ -427,7 +435,7 @@ const Body = <TData,>({
       ) : (data?.length ?? 0) > 0 ? (
         data?.map((value) => children({ data: value, isSelected: false }))
       ) : (
-        <div className="text-content-muted col-span-full row-span-3 flex flex-col items-center justify-center text-center">
+        <div className="col-span-full row-span-3 flex flex-col items-center justify-center text-center text-content-muted">
           {emptyMessage}
         </div>
       )}

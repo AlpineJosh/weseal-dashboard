@@ -12,7 +12,7 @@ export default function ReceiptsOverview() {
       <Heading level={1}>Receipts</Heading>
 
       <DatatableQueryProvider
-        endpoint={api.receiving.receipts.list}
+        endpoint={api.receiving.receipt.list}
         defaultInput={{
           sort: [{ field: "receiptDate", order: "desc" }],
         }}

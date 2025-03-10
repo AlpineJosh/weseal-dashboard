@@ -175,10 +175,19 @@ export type DateTimeCellProps = CellProps & {
   includeTime?: boolean;
 };
 
-const DateTimeCell = ({ value, includeTime, ...props }: DateTimeCellProps) => {
-  const dateFormat = includeTime ? "yy/MM/dd h:mm a" : "yy-MM-dd";
+const DateTimeCell = ({
+  value,
+  includeTime,
+  className,
+  ...props
+}: DateTimeCellProps) => {
+  const dateFormat = includeTime ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd";
   const date = format(value, dateFormat);
-  return <Table.Cell {...props}>{date}</Table.Cell>;
+  return (
+    <Table.Cell className={cn("tabular-nums", className)} {...props}>
+      {date}
+    </Table.Cell>
+  );
 };
 
 export const Datatable = Object.assign(Root, {

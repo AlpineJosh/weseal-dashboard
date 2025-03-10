@@ -16,7 +16,7 @@ export default function ReceiptsOverview({
 
   return (
     <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
-      <Heading level={1}>Receipt #{id}</Heading>
+      <Heading level={1}>Despatch #{id}</Heading>
 
       <DatatableQueryProvider
         endpoint={api.receiving.receipt.item.list}

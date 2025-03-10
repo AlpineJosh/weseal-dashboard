@@ -26,7 +26,6 @@ const despatchItems = db
 const items = db
   .select({
     orderId: salesOrderItem.orderId,
-    componentId: salesOrderItem.componentId,
     totalItems: count().as("total_items"),
     incompleteItems: count(
       ne(
@@ -43,7 +42,7 @@ const items = db
       eq(salesOrderItem.componentId, despatchItems.componentId),
     ),
   )
-  .groupBy(salesOrderItem.orderId, salesOrderItem.componentId)
+  .groupBy(salesOrderItem.orderId)
   .as("items");
 
 const overview = db
@@ -75,13 +74,13 @@ export default datatable(
   {
     id: "number",
     customerId: "string",
-    orderDate: "string",
+    orderDate: "date",
     isQuote: "boolean",
     isCancelled: "boolean",
     isComplete: "boolean",
     isOpen: "boolean",
-    createdAt: "string",
-    lastModified: "string",
+    createdAt: "date",
+    lastModified: "date",
     isDeleted: "boolean",
     customerName: "string",
     totalItems: "number",

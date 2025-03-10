@@ -23,14 +23,14 @@ export default function DespatchesOverview() {
               <Datatable.Column id="id" isSortable>
                 ID
               </Datatable.Column>
-              <Datatable.Column id="supplierName" isSortable>
-                Supplier
+              <Datatable.Column id="customerName" isSortable>
+                Customer
               </Datatable.Column>
               <Datatable.Column id="orderId" isSortable>
-                Purchase Order
+                Sales Order
               </Datatable.Column>
-              <Datatable.Column id="receiptDate" isSortable>
-                Receipt Date
+              <Datatable.Column id="despatchDate" isSortable>
+                Despatch Date
               </Datatable.Column>
               <Datatable.Column id="itemCount" isSortable>
                 Items
@@ -40,22 +40,22 @@ export default function DespatchesOverview() {
               {({ data }) => (
                 <Datatable.Row key={`${data.id}`}>
                   <Datatable.Cell id="id">
-                    <TextLink href={`/receiving/receipts/${data.id}`}>
+                    <TextLink href={`/despatching/despatches/${data.id}`}>
                       {data.id}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="supplierName">
-                    <TextLink href={`/suppliers/${data.supplierId}`}>
-                      {data.supplierName}
+                  <Datatable.Cell id="customerName">
+                    <TextLink href={`/customers/${data.customerId}`}>
+                      {data.customerName}
                     </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="orderId">
-                    <TextLink href={`/receiving/orders/${data.orderId}`}>
+                    <TextLink href={`/despatching/orders/${data.orderId}`}>
                       #{data.orderId}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="receiptDate">
-                    {data.receiptDate?.toLocaleDateString()}
+                  <Datatable.Cell id="despatchDate">
+                    {data.despatchDate?.toLocaleDateString()}
                   </Datatable.Cell>
                   <Datatable.Cell id="itemCount">
                     {data.itemCount}

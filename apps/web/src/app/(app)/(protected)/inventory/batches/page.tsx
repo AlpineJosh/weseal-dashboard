@@ -41,10 +41,8 @@ export default function BatchOverview() {
             <Datatable.Body data={props.data}>
               {({ data }) => (
                 <Datatable.Row key={`${data.id}`}>
-                  <Datatable.Cell id="id">
-                    <TextLink href={`/inventory/batches/${data.id}`}>
-                      {data.batchReference}
-                    </TextLink>
+                  <Datatable.Cell id="batchReference">
+                    #{data.batchReference}
                   </Datatable.Cell>
                   <Datatable.Cell id="componentId">
                     <TextLink href={`/components/${data.componentId}`}>
@@ -54,12 +52,10 @@ export default function BatchOverview() {
                   <Datatable.Cell id="componentDescription">
                     {data.componentDescription}
                   </Datatable.Cell>
-                  <Datatable.Cell id="batchReference">
-                    {data.batchReference}
-                  </Datatable.Cell>
-                  <Datatable.Cell id="entryDate">
-                    {data.entryDate.toLocaleDateString()}
-                  </Datatable.Cell>
+                  <Datatable.DateTimeCell
+                    id="entryDate"
+                    value={data.entryDate}
+                  />
                   <Datatable.DecimalCell
                     id="totalQuantity"
                     value={data.totalQuantity}

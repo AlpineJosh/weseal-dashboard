@@ -16,7 +16,7 @@ const uniqueProductionJobInput = z.object({
 
 const taskItemInput = z.object({
   componentId: z.string(),
-  batchId: z.number(),
+  batchId: z.number().optional(),
   locationId: z.number(),
   quantity: decimal(),
 });

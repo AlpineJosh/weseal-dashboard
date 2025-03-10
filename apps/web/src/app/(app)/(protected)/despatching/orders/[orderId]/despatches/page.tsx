@@ -41,9 +41,10 @@ export default function ReceivingPage({
                       {despatch.id}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="despatchDate">
-                    {item.despatchDate?.toLocaleDateString()}
-                  </Datatable.Cell>
+                  <Datatable.DateTimeCell
+                    id="despatchDate"
+                    value={despatch.despatchDate}
+                  />
                 </Datatable.Row>
               )}
             </Datatable.Body>

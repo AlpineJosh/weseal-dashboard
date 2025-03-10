@@ -8,12 +8,11 @@ const { salesDespatch, salesOrder, customer, salesDespatchItem } = publicSchema;
 const despatchItems = db
   .select({
     despatchId: salesDespatchItem.despatchId,
-    componentId: salesDespatchItem.componentId,
     itemCount: count().as("item_count"),
   })
   .from(salesDespatchItem)
   .leftJoin(salesDespatch, eq(salesDespatchItem.despatchId, salesDespatch.id))
-  .groupBy(salesDespatchItem.despatchId, salesDespatchItem.componentId)
+  .groupBy(salesDespatchItem.despatchId)
   .as("despatch_items");
 
 const overview = db
@@ -30,13 +29,14 @@ const overview = db
   .from(salesDespatch)
   .leftJoin(salesOrder, eq(salesDespatch.orderId, salesOrder.id))
   .leftJoin(customer, eq(salesOrder.customerId, customer.id))
+  .leftJoin(despatchItems, eq(salesDespatch.id, despatchItems.despatchId))
   .as("overview");
 
 export default datatable(
   {
     id: "number",
     orderId: "number",
-    despatchDate: "string",
+    despatchDate: "date",
     isDespatched: "boolean",
     isCancelled: "boolean",
     customerId: "string",

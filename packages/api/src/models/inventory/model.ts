@@ -240,6 +240,10 @@ export const updateInventory = async (
 ) => {
   const promises = [];
 
+  if (entry.quantity.lt(0)) {
+    throw new Error("Quantity must be greater than 0");
+  }
+
   const getTotal = (quantity: Decimal): Decimal => {
     switch (type) {
       case "inbound":
@@ -273,11 +277,16 @@ export const updateInventory = async (
       case "outbound":
         return quantity.negated();
       case "allocation":
-        return new Decimal(0);
+        return quantity.negated();
       case "deallocation":
         return quantity;
     }
   };
+
+  console.log(entry);
+  console.log(getTotal(entry.quantity));
+  console.log(getAllocated(entry.quantity));
+  console.log(getFree(entry.quantity));
 
   promises.push(
     tx

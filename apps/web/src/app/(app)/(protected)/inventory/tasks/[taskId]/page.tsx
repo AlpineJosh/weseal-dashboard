@@ -6,7 +6,7 @@ import { api } from "@/utils/trpc/react";
 import { faCheck, faXmark } from "@repo/pro-solid-svg-icons";
 import { Datatable } from "@repo/ui/components/display";
 import { Badge, Button, Icon } from "@repo/ui/components/element";
-import { Heading } from "@repo/ui/components/typography";
+import { Heading, TextLink } from "@repo/ui/components/typography";
 
 interface TaskPageProps {
   params: { taskId: string };
@@ -15,12 +15,11 @@ interface TaskPageProps {
 export default function TaskPage({ params }: TaskPageProps) {
   const id = Number(params.taskId);
 
-  const { data: task } = api.inventory.tasks.get.useQuery({
+  const { data: task } = api.task.get.useQuery({
     id,
   });
 
-  const { mutate: completeTask } =
-    api.inventory.tasks.items.complete.useMutation();
+  const { mutate: completeTask } = api.task.item.complete.useMutation();
 
   return (
     <div className="flex max-w-screen-xl grow flex-col space-y-4">
@@ -39,7 +38,7 @@ export default function TaskPage({ params }: TaskPageProps) {
       )}
 
       <DatatableQueryProvider
-        endpoint={api.inventory.tasks.items.list}
+        endpoint={api.task.item.list}
         defaultInput={{
           filter: {
             taskId: {
@@ -51,35 +50,57 @@ export default function TaskPage({ params }: TaskPageProps) {
         {(props) => (
           <Datatable {...props}>
             <Datatable.Head>
-              <Datatable.Column id="componentId">Component</Datatable.Column>
-              <Datatable.Column id="quantity">Quantity</Datatable.Column>
-              <Datatable.Column id="batchReference">
+              <Datatable.Column id="componentId" isSortable>
+                Component
+              </Datatable.Column>
+              <Datatable.Column id="batchReference" isSortable>
                 Batch Reference
               </Datatable.Column>
-              <Datatable.Column id="fromLocation">From</Datatable.Column>
-              <Datatable.Column id="toLocation">To</Datatable.Column>
+              <Datatable.Column id="quantity" isSortable>
+                Quantity
+              </Datatable.Column>
+              <Datatable.Column id="fromLocation" isSortable>
+                From
+              </Datatable.Column>
+              <Datatable.Column id="toLocation" isSortable>
+                To
+              </Datatable.Column>
               <Datatable.Column id="isCompleted">Completed</Datatable.Column>
-              <Datatable.Column id="action">Action</Datatable.Column>
+              <Datatable.Column id="action"> </Datatable.Column>
             </Datatable.Head>
             <Datatable.Body data={props.data}>
               {({ data }) => (
                 <Datatable.Row key={`${data.id}`}>
                   <Datatable.Cell id="componentId">
-                    {data.componentId}
+                    <TextLink href={`/components/${data.componentId}`}>
+                      {data.componentId}
+                    </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="quantity">{data.quantity}</Datatable.Cell>
+                  <Datatable.DecimalCell
+                    id="quantity"
+                    value={data.quantity}
+                    unit={data.componentUnit}
+                  />
                   <Datatable.Cell id="batchReference">
                     {data.batchReference}
                   </Datatable.Cell>
                   <Datatable.Cell id="fromLocation">
-                    {data.pickLocationName}{" "}
-                    <span className="text-content-muted">
+                    <TextLink
+                      href={`/inventory/locations/${data.pickLocationId}`}
+                    >
+                      {data.pickLocationName}
+                    </TextLink>
+                    <span className="ml-1 text-content-muted">
                       ({data.pickLocationGroupName})
                     </span>
                   </Datatable.Cell>
                   <Datatable.Cell id="toLocation">
-                    {data.putLocationName}{" "}
-                    <span className="text-content-muted">
+                    <TextLink
+                      href={`/inventory/locations/${data.putLocationId}`}
+                    >
+                      {data.putLocationName}
+                    </TextLink>
+                    <span className="ml-1 text-content-muted">
                       ({data.putLocationGroupName})
                     </span>
                   </Datatable.Cell>

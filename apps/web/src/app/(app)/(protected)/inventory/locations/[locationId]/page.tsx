@@ -1,12 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
 
-import { faCheck, faXmark } from "@repo/pro-solid-svg-icons";
 import { Datatable } from "@repo/ui/components/display";
-import { Badge, Button, Icon } from "@repo/ui/components/element";
-import { Heading, Text } from "@repo/ui/components/typography";
+import { Heading, Text, TextLink } from "@repo/ui/components/typography";
 
 interface LocationPageProps {
   params: { locationId: string };
@@ -15,7 +14,7 @@ interface LocationPageProps {
 export default function LocationPage({ params }: LocationPageProps) {
   const id = Number(params.locationId);
 
-  const { data: location } = api.inventory.locations.get.useQuery({
+  const { data: location } = api.location.get.useQuery({
     id,
   });
 
@@ -31,7 +30,7 @@ export default function LocationPage({ params }: LocationPageProps) {
       )}
 
       <DatatableQueryProvider
-        endpoint={api.inventory.quantity}
+        endpoint={api.inventory.list}
         defaultInput={{
           filter: {
             locationId: {
@@ -55,24 +54,26 @@ export default function LocationPage({ params }: LocationPageProps) {
               {({ data }) => (
                 <Datatable.Row key={`${data.componentId}`}>
                   <Datatable.Cell id="componentId">
-                    {data.componentId}
+                    <TextLink href={`/components/${data.componentId}`}>
+                      {data.componentId}
+                    </TextLink>
                   </Datatable.Cell>
                   <Datatable.Cell id="batchReference">
-                    {data.batchReference}
+                    {data.batchId ? `#${data.batchReference}` : ""}
                   </Datatable.Cell>
                   <Datatable.DecimalCell
                     id="total"
-                    value={data.total}
+                    value={data.totalQuantity}
                     unit={data.componentUnit}
                   />
                   <Datatable.DecimalCell
                     id="free"
-                    value={data.free}
+                    value={data.freeQuantity}
                     unit={data.componentUnit}
                   />
                   <Datatable.DecimalCell
                     id="allocated"
-                    value={data.allocated}
+                    value={data.allocatedQuantity}
                     unit={data.componentUnit}
                   />
                 </Datatable.Row>

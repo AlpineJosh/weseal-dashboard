@@ -3,6 +3,7 @@ import { LocationPicker } from "@/components/LocationPicker";
 import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { TRPCClientErrorLike } from "@trpc/client";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,7 +22,7 @@ interface ProductionTaskFormProps {
 
 const taskItemInput = z.object({
   componentId: z.string(),
-  batchId: z.number(),
+  batchId: z.number().optional(),
   locationId: z.number(),
   quantity: decimal(),
 });
@@ -67,20 +68,25 @@ export const ProductionTaskForm = ({
     },
   });
 
+  const formData = form.watch();
+  console.log(formData);
+
   const type = form.watch("type");
 
   const componentId = form.watch("outputComponentId");
   const quantity = form.watch("quantity");
   const productionJobId = form.watch("productionJobId");
   const batchReference = form.watch("batchReference");
-  const jobReady = !!productionJobId;
-
   const { data: component } = api.component.get.useQuery(
     {
       id: componentId,
     },
     { enabled: !!componentId },
   );
+  const jobReady =
+    (component && !component.isBatchTracked) ||
+    !!productionJobId ||
+    !!batchReference;
 
   const { data: subcomponents } = api.component.subcomponent.list.useQuery(
     {
@@ -102,35 +108,43 @@ export const ProductionTaskForm = ({
   );
 
   useEffect(() => {
-    if (componentId && productionJobs && productionJobs.rows.length === 0) {
-      form.setValue("type", "production-new");
+    if (component) {
+      if (!component.isBatchTracked) {
+        form.setValue("type", "production-new");
+      } else if (productionJobs?.rows.length === 0) {
+        form.setValue("type", "production-new");
+      }
     }
-  }, [componentId, productionJobs, form]);
+  }, [component, productionJobs, form]);
+
+  const onSuccess = async () => {
+    await utils.task.item.list.invalidate();
+    onSave();
+    addToast({
+      type: "success",
+      message: "Production Task Created",
+    });
+  };
+
+  const onError = (error: TRPCClientErrorLike<any>) => {
+    addToast({
+      type: "error",
+      message: error.message,
+    });
+  };
 
   const { mutate: createTask } = api.production.createJobTask.useMutation({
-    onSuccess: async () => {
-      await utils.task.item.list.invalidate();
-    },
+    onSuccess,
+    onError,
   });
 
   const { mutate: addToTask } = api.production.addToJob.useMutation({
-    onSuccess: async () => {
-      await utils.task.item.list.invalidate();
-      onSave();
-      addToast({
-        type: "success",
-        message: "Production Task Created",
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: "error",
-        message: error.message,
-      });
-    },
+    onSuccess,
+    onError,
   });
 
   const handleSubmit = (input: z.infer<typeof productionTaskInput>) => {
+    console.log(input);
     if (input.type === "production-new") {
       createTask({
         componentId: input.outputComponentId,
@@ -156,9 +170,6 @@ export const ProductionTaskForm = ({
     <Form
       className="flex flex-col space-x-4"
       onSubmit={handleSubmit}
-      onInvalid={(details) => {
-        console.log(details);
-      }}
       form={form}
     >
       <div className="flex flex-col items-stretch gap-4 [--grid-cols:200px_1fr]">
@@ -212,13 +223,11 @@ export const ProductionTaskForm = ({
                           form.setValue("type", "production-existing");
                         }}
                       >
-                        {(job) => {
-                          return (
-                            <Select.Option id={job.id}>
-                              {job.batchReference}
-                            </Select.Option>
-                          );
-                        }}
+                        {(job) => (
+                          <Select.Option id={job.id}>
+                            {job.batchReference}
+                          </Select.Option>
+                        )}
                       </Select>
                     </Field.Control>
                     <Button
@@ -236,49 +245,46 @@ export const ProductionTaskForm = ({
               </>
             )}
             {type === "production-new" && (
-              <>
-                <Field name="batchReference" layout="row">
-                  <Field.Label>Batch Reference</Field.Label>
-                  <Field.Control>
-                    <Input type="text" />
-                  </Field.Control>
-                </Field>
-                <Field name="outputLocationId" layout="row">
-                  <Field.Label>Job Output Location</Field.Label>
-                  <Field.Control>
-                    <AsyncCombobox
-                      data={(query) => {
-                        const { data, isLoading } = api.location.list.useQuery({
-                          search: { query },
-                        });
-                        return {
-                          isLoading: isLoading,
-                          items: data?.rows ?? [],
-                        };
-                      }}
-                      keyAccessor={(location) => location.id}
-                      textValueAccessor={(location) => location.name}
-                    >
-                      {(location) => {
-                        return (
-                          <Combobox.Option
-                            id={location.id}
-                            textValue={location.name}
-                          >
-                            {location.name}
-                          </Combobox.Option>
-                        );
-                      }}
-                    </AsyncCombobox>
-                  </Field.Control>
-                </Field>
-              </>
+              <Field name="batchReference" layout="row">
+                <Field.Label>Batch Reference</Field.Label>
+                <Field.Control>
+                  <Input type="text" required />
+                </Field.Control>
+              </Field>
             )}
           </>
         )}
+        {type === "production-new" && (
+          <Field name="outputLocationId" layout="row">
+            <Field.Label>Job Output Location</Field.Label>
+            <Field.Control>
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } = api.location.list.useQuery({
+                    search: { query },
+                  });
+                  return {
+                    isLoading: isLoading,
+                    items: data?.rows ?? [],
+                  };
+                }}
+                keyAccessor={(location) => location.id}
+                textValueAccessor={(location) => location.name}
+              >
+                {(location) => {
+                  return (
+                    <Combobox.Option id={location.id} textValue={location.name}>
+                      {location.name}
+                    </Combobox.Option>
+                  );
+                }}
+              </AsyncCombobox>
+            </Field.Control>
+          </Field>
+        )}
         <Divider />
 
-        <Field name="putLocationId" layout="row">
+        <Field name="inputLocationId" layout="row">
           <Field.Label>Input Location</Field.Label>
           <Field.Control>
             <AsyncCombobox
@@ -354,6 +360,7 @@ export const ProductionTaskForm = ({
                   }
                   value={value}
                   onChange={(items) => {
+                    console.log(items);
                     onChange({
                       target: {
                         value: items,
@@ -375,12 +382,7 @@ export const ProductionTaskForm = ({
           <Button variant="plain" color="default" onPress={onExit}>
             Cancel
           </Button>
-          <Button
-            isDisabled={!componentId}
-            variant="solid"
-            color="primary"
-            type="submit"
-          >
+          <Button variant="solid" color="primary" type="submit">
             Create Task
           </Button>
         </div>
