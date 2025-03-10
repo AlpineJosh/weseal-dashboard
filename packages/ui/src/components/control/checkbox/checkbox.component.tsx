@@ -5,10 +5,10 @@ import { faCheck } from "@repo/pro-solid-svg-icons";
 import { colorVariants } from "@repo/ui/lib/colors";
 
 import type { InputTypeProps } from "../../form/input/input.component";
+import { useControllable } from "../../../hooks/use-controllable.hook";
 import { Icon } from "../../element";
 import { Control } from "../../form/control/control.component";
 import { Input } from "../../form/input/input.component";
-import { useControllable } from "../../utility/hooks/useControllable.hook";
 
 const variants = cva(
   [

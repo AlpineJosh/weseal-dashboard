@@ -1,5 +1,5 @@
 import type { VariantProps } from "class-variance-authority";
-import type { ComponentPropsWithRef, ElementType } from "react";
+import type { ComponentPropsWithRef } from "react";
 import { cva } from "class-variance-authority";
 
 const variants = cva(
@@ -11,10 +11,11 @@ const variants = cva(
       variant: {
         box: [
           "relative block w-full",
-          "bg-panel border-content/10 hover:border-content/20 inset-ring-primary-strong rounded-lg border inset-ring-0 inset-shadow-2xs shadow-xs",
+          "bg-panel border-content/10 hover:border-content/20 rounded-lg border",
+          "inset-ring-primary-strong inset-ring-0 shadow-sm",
 
-          "focus-within:inset-ring-primary-strong focus-within:border-transparent focus-within:inset-ring-2 focus-within:shadow-sm focus-within:hover:border-transparent",
-          "invalid-within:border-destructive-content/50 invalid-within:inset-ring-destructive-strong invalid-within:focus-within:border-transparent",
+          "focus-within:inset-ring-primary-strong focus-within:border-primary-strong/100 focus-within:hover:border-primary-strong/100 focus-within:inset-ring-1 focus-within:shadow-sm",
+          "invalid-within:border-destructive-strong/50 invalid-within:inset-ring-destructive-strong invalid-within:focus-within:border-destructive-strong/100",
           "disabled-within:bg-content/5 disabled-within:opacity-50 disabled-within:shadow-none disabled-within:hover:border-content/10",
 
           // Common spacing

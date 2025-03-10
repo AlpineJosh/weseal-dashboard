@@ -6,8 +6,8 @@ import { cn } from "@repo/ui/lib/class-merge";
 
 import type { InputTypeProps } from "../../form/input";
 import type { OptionProps } from "../option/option.component";
+import { useControllable } from "../../../hooks/use-controllable.hook";
 import { Input } from "../../form/input";
-import { useControllable } from "../../utility/hooks/useControllable.hook";
 import { Listbox } from "../listbox/listbox.component";
 
 const variants = {

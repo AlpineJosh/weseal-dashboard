@@ -1,22 +1,20 @@
 "use client";
 
-import { cva } from "class-variance-authority";
+import { cv } from "@/utilities";
 import { Decimal } from "decimal.js";
 import { useImmer } from "use-immer";
 
-import { cn } from "@repo/ui/lib/class-merge";
-
 import type { InputTypeProps } from "../../form/input";
+import { useControllable } from "../../../hooks/use-controllable.hook";
 import { withControl } from "../../form/control/control.component";
 import { withField } from "../../form/field/with-field.hoc";
 import { Input } from "../../form/input";
-import { useControllable } from "../../utility/hooks/useControllable.hook";
 
-const variants = {
-  input: cva([
+const variants = cv({
+  base: [
     "relative block w-full appearance-none text-right tabular-nums focus:outline-none",
-  ]),
-};
+  ],
+});
 
 export type NumberInputProps = InputTypeProps<Decimal | null>;
 
@@ -52,7 +50,7 @@ export const NumberInput = ({
             setControlledValue(new Decimal(value));
           }
         }}
-        className={cn(variants.input())}
+        className={variants()}
       />
     </Input>
   );

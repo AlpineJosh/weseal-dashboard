@@ -1,20 +1,16 @@
 "use client";
 
-import { cva } from "class-variance-authority";
-
-import { cn } from "@repo/ui/lib/class-merge";
+import { cv } from "@/utilities";
 
 import type { InputTypeProps } from "../../form/input";
+import { useControllable } from "../../../hooks/use-controllable.hook";
 import { withControl } from "../../form/control/control.component";
 import { withField } from "../../form/field/with-field.hoc";
 import { Input } from "../../form/input";
-import { useControllable } from "../../utility/hooks/useControllable.hook";
 
-const variants = {
-  input: cva([
-    "relative block w-full appearance-none rounded-lg focus:outline-none",
-  ]),
-};
+const variants = cv({
+  base: ["relative block w-full appearance-none rounded-lg focus:outline-none"],
+});
 
 export type TextInputProps = InputTypeProps<string>;
 
@@ -38,7 +34,7 @@ export const TextInput = ({
         type="text"
         value={controlledValue}
         onChange={(event) => setControlledValue(event.target.value)}
-        className={cn(variants.input())}
+        className={variants()}
       />
     </Input>
   );

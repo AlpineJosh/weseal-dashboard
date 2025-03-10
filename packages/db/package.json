@@ -25,21 +25,21 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.9.4",
+    "@neondatabase/serverless": "^0.9.5",
     "@t3-oss/env-nextjs": "^0.10.1",
-    "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.32.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.32.2",
     "drizzle-zod": "^0.5.1",
-    "postgres": "^3.4.4",
+    "postgres": "^3.4.5",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
-    "@types/node": "^20.14.10",
-    "dotenv-cli": "^7.4.2",
-    "drizzle-kit": "^0.23.0",
+    "@types/node": "^20.17.23",
+    "dotenv-cli": "^7.4.4",
+    "drizzle-kit": "^0.23.2",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"

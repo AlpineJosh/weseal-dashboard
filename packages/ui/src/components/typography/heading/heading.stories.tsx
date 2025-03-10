@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 
 import type { HeadingProps } from "./heading.component";
 import { Heading, Subheading } from "./heading.component";

@@ -1,13 +1,9 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import React from "react";
-import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
 
 import { Popover } from "@repo/ui/components/utility";
-
-import { cn } from "../../../lib/class-merge";
 
 const variants = {
   root: cva(),

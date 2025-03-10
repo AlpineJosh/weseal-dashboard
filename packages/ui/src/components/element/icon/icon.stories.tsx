@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
-
-import { faUser } from "@repo/pro-light-svg-icons";
+import { faUser } from "@fortawesome/pro-light-svg-icons";
 
 import type { IconProps } from "./icon.component";
 import { Icon } from "./icon.component";

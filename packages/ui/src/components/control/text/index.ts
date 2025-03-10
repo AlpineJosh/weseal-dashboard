@@ -1,2 +1,2 @@
-export type { InputProps } from "./text.component";
-export { Input } from "./text.component";
+export type { TextInputProps } from "./text.component";
+export { TextInput, TextControl, TextField } from "./text.component";

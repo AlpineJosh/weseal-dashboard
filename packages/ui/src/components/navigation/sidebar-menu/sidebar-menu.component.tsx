@@ -13,7 +13,7 @@ import { faChevronDown, faChevronUp } from "@repo/pro-solid-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
 
 import { Icon } from "../../element";
-import { Link } from "../../element/link";
+import { Link } from "../../utility/link";
 import {
   NestingContext,
   SidebarMenuContext,
@@ -48,9 +48,9 @@ const styles = {
     "data-[slot=icon]:last:*:ml-auto data-[slot=icon]:last:*:size-5 sm:data-[slot=icon]:last:*:size-4",
   ]),
   itemContent: cva([
-    "text-current flex grow items-center gap-3 px-2 py-2.5 text-left text-base/6 font-medium sm:py-2 sm:text-sm/5",
+    "flex grow items-center gap-3 px-2 py-2.5 text-left text-base/6 font-medium text-current sm:py-2 sm:text-sm/5",
     // Leading icon/icon-only
-    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:text-content-muted sm:data-[slot=icon]:*:size-5",
+    "data-[slot=icon]:*:text-content-muted data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 sm:data-[slot=icon]:*:size-5",
     // Trailing icon (down chevron or similar)
     // Avatar
     "data-[slot=avatar]:*:-m-0.5 data-[slot=avatar]:*:size-7 data-[slot=avatar]:*:[--ring-opacity:10%] sm:data-[slot=avatar]:*:size-6",
@@ -126,7 +126,7 @@ const SubItems = ({
       <div
         className={cn(
           "relative ml-4 flex flex-col gap-y-1 pl-4",
-          "before:absolute before:inset-y-0 before:left-0 before:border-l before:border-content/10",
+          "before:border-content/10 before:absolute before:inset-y-0 before:left-0 before:border-l",
           className,
         )}
         {...props}
@@ -163,7 +163,7 @@ const Item = ({
       {pathname === props.href && (
         <motion.span
           layoutId="current-indicator"
-          className="absolute inset-y-1 -left-4 w-0.5 rounded-full bg-content"
+          className="bg-content absolute inset-y-1 -left-4 w-0.5 rounded-full"
           style={{
             left: `-${1 + 2 * (branch.length + (isParent ? -1 : 0))}rem`,
           }}

@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-
-import { faPlus } from "@repo/pro-light-svg-icons";
+import { faPlus } from "@fortawesome/pro-light-svg-icons";
 
 import type { ButtonProps } from "./button.component";
 import { Icon } from "..";
-import { colorVariants } from "../../../lib/colors";
 import { Button } from "./button.component";
 
 const meta: Meta<ButtonProps> = {
@@ -26,13 +24,14 @@ export const Default: Story = {
 
 export const Solid: Story = {
   render: (args) => (
-    <div className="grid grid-cols-5 gap-2">
-      {Object.keys(colorVariants).map((color) => (
-        <Button key={color} {...args} color={color as any}>
-          {color}
-        </Button>
-      ))}
-    </div>
+    <Button {...args}>Test</Button>
+    // <div className="grid grid-cols-5 gap-2">
+    //   {Object.keys(colorVariants).map((color) => (
+    //     <Button key={color} {...args} color={color as any}>
+    //       {color}
+    //     </Button>
+    //   ))}
+    // </div>
   ),
   args: {
     children: "Button",

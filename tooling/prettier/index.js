@@ -13,7 +13,7 @@ const config = {
   tailwindConfig: fileURLToPath(
     new URL("../tailwind/tailwind.config.ts", import.meta.url),
   ),
-  tailwindFunctions: ["cn", "cva"],
+  tailwindFunctions: ["cx"],
   importOrder: [
     "<TYPES>",
     "^(react/(.*)$)|^(react$)|^(react-native(.*)$)",

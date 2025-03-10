@@ -1,26 +1,35 @@
-import type { ReactElement } from "react";
-import { Children, isValidElement, useEffect, useMemo, useState } from "react";
-import { cva } from "class-variance-authority";
+import { isValidElement, useEffect, useMemo, useState } from "react";
+import type { ComposedChildren, RenderableChildren } from "@/utilities";
+import { Children, Children, cv } from "@/utilities";
 import { useImmer } from "use-immer";
 
 import type { InputTypeProps } from "../../form/input";
 import type { OptionProps } from "../option";
 // import { withControl } from "../../form/control/control.component";
 // import { withField } from "../../form/field/with-field.hoc";
-import { useControllable } from "../../utility/hooks/useControllable.hook";
+import type { Controllable} from "@/hooks/use-controllable.hook";
+import { useControllable } from "@/hooks/use-controllable.hook";
 import { ListboxProvider } from "./listbox.context";
+import type { OptionRenderProps } from "../option/option.component";
 
-const variants = cva(["bg-white shadow-md", "focus-within:bg-secondary"]);
+const variants = cv({
+  base: ["bg-white shadow-md", "focus-within:bg-secondary"],
+});
 
-export type ListboxProps<TValue, TOption> = Omit<
-  InputTypeProps<TValue>,
-  "children"
-> & {
+type BaseProps<TValue> = Controllable<TValue | undefined> & {
+  className?: string;
+}
+
+type CompoundProps<TValue, TOption> = BaseProps<TValue> & {
   options: TOption[];
-  children:
-    | ReactElement<OptionProps<TValue>>[]
-    | ((option: TOption) => ReactElement<OptionProps<TValue>>);
-};
+  children: RenderableChildren<OptionRenderProps<TOption>>
+}
+
+type ComposedProps<TValue, TOption> = CompoundProps<TValue, TOption> & {
+  children: ComposedChildren
+}
+
+export type ListboxProps<TValue, TOption> = ComposedProps<TValue, TOption> | CompoundProps<TValue, TOption>
 
 export const Listbox = <TValue, TOption>({
   children,
@@ -30,14 +39,16 @@ export const Listbox = <TValue, TOption>({
   defaultValue,
   onChange,
 }: ListboxProps<TValue, TOption>) => {
-  const [values, setValues] = useImmer<TValue[]>([]);
-
-  const [selectedValue, setSelectedValue] = useControllable({
+  const [selectedValue, setSelectedValue] = useControllable<TValue | undefined>({
     value,
     onChange,
-    defaultValue,
+    defaultValue
+  }, {
     requiresState: true,
   });
+  
+  const [values, setValues] = useImmer<TValue[]>([]);
+
 
   const [highlightedValue, setHighlightedValue] = useState<TValue | undefined>(
     undefined,

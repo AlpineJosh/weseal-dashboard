@@ -3,14 +3,11 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "ES2022"],
     "jsx": "react-jsx",
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "strictNullChecks": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@repo/ui/components/*": ["src/components/*"],
-      "@repo/ui/lib/*": ["src/lib/*"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["*.ts", "src"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", ".storybook", ".turbo", "storybook-static"]
 }

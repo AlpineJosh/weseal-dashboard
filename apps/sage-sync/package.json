@@ -31,31 +31,31 @@
   "license": "ISC",
   "dependencies": {
     "@repo/db": "workspace:*",
-    "@types/better-sqlite3": "^7.6.11",
-    "better-sqlite3": "^11.5.0",
-    "drizzle-orm": "^0.32.0",
-    "fs-extra": "^11.2.0",
-    "node-gyp": "^10.2.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "better-sqlite3": "^11.8.1",
+    "drizzle-orm": "^0.32.2",
+    "fs-extra": "^11.3.0",
+    "node-gyp": "^10.3.1",
     "node-schedule": "^2.1.1",
     "node-windows": "1.0.0-beta.8",
     "odbc": "^2.4.9",
-    "postgres": "^3.4.4",
+    "postgres": "^3.4.5",
     "sqlite": "^5.1.1",
-    "winston": "^3.16.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.18.10",
-    "@babel/preset-env": "^7.18.10",
-    "@babel/preset-typescript": "^7.24.0",
+    "@babel/cli": "^7.26.4",
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.26.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
-    "@rollup/plugin-commonjs": "^28.0.1",
-    "@rollup/plugin-node-resolve": "^15.3.0",
-    "@rollup/plugin-typescript": "^12.1.1",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.14.10",
+    "@types/node": "^20.17.23",
     "@types/node-schedule": "^2.1.7",
     "@types/node-windows": "^0.1.6",
     "@types/sqlite3": "^3.1.11",
@@ -65,15 +65,10 @@
     "pkg": "^5.8.1",
     "prettier": "catalog:",
     "rimraf": "^6.0.1",
-    "rollup": "^4.25.0",
+    "rollup": "^4.34.9",
     "ts-node": "^10.9.2",
-    "tsx": "^4.19.2",
+    "tsx": "^4.19.3",
     "typescript": "catalog:"
-  },
-  "pnpm": {
-    "neverBuiltDependencies": [
-      "node-windows"
-    ]
   },
   "prettier": "@repo/prettier-config"
 }

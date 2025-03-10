@@ -20,13 +20,18 @@
   "devDependencies": {
     "@repo/prettier-config": "workspace:*",
     "prettier": "catalog:",
-    "tsx": "^4.19.2",
-    "turbo": "^2.1.1",
+    "tsx": "^4.19.3",
+    "turbo": "^2.4.4",
     "typescript": "catalog:"
   },
   "packageManager": "pnpm@9.7.0",
   "engines": {
     "node": ">=20"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": [
+      "node-windows"
+    ]
   },
   "prettier": "@repo/prettier-config"
 }

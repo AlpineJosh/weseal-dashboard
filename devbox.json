@@ -4,7 +4,8 @@
     "nodejs@20.14.0",
     "turbo@latest",
     "supabase-cli@latest",
-    "dotenv-cli@latest"
+    "dotenv-cli@latest",
+    "git@latest"
   ],
   "env": {
     "DEVBOX_COREPACK_ENABLED": "true"

@@ -1,13 +1,8 @@
 "use client";
 
-import type { SeparatorProps } from "react-aria-components";
-import React from "react";
-import { cva, VariantProps } from "class-variance-authority";
-import { Separator as AriaSeparator } from "react-aria-components";
+import { cv, VariantProps } from "@/utilities";
 
-import { cn } from "@repo/ui/lib/class-merge";
-
-const variants = cva("", {
+const variants = cv({
   variants: {
     orientation: {
       horizontal: "h-0 w-full border-t",
@@ -24,14 +19,11 @@ const variants = cva("", {
   },
 });
 
-type DividerProps = SeparatorProps & VariantProps<typeof variants>;
+type DividerProps = VariantProps<typeof variants> & { className?: string };
 
 const Divider = ({ orientation, className, soft, ...props }: DividerProps) => {
   return (
-    <AriaSeparator
-      {...props}
-      className={cn(variants({ orientation, soft }), className)}
-    />
+    <div {...props} className={variants({ orientation, soft, className })} />
   );
 };
 

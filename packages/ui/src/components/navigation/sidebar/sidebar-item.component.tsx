@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import * as Aria from "react-aria-components";
 
-import type { LinkProps } from "../../element/link";
+import type { LinkProps } from "../../utility/link";
 import { cn } from "../../../lib/class-merge";
-import { Link } from "../../element/link";
+import { Link } from "../../utility/link";
 
 type SidebarItemProps = {
   current?: boolean;
@@ -14,9 +14,9 @@ type SidebarItemProps = {
 const Item = ({ current, className, children, ...props }: SidebarItemProps) => {
   const classes = cn(
     // Base
-    "text-current flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium sm:py-2 sm:text-sm/5",
+    "flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium text-current sm:py-2 sm:text-sm/5",
     // Leading icon/icon-only
-    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:text-content-muted sm:data-[slot=icon]:*:size-5",
+    "data-[slot=icon]:*:text-content-muted data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 sm:data-[slot=icon]:*:size-5",
     // Trailing icon (down chevron or similar)
     "data-[slot=icon]:last:*:ml-auto data-[slot=icon]:last:*:size-5 sm:data-[slot=icon]:last:*:size-4",
     // Avatar
@@ -34,7 +34,7 @@ const Item = ({ current, className, children, ...props }: SidebarItemProps) => {
       {current && (
         <motion.span
           layoutId="current-indicator"
-          className="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-content"
+          className="bg-content absolute inset-y-2 -left-4 w-0.5 rounded-full"
         />
       )}
       {"href" in props ? (

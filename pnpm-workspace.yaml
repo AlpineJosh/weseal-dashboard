@@ -4,10 +4,23 @@ packages:
   - tooling/*
 
 catalog:
-  eslint: ^9.9.0
-  prettier: ^3.3.3
-  tailwindcss: ^3.4.10
-  typescript: ^5.5.4
-  zod: ^3.23.8
-  typescript-eslint: ^8.7.0
+  eslint: ^9.21.0
+  prettier: ^3.5.3
+  tailwindcss: ^4.0.11
+  typescript: ^5.8.2
+  zod: ^3.24.2
+  react-hook-form: ^7.54.2
+  typescript-eslint: ^8.26.0
+  react: ^19.0.0
+  react-dom: ^19.0.0
+  next: ^15.2.1
+  use-immer: ^0.11.0
+  framer-motion: ^12.4.10
+  postcss: ^8.5.3
+  tailwindcss-animate: ^1.0.7
+  "@hookform/resolvers": ^3.10.0
   "@types/node": ^20.16.4
+  "@fortawesome/fontawesome-svg-core": ^6.7.2
+  "@fortawesome/react-fontawesome": ^0.2.2
+  "@fortawesome/pro-light-svg-icons": ^6.7.2
+  "@fortawesome/pro-solid-svg-icons": ^6.7.2

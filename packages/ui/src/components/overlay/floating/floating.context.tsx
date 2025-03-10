@@ -20,7 +20,7 @@ import {
   useTransitionStatus,
 } from "@floating-ui/react";
 
-import { useControllable } from "../../utility/hooks/useControllable.hook";
+import { useControllable } from "../../../hooks/use-controllable.hook";
 
 export type FloatingChildren =
   | React.ReactNode

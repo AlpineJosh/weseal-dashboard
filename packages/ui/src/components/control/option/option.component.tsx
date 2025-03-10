@@ -1,29 +1,39 @@
 import type { ComponentPropsWithRef } from "react";
-import { cva } from "class-variance-authority";
+import { cv } from "@/utilities";
 
 import { faCheck } from "@repo/pro-solid-svg-icons";
 
 import { Icon } from "../../element/icon/icon.component";
 import { useOption } from "./option.context";
 
+export interface OptionRenderProps<TOption> {
+  option: TOption;
+  isHighlighted: boolean;
+  isSelected: boolean;
+  select: () => void;
+  highlight: () => void;
+}
+
 export type OptionProps<TValue> = ComponentPropsWithRef<"div"> & {
   value: TValue;
   disabled?: boolean;
 };
 
-export const variants = cva([
-  // Basic layout
-  "group/option flex cursor-default flex-row items-center gap-x-2 rounded-lg py-2.5 pr-3.5 pl-2 sm:py-1.5 sm:pr-3 sm:pl-1.5",
-  // Typography
-  "text-base/6 sm:text-sm/6",
-  // Focus
-  "outline-none",
-  // Disabled
-  "disabled:opacity-50",
+export const variants = cv({
+  base: [
+    // Basic layout
+    "group/option flex cursor-default flex-row items-center gap-x-2 rounded-lg py-2.5 pr-3.5 pl-2 sm:py-1.5 sm:pr-3 sm:pl-1.5",
+    // Typography
+    "text-base/6 sm:text-sm/6",
+    // Focus
+    "outline-none",
+    // Disabled
+    "disabled:opacity-50",
 
-  "highlighted:bg-primary-strong highlighted:text-inverse",
-  // "selected:bg-primary-strong selected:text-inverse",
-]);
+    "highlighted:bg-primary-strong highlighted:text-inverse",
+    // "selected:bg-primary-strong selected:text-inverse",
+  ],
+});
 
 export const Option = <TValue,>({
   value,
