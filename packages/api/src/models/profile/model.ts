@@ -16,7 +16,7 @@ const overview = db
 
 export default datatable(
   {
-    id: "string",
+    id: "uuid",
     name: "string",
     email: "string",
   },

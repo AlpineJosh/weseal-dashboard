@@ -12,6 +12,7 @@ import {
 import { numericDecimal } from "../../lib/numeric";
 import { batch } from "./batch.schema";
 import { component } from "./component.schema";
+import { componentLot } from "./inventory.schema";
 import { location } from "./location.schema";
 
 export const productionJob = pgTable("production_job", {
@@ -110,6 +111,9 @@ export const productionJobAllocationLot = pgTable(
   "production_job_allocation_lot",
   {
     id: serial("id").notNull().primaryKey(),
+    componentLotId: integer("component_lot_id")
+      .notNull()
+      .references(() => componentLot.id),
     productionJobAllocationId: integer("production_job_allocation_id")
       .notNull()
       .references(() => productionJobAllocation.id),

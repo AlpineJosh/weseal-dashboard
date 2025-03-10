@@ -1,7 +1,17 @@
 import Decimal from "decimal.js";
 
 import type { Schema } from "@repo/db";
-import { and, asc, desc, eq, ne, schema, sql } from "@repo/db";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  ne,
+  publicSchema,
+  schema,
+  sql,
+} from "@repo/db";
 
 import type { Transaction } from "../../db";
 import { db } from "../../db";
@@ -56,7 +66,7 @@ export const fetchLotInventory = async (
       and(
         eq(schema.inventoryLot.locationId, locationId),
         eq(schema.componentLot.componentId, reference.componentId),
-        ne(schema.inventoryLot.freeQuantity, schema.inventoryLot.totalQuantity),
+        gt(schema.inventoryLot.freeQuantity, new Decimal(0)),
         reference.batchId
           ? eq(schema.componentLot.batchId, reference.batchId)
           : undefined,
@@ -333,6 +343,397 @@ export const updateInventory = async (
   );
 
   await Promise.all(promises);
+};
+
+export const allocateToTask = async (
+  tx: Transaction,
+  reference: InventoryReference,
+  quantity: Decimal,
+  taskId: number,
+  pickLocationId: number,
+  putLocationId?: number,
+) => {
+  const entry = await calculateOutboundEntry(
+    tx,
+    reference,
+    pickLocationId,
+    quantity,
+  );
+
+  const allocations = await tx
+    .insert(schema.taskAllocation)
+    .values({
+      componentId: entry.componentId,
+      batchId: entry.batchId,
+      pickLocationId: pickLocationId,
+      putLocationId: putLocationId,
+      quantity: entry.quantity,
+      taskId: taskId,
+    })
+    .returning();
+
+  const allocation = allocations[0];
+
+  if (!allocation) {
+    throw new Error("Failed to create production job allocation");
+  }
+
+  await tx.insert(schema.taskAllocationLot).values(
+    entry.lots.map((lot) => ({
+      componentLotId: lot.id,
+      taskAllocationId: allocation.id,
+      quantity: lot.quantity,
+    })),
+  );
+
+  await updateInventory(tx, entry, "allocation");
+};
+
+export const completeTaskAllocation = async (
+  tx: Transaction,
+  taskAllocationId: number,
+  userId: string,
+) => {
+  const allocations = await tx
+    .select({
+      componentId: schema.taskAllocation.componentId,
+      batchId: schema.taskAllocation.batchId,
+      pickLocationId: schema.taskAllocation.pickLocationId,
+      putLocationId: schema.taskAllocation.putLocationId,
+      quantity: schema.taskAllocation.quantity,
+      taskId: schema.taskAllocation.taskId,
+      type: schema.task.type,
+      productionJobId: schema.task.productionJobId,
+      salesDespatchId: schema.task.salesDespatchId,
+    })
+    .from(schema.taskAllocation)
+    .where(eq(schema.taskAllocation.id, taskAllocationId))
+    .leftJoin(schema.task, eq(schema.taskAllocation.taskId, schema.task.id))
+    .limit(1);
+
+  const allocation = allocations[0];
+
+  if (!allocation || !allocation.type) {
+    throw new Error("Task allocation not found");
+  }
+
+  const allocationLots = await tx
+    .select()
+    .from(schema.taskAllocationLot)
+    .where(eq(schema.taskAllocationLot.taskAllocationId, taskAllocationId));
+
+  const entry = {
+    componentId: allocation.componentId,
+    batchId: allocation.batchId ?? undefined,
+    quantity: allocation.quantity,
+    lots: allocationLots,
+  };
+
+  const details: LedgerEntryDetails = {
+    userId,
+    type: allocation.type,
+  };
+
+  if (allocation.salesDespatchId) {
+    const salesDespatchItem = await tx
+      .insert(schema.salesDespatchItem)
+      .values({
+        despatchId: allocation.salesDespatchId,
+        componentId: entry.componentId,
+        batchId: entry.batchId,
+        quantity: entry.quantity,
+      })
+      .returning({
+        id: schema.salesDespatchItem.id,
+      });
+
+    details.salesDespatchItemId = salesDespatchItem[0]?.id;
+  }
+
+  if (allocation.productionJobId && allocation.putLocationId) {
+    const productionAllocations = await tx
+      .insert(schema.productionJobAllocation)
+      .values({
+        componentId: entry.componentId,
+        batchId: entry.batchId,
+        locationId: allocation.putLocationId,
+        totalQuantity: entry.quantity,
+        remainingQuantity: entry.quantity,
+        usedQuantity: new Decimal(0),
+        productionJobId: allocation.productionJobId,
+      })
+      .returning();
+
+    const productionAllocation = productionAllocations[0];
+
+    if (!productionAllocation) {
+      throw new Error("Failed to create production job allocation");
+    }
+
+    await tx.insert(schema.productionJobAllocationLot).values(
+      entry.lots.map((lot) => ({
+        componentLotId: lot.id,
+        productionJobAllocationId: productionAllocation.id,
+        quantity: lot.quantity,
+      })),
+    );
+
+    await updateInventory(
+      tx,
+      {
+        ...entry,
+        locationId: allocation.putLocationId,
+      },
+      "allocation",
+    );
+
+    details.productionJobAllocationId = productionAllocation.id;
+  }
+
+  await tx
+    .update(schema.taskAllocation)
+    .set({
+      isComplete: true,
+    })
+    .where(eq(schema.taskAllocation.id, taskAllocationId));
+
+  await updateInventory(
+    tx,
+    {
+      ...entry,
+      locationId: allocation.pickLocationId,
+    },
+    "deallocation",
+  );
+
+  await updateInventory(
+    tx,
+    {
+      ...entry,
+      locationId: allocation.pickLocationId,
+    },
+    "outbound",
+  );
+  await logToLedger(
+    tx,
+    "outbound",
+    {
+      ...entry,
+      locationId: allocation.pickLocationId,
+    },
+    details,
+  );
+
+  if (allocation.putLocationId) {
+    await updateInventory(
+      tx,
+      {
+        ...entry,
+        locationId: allocation.putLocationId,
+      },
+      "inbound",
+    );
+
+    await logToLedger(
+      tx,
+      "inbound",
+      {
+        ...entry,
+        locationId: allocation.putLocationId,
+      },
+      details,
+    );
+  }
+};
+
+export const processProductionOut = async (
+  tx: Transaction,
+  productionJobId: number,
+  quantity: Decimal,
+  userId: string,
+) => {
+  const jobs = await tx
+    .select()
+    .from(schema.productionJob)
+    .where(eq(schema.productionJob.id, productionJobId))
+    .limit(1);
+
+  const job = jobs[0];
+
+  if (!job) {
+    throw new Error("Production job not found");
+  }
+
+  const wip = await tx.query.component.findFirst({
+    where: eq(schema.component.id, `${job.componentId}WIP`),
+  });
+
+  const componentId = wip ? wip.id : job.componentId;
+
+  const subcomponents = await tx
+    .select()
+    .from(schema.subcomponent)
+    .where(eq(schema.subcomponent.componentId, componentId));
+
+  for (const subcomponent of subcomponents) {
+    const allocations = await tx
+      .select({
+        id: schema.productionJobAllocation.id,
+        componentId: schema.productionJobAllocation.componentId,
+        batchId: schema.productionJobAllocation.batchId,
+        locationId: schema.productionJobAllocation.locationId,
+        remainingQuantity: schema.productionJobAllocation.remainingQuantity,
+        usedQuantity: schema.productionJobAllocation.usedQuantity,
+        quantity: schema.productionJobAllocationLot.quantity,
+      })
+      .from(schema.productionJobAllocation)
+      .where(
+        and(
+          eq(
+            schema.productionJobAllocation.componentId,
+            subcomponent.subcomponentId,
+          ),
+          eq(schema.productionJobAllocation.productionJobId, productionJobId),
+        ),
+      );
+
+    let requiredQuantity = quantity.mul(subcomponent.quantity);
+
+    for (const allocation of allocations) {
+      // Get the lots for this allocation ordered by componentLotId (FIFO)
+      const lots = await tx
+        .select()
+        .from(schema.productionJobAllocationLot)
+        .where(
+          eq(
+            schema.productionJobAllocationLot.productionJobAllocationId,
+            allocation.id,
+          ),
+        )
+        .orderBy(asc(schema.productionJobAllocationLot.componentLotId));
+
+      let remainingToUse = Decimal.min(
+        allocation.remainingQuantity,
+        requiredQuantity,
+      );
+      const usedLots: { id: number; quantity: Decimal }[] = [];
+
+      // Use up lots one by one until we have enough quantity
+      for (const lot of lots) {
+        if (remainingToUse.lte(0)) break;
+
+        const useFromLot = Decimal.min(lot.quantity, remainingToUse);
+        usedLots.push({
+          id: lot.componentLotId,
+          quantity: useFromLot,
+        });
+        remainingToUse = remainingToUse.sub(useFromLot);
+      }
+
+      const useQuantity = requiredQuantity.sub(remainingToUse);
+
+      const entry: InventoryEntry = {
+        componentId: allocation.componentId,
+        batchId: allocation.batchId ?? undefined,
+        locationId: allocation.locationId,
+        quantity: useQuantity,
+        lots: usedLots,
+      };
+
+      // Update the allocation's remaining quantity
+      await tx
+        .update(schema.productionJobAllocation)
+        .set({
+          remainingQuantity: allocation.remainingQuantity.sub(useQuantity),
+          usedQuantity: allocation.usedQuantity.add(useQuantity),
+        })
+        .where(eq(schema.productionJobAllocation.id, allocation.id));
+
+      // Process the inventory movements
+      await updateInventory(tx, entry, "deallocation");
+      await updateInventory(tx, entry, "outbound");
+      await logToLedger(tx, "outbound", entry, {
+        userId,
+        type: "production",
+        productionJobAllocationId: allocation.id,
+      });
+
+      requiredQuantity = requiredQuantity.sub(useQuantity);
+      if (requiredQuantity.lte(0)) {
+        break;
+      }
+    }
+  }
+
+  const entry = await createInboundEntry(
+    tx,
+    {
+      componentId: job.componentId,
+      batchId: job.batchId ?? undefined,
+    },
+    job.outputLocationId,
+    quantity,
+    new Date(),
+    undefined,
+    productionJobId,
+  );
+
+  await updateInventory(tx, entry, "inbound");
+  await logToLedger(tx, "inbound", entry, {
+    userId,
+    type: "production",
+  });
+};
+
+export const adjustInventory = async (
+  tx: Transaction,
+  reference: InventoryReference,
+  locationId: number,
+  quantity: Decimal,
+  type: "correction" | "wastage" | "lost" | "found",
+  userId: string,
+) => {
+  let entry;
+  if (quantity.gt(0)) {
+    entry = await calculateOutboundEntry(tx, reference, locationId, quantity);
+    await updateInventory(tx, entry, "outbound");
+    await logToLedger(tx, "outbound", entry, {
+      userId,
+      type,
+    });
+  } else {
+    entry = await assignInboundEntry(tx, reference, locationId, quantity);
+    await updateInventory(tx, entry, "inbound");
+    await logToLedger(tx, "inbound", entry, {
+      userId,
+      type,
+    });
+  }
+};
+
+export const processReceipt = async (
+  tx: Transaction,
+  reference: InventoryReference,
+  locationId: number,
+  quantity: Decimal,
+  entryDate: Date,
+  purchaseReceiptItemId: number,
+  userId: string,
+) => {
+  const entry = await createInboundEntry(
+    tx,
+    reference,
+    locationId,
+    quantity,
+    entryDate,
+    purchaseReceiptItemId,
+  );
+
+  await updateInventory(tx, entry, "inbound");
+  await logToLedger(tx, "inbound", entry, {
+    userId,
+    type: "receipt",
+  });
 };
 
 const overview = db

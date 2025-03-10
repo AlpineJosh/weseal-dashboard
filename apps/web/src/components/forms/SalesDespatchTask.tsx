@@ -13,14 +13,14 @@ import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
-  salesOrderId: z.number(),
+  orderId: z.number(),
   assignedToId: z.string(),
   items: z.array(
     z.object({
       componentId: z.string(),
       batchId: z.number(),
       quantity: decimal(),
-      pickLocationId: z.number(),
+      locationId: z.number(),
     }),
   ),
 });
@@ -37,7 +37,7 @@ export function SalesDespatchTaskForm({
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      salesOrderId: undefined,
+      orderId: undefined,
       assignedToId: undefined,
       items: [],
     },
@@ -45,37 +45,38 @@ export function SalesDespatchTaskForm({
 
   const { addToast } = useToast();
 
-  const salesOrderId = form.watch("salesOrderId");
+  const orderId = form.watch("orderId");
 
   const { data: orderItems } = api.despatching.order.item.list.useQuery(
     {
       filter: {
-        orderId: { eq: salesOrderId },
+        orderId: { eq: orderId },
       },
     },
-    { enabled: !!salesOrderId },
+    { enabled: !!orderId },
   );
 
-  const { mutate: createTask } = api.task.create.useMutation({
-    onSuccess: async () => {
-      await utils.task.item.list.invalidate();
-    },
-  });
-
-  const handleSave = ({
-    items,
-    assignedToId,
-    salesOrderId,
-  }: z.infer<typeof taskSchema>) => {
-    createTask({
-      type: "despatch",
-      assignedToId,
-      salesOrderId,
-      items,
+  const { mutate: createTask } =
+    api.despatching.despatch.createDespatchTask.useMutation({
+      onSuccess: async () => {
+        await utils.task.item.list.invalidate();
+        onSave();
+        addToast({
+          type: "success",
+          message: "Despatch Task Created",
+        });
+      },
+      onError: (error) => {
+        addToast({
+          type: "error",
+          message: error.message,
+        });
+      },
     });
 
+  const handleSave = (task: z.infer<typeof taskSchema>) => {
+    createTask(task);
     addToast({ message: "Despatch task created", type: "success" });
-
     onSave();
   };
 
@@ -87,7 +88,7 @@ export function SalesDespatchTaskForm({
     >
       <h1 className="text-2xl font-semibold">Prepare Despatch</h1>
       <Divider />
-      <Field name="salesOrderId" layout="row">
+      <Field name="orderId" layout="row">
         <Field.Label>Sales Order</Field.Label>
         <Field.Control>
           <AsyncCombobox
@@ -138,7 +139,7 @@ export function SalesDespatchTaskForm({
         </Field.Control>
       </Field>
       <div className="-mx-8 flex max-h-[400px] flex-col overflow-y-auto border-b border-t border-content/10 bg-background-muted px-8">
-        {salesOrderId ? (
+        {orderId ? (
           <Controller
             control={form.control}
             name="items"
@@ -181,7 +182,7 @@ export function SalesDespatchTaskForm({
           Cancel
         </Button>
         <Button
-          isDisabled={!salesOrderId}
+          isDisabled={!orderId}
           variant="solid"
           color="primary"
           type="submit"

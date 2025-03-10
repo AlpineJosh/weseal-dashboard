@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import { Combobox, Input } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
+import { useToast } from "@repo/ui/components/display/toaster";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
@@ -24,6 +25,7 @@ export function PurchaseReceiptTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
+  const { addToast } = useToast();
   const utils = api.useUtils();
 
   const form = useForm<z.infer<typeof taskSchema>>({
@@ -77,6 +79,17 @@ export function PurchaseReceiptTaskForm({
   const { mutate: receiveOrder } = api.receiving.order.receive.useMutation({
     onSuccess: async () => {
       await utils.receiving.order.item.list.invalidate();
+      onSave();
+      addToast({
+        type: "success",
+        message: "Purchase Order Received",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        type: "error",
+        message: error.message,
+      });
     },
   });
 
@@ -89,7 +102,6 @@ export function PurchaseReceiptTaskForm({
         quantity: item.quantity,
       })),
     });
-    onSave();
   };
 
   return (

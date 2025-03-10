@@ -37,9 +37,6 @@ export const buildSearchClause = <T extends DatatableDefinition>(
 ): SQL | undefined => {
   if (!input) return undefined;
 
-  console.log(availableFields);
-  console.log(input);
-
   const { query, fields } = input;
   const whereClause: (SQL | undefined)[] = [];
   if (query.length > 0) {

@@ -6,6 +6,7 @@ import { and, eq, publicSchema } from "@repo/db";
 import { db } from "../../db";
 import { decimal } from "../../lib/decimal";
 import { publicProcedure } from "../../trpc";
+import { allocateToTask, processProductionOut } from "../inventory/model";
 // import { processAllocateLedgerEntry } from "../inventory/model";
 import overview from "./model";
 
@@ -56,45 +57,37 @@ export const productionRouter = {
     .input(createProductionTaskInput)
     .mutation(async ({ input, ctx }) => {
       return await db.transaction(async (tx) => {
-        let batch;
+        let batchId: number | undefined;
         if (input.batchReference) {
-          let batches = await tx
-            .select()
-            .from(publicSchema.batch)
-            .where(
-              and(
-                eq(publicSchema.batch.batchReference, input.batchReference),
-                eq(publicSchema.batch.componentId, input.componentId),
-              ),
-            );
-          if (batches.length === 0) {
-            batches = await tx
-              .insert(publicSchema.batch)
-              .values({
-                batchReference: input.batchReference,
-                componentId: input.componentId,
-              })
-              .returning();
+          const batches = await tx
+            .insert(publicSchema.batch)
+            .values({
+              batchReference: input.batchReference,
+              componentId: input.componentId,
+            })
+            .returning();
+          const batch = batches[0];
 
-            if (batches.length === 0) {
-              throw new Error("Failed to create batch");
-            }
+          if (!batch) {
+            throw new Error("Batch not found");
           }
-          batch = batches[0];
+
+          batchId = batch.id;
         }
 
-        const productionJobs = await tx
+        const jobs = await tx
           .insert(publicSchema.productionJob)
           .values({
             componentId: input.componentId,
+            batchId,
             outputLocationId: input.outputLocationId,
-            batchId: batch?.id,
             targetQuantity: input.targetQuantity,
           })
           .returning();
 
-        const productionJob = productionJobs[0];
-        if (!productionJob) {
+        const job = jobs[0];
+
+        if (!job) {
           throw new Error("Failed to create production job");
         }
 
@@ -102,40 +95,31 @@ export const productionRouter = {
           .insert(publicSchema.task)
           .values({
             type: "production",
-            productionJobId: productionJob.id,
+            productionJobId: job.id,
             assignedToId: input.assignedToId,
             createdById: ctx.user.id,
           })
           .returning();
 
         const task = tasks[0];
+
         if (!task) {
-          throw new Error("Failed to create task");
+          throw new Error("Failed to create production task");
         }
 
-        await tx.insert(publicSchema.taskAllocation).values(
-          input.items.map((item) => ({
-            taskId: task.id,
-            componentId: item.componentId,
-            batchId: item.batchId,
-            pickLocationId: item.locationId,
-            putLocationId: input.inputLocationId,
-            quantity: item.quantity,
-          })),
-        );
-
-        // await Promise.all(
-        //   input.items.map((item) =>
-        //     processAllocateLedgerEntry({
-        //       componentId: item.componentId,
-        //       batchId: item.batchId,
-        //       locationId: item.locationId,
-        //       quantity: item.quantity,
-        //       type: "transfer",
-        //       userId: input.assignedToId,
-        //     }),
-        //   ),
-        // );
+        for (const item of input.items) {
+          await allocateToTask(
+            tx,
+            {
+              componentId: item.componentId,
+              batchId: item.batchId,
+            },
+            item.quantity,
+            task.id,
+            item.locationId,
+            input.inputLocationId,
+          );
+        }
       });
     }),
   addToJob: publicProcedure
@@ -157,29 +141,19 @@ export const productionRouter = {
           throw new Error("Failed to create task");
         }
 
-        await tx.insert(publicSchema.taskAllocation).values(
-          input.items.map((item) => ({
-            taskId: task.id,
-            componentId: item.componentId,
-            batchId: item.batchId,
-            pickLocationId: item.locationId,
-            putLocationId: input.inputLocationId,
-            quantity: item.quantity,
-          })),
-        );
-
-        // await Promise.all(
-        //   input.items.map((item) =>
-        //     processAllocateLedgerEntry({
-        //       componentId: item.componentId,
-        //       batchId: item.batchId,
-        //       locationId: item.locationId,
-        //       quantity: item.quantity,
-        //       type: "transfer",
-        //       userId: input.assignedToId,
-        //     }),
-        //   ),
-        // );
+        for (const item of input.items) {
+          await allocateToTask(
+            tx,
+            {
+              componentId: item.componentId,
+              batchId: item.batchId,
+            },
+            item.quantity,
+            task.id,
+            item.locationId,
+            input.inputLocationId,
+          );
+        }
       });
     }),
 
@@ -187,30 +161,7 @@ export const productionRouter = {
     .input(processOutputInput)
     .mutation(async ({ input, ctx }) => {
       return await db.transaction(async (tx) => {
-        const job = await tx.query.productionJob.findFirst({
-          where: eq(publicSchema.productionJob.id, input.id),
-        });
-
-        if (!job) {
-          throw new Error("Production job not found");
-        }
-
-        const wip = await tx.query.component.findFirst({
-          where: eq(publicSchema.component.id, `${job.componentId}WIP`),
-        });
-
-        const componentId = wip ? wip.id : job.componentId;
-
-        // const subcomponents = await tx.query.subcomponent.findMany({
-        //   where: eq(publicSchema.subcomponent.componentId, componentId),
-        // });
-
-        // const batchInputs = await tx.query.productionBatchInput.findMany({
-        //   where: eq(publicSchema.productionBatchInput.jobId, input.id),
-        //   with: {
-        //     batch: true,
-        //   },
-        // });
+        await processProductionOut(tx, input.id, input.quantity, ctx.user.id);
       });
     }),
 } satisfies TRPCRouterRecord;

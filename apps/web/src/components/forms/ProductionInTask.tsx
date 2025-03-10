@@ -22,7 +22,7 @@ interface ProductionTaskFormProps {
 const taskItemInput = z.object({
   componentId: z.string(),
   batchId: z.number(),
-  pickLocationId: z.number(),
+  locationId: z.number(),
   quantity: decimal(),
 });
 
@@ -30,7 +30,7 @@ const taskInput = z.object({
   assignedToId: z.string(),
   items: z.array(taskItemInput),
   quantity: decimal(),
-  putLocationId: z.number(),
+  inputLocationId: z.number(),
 });
 
 const newProductionTaskInput = taskInput.extend({
@@ -73,7 +73,7 @@ export const ProductionTaskForm = ({
   const quantity = form.watch("quantity");
   const productionJobId = form.watch("productionJobId");
   const batchReference = form.watch("batchReference");
-  const jobReady = !!productionJobId || !!batchReference;
+  const jobReady = !!productionJobId;
 
   const { data: component } = api.component.get.useQuery(
     {
@@ -101,10 +101,6 @@ export const ProductionTaskForm = ({
     { enabled: component?.isBatchTracked },
   );
 
-  console.log(productionJobs);
-  console.log(component);
-  console.log(subcomponents);
-
   useEffect(() => {
     if (componentId && productionJobs && productionJobs.rows.length === 0) {
       form.setValue("type", "production-new");
@@ -117,13 +113,43 @@ export const ProductionTaskForm = ({
     },
   });
 
+  const { mutate: addToTask } = api.production.addToJob.useMutation({
+    onSuccess: async () => {
+      await utils.task.item.list.invalidate();
+      onSave();
+      addToast({
+        type: "success",
+        message: "Production Task Created",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        type: "error",
+        message: error.message,
+      });
+    },
+  });
+
   const handleSubmit = (input: z.infer<typeof productionTaskInput>) => {
-    createTask(input);
-    onSave();
-    addToast({
-      type: "success",
-      message: "Production Task Created",
-    });
+    if (input.type === "production-new") {
+      createTask({
+        componentId: input.outputComponentId,
+        batchReference: input.batchReference,
+        assignedToId: input.assignedToId,
+        outputLocationId: input.outputLocationId,
+        targetQuantity: input.quantity,
+        items: input.items,
+        inputLocationId: input.inputLocationId,
+      });
+    } else {
+      addToTask({
+        id: input.productionJobId,
+        assignedToId: input.assignedToId,
+        items: input.items,
+        inputLocationId: input.inputLocationId,
+        additionalQuantity: input.quantity,
+      });
+    }
   };
 
   return (

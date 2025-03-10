@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Combobox, Input } from "@repo/ui/components/control";
+import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
@@ -22,6 +23,7 @@ export function StockAdjustmentTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
+  const { addToast } = useToast();
   const form = useForm<z.infer<typeof taskSchema>>({
     defaultValues: {
       quantity: 1,
@@ -33,9 +35,21 @@ export function StockAdjustmentTaskForm({
 
   const componentId = form.watch("componentId");
 
-  const { mutate: createMovement } = api.inventory.movements.create.useMutation(
-    {},
-  );
+  const { mutate: adjustActivity } = api.inventory.adjust.useMutation({
+    onSuccess: async () => {
+      onSave();
+      addToast({
+        type: "success",
+        message: "Stock Adjustment Logged",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        type: "error",
+        message: error.message,
+      });
+    },
+  });
 
   const handleSubmit = ({
     locationId,
@@ -45,13 +59,13 @@ export function StockAdjustmentTaskForm({
       number,
       number,
     ];
-    console.log(locId, batchId, quantity);
-    createMovement({
+    adjustActivity({
+      componentId,
       batchId,
       locationId: locId,
       quantity,
+      type: "correction",
     });
-    onSave();
   };
 
   return (

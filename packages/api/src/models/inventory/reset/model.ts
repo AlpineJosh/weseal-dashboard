@@ -478,20 +478,6 @@ const balanceInventory = (
     locations.set(location.locationId, entry);
   }
 
-  if (componentId === "WS051RD012003000EB090") {
-    console.log(
-      JSON.stringify(
-        Array.from(locations.entries()).map(([locationId, amounts]) => {
-          return {
-            locationId,
-            current: amounts.current.toFixed(2),
-            target: amounts.target.toFixed(2),
-          };
-        }),
-      ),
-    );
-  }
-
   for (const [locationId, amounts] of locations) {
     if (amounts.current.gt(amounts.target)) {
       let excess = amounts.current.minus(amounts.target);
@@ -722,9 +708,6 @@ export const resetInventory = async () => {
           },
           {} as Record<number, { locationId: number; quantity: Decimal }[]>,
         );
-      if (component.id === "WS051RD012003000EB090") {
-        console.log(JSON.stringify(targetBatches));
-      }
 
       const currentBatches = currentInventory
         .filter((i) => i.componentId === component.id && i.batchId !== null)
@@ -743,10 +726,6 @@ export const resetInventory = async () => {
           },
           {} as Record<number, { locationId: number; quantity: Decimal }[]>,
         );
-
-      if (component.id === "WS051RD012003000EB090") {
-        console.log(JSON.stringify(currentBatches));
-      }
 
       // Process each batch separately
       const batches = new Set([
@@ -790,10 +769,6 @@ export const resetInventory = async () => {
       const unbatchedCurrent = currentInventory.filter(
         (i) => i.componentId === component.id && i.batchId === null,
       );
-
-      if (component.id === "WS051RD012003000EB090") {
-        console.log(JSON.stringify(unbatchedCurrent));
-      }
 
       balanceInventory(processor, unbatchedCurrent, []);
     } else {

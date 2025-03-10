@@ -10,8 +10,11 @@ import { Input, Switch } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
-type TaskItem = RouterInputs["task"]["create"]["items"][number] & {
+type TaskItem = {
   componentId: string;
+  locationId: number;
+  batchId?: number;
+  quantity: Decimal;
 };
 
 export interface LocationPickerItemProps {
@@ -133,7 +136,7 @@ const LocationPickerItem = ({
     for (const location of inventory) {
       if (location.overridden && !location.blocked && location.using.gt(0)) {
         batches.push({
-          pickLocationId: location.locationId,
+          locationId: location.locationId,
           batchId: location.batchId,
           quantity: location.using,
           componentId: id,
@@ -149,7 +152,7 @@ const LocationPickerItem = ({
           if (use.gt(0)) {
             remaining = remaining.sub(use);
             batches.push({
-              pickLocationId: location.locationId,
+              locationId: location.locationId,
               batchId: location.batchId,
               quantity: use,
               componentId: id,
@@ -164,7 +167,7 @@ const LocationPickerItem = ({
       batches.some((newBatch) => {
         const existingBatch = value.find(
           (batch) =>
-            batch.pickLocationId === newBatch.pickLocationId &&
+            batch.locationId === newBatch.locationId &&
             batch.batchId === newBatch.batchId,
         );
         return !existingBatch || !existingBatch.quantity.eq(newBatch.quantity);
@@ -178,7 +181,7 @@ const LocationPickerItem = ({
   const getUsing = (inventory: InventoryType) => {
     const existing = value.find(
       (batch) =>
-        batch.pickLocationId === inventory.locationId &&
+        batch.locationId === inventory.locationId &&
         batch.batchId === inventory.batchId,
     );
     return existing?.quantity ?? 0;

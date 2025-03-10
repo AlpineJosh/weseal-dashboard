@@ -30,8 +30,8 @@ const items = db
     totalItems: count().as("total_items"),
     incompleteItems: count(
       ne(
-        coalesce(sum(salesOrderItem.quantityOrdered), 0),
-        coalesce(sum(despatchItems.quantity), 0),
+        coalesce(salesOrderItem.quantityOrdered, 0),
+        coalesce(despatchItems.quantity, 0),
       ),
     ).as("incomplete_items"),
   })

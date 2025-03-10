@@ -18,7 +18,8 @@ export type FieldDataType =
   | "array"
   | "json"
   | "custom"
-  | "buffer";
+  | "buffer"
+  | "uuid";
 
 interface DataTypeMap {
   string: string;

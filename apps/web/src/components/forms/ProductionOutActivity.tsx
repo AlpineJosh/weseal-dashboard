@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Combobox, Input } from "@repo/ui/components/control";
+import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
@@ -24,6 +25,7 @@ export function ProductionOutTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
+  const { addToast } = useToast();
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -37,7 +39,21 @@ export function ProductionOutTaskForm({
   const componentId = form.watch("componentId");
 
   const { mutate: processProduction } =
-    api.production.processOutput.useMutation();
+    api.production.processOutput.useMutation({
+      onSuccess: async () => {
+        onSave();
+        addToast({
+          type: "success",
+          message: "Production Out Logged",
+        });
+      },
+      onError: (error) => {
+        addToast({
+          type: "error",
+          message: error.message,
+        });
+      },
+    });
 
   const handleSubmit = ({
     productionJobId,

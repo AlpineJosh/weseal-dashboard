@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Combobox, Input } from "@repo/ui/components/control";
+import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
@@ -24,6 +25,7 @@ export function StockTransferTaskForm({
   onSave: () => void;
   onExit: () => void;
 }) {
+  const { addToast } = useToast();
   const utils = api.useUtils();
   const form = useForm<z.infer<typeof taskSchema>>({
     defaultValues: {
@@ -37,9 +39,20 @@ export function StockTransferTaskForm({
   });
   const componentId = form.watch("componentId");
 
-  const { mutate: createTask } = api.task.create.useMutation({
+  const { mutate: createTask } = api.inventory.createTransferTask.useMutation({
     onSuccess: async () => {
       await utils.task.item.list.invalidate();
+      onSave();
+      addToast({
+        type: "success",
+        message: "Transfer Task Created",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        type: "error",
+        message: error.message,
+      });
     },
   });
 
@@ -51,7 +64,6 @@ export function StockTransferTaskForm({
   }: z.infer<typeof taskSchema>) => {
     const pick = pickLocationId.toString().split("-");
     createTask({
-      type: "transfer",
       assignedToId,
       putLocationId,
       items: [

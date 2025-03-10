@@ -6,6 +6,7 @@ import { eq, publicSchema } from "@repo/db";
 import { db } from "../../../db";
 import { decimal } from "../../../lib/decimal";
 import { publicProcedure } from "../../../trpc";
+import { allocateToTask } from "../../inventory/model";
 import overview from "./model";
 
 export const uniqueDespatchSchema = z.object({
@@ -55,62 +56,55 @@ export const salesDespatchRouter = {
   createDespatchTask: publicProcedure
     .input(createDespatchTaskSchema)
     .mutation(async ({ input, ctx }) => {
-      const despatches = await db
-        .insert(publicSchema.salesDespatch)
-        .values({
-          orderId: input.orderId,
-          despatchDate: new Date(),
-        })
-        .returning({
-          id: publicSchema.salesDespatch.id,
-        });
-
-      const despatch = despatches[0];
-
-      if (!despatch) {
-        throw new Error("Failed to create despatch");
-      }
-
-      const tasks = await db
-        .insert(publicSchema.task)
-        .values({
-          salesDespatchId: despatch.id,
-          type: "despatch",
-          createdById: ctx.user.id,
-          assignedToId: input.assignedToId,
-        })
-        .returning({
-          id: publicSchema.task.id,
-        });
-
-      const task = tasks[0];
-
-      if (!task) {
-        throw new Error("Failed to create task");
-      }
-
       await db.transaction(async (tx) => {
-        // for (const item of input.items) {
-        //   const lots = await getLotsToConsume(tx, {
-        //     lot: {
-        //       componentId: item.componentId,
-        //       batchId: item.batchId,
-        //     },
-        //     locationId: item.locationId,
-        //     isAllocated: false,
-        //   }, item.quantity);
-        //   tx.insert(publicSchema.taskAllocation).values(lots.map((lot) => ({
-        // return await tx.insert(publicSchema.taskAllocation).values(input.items.map((item) => ({
-        //   taskId: task.id,
-        //   componentId: item.componentId,
-        //   batchId: item.batchId,
-        // })));
-      });
+        const despatches = await tx
+          .insert(publicSchema.salesDespatch)
+          .values({
+            orderId: input.orderId,
+            despatchDate: new Date(),
+          })
+          .returning({
+            id: publicSchema.salesDespatch.id,
+          });
 
-      // return await db
-      //   .insert(publicSchema.salesDespatchTask)
-      //   .values(input.data)
-      //   .returning();
+        const despatch = despatches[0];
+
+        if (!despatch) {
+          throw new Error("Failed to create despatch");
+        }
+
+        const tasks = await tx
+          .insert(publicSchema.task)
+          .values({
+            salesDespatchId: despatch.id,
+            type: "despatch",
+            createdById: ctx.user.id,
+            assignedToId: input.assignedToId,
+          })
+          .returning({
+            id: publicSchema.task.id,
+          });
+
+        const task = tasks[0];
+
+        if (!task) {
+          throw new Error("Failed to create task");
+        }
+
+        for (const item of input.items) {
+          await allocateToTask(
+            tx,
+            {
+              componentId: item.componentId,
+              batchId: item.batchId,
+            },
+            item.quantity,
+            task.id,
+            item.locationId,
+            undefined,
+          );
+        }
+      });
     }),
 } satisfies TRPCRouterRecord;
 
