@@ -10,12 +10,12 @@ import { Input, Switch } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
-type TaskItem = {
+interface TaskItem {
   componentId: string;
   locationId: number;
   batchId?: number;
   quantity: Decimal;
-};
+}
 
 export interface LocationPickerItemProps {
   id: string;
@@ -153,7 +153,7 @@ const LocationPickerItem = ({
             remaining = remaining.sub(use);
             batches.push({
               locationId: location.locationId,
-              batchId: location.batchId ?? undefined,
+              batchId: location.batchId,
               quantity: use,
               componentId: id,
             });
@@ -170,7 +170,7 @@ const LocationPickerItem = ({
             batch.locationId === newBatch.locationId &&
             batch.batchId === newBatch.batchId,
         );
-        return !existingBatch || !existingBatch.quantity.eq(newBatch.quantity);
+        return !existingBatch?.quantity.eq(newBatch.quantity);
       });
 
     if (hasChanges) {
@@ -268,7 +268,10 @@ const LocationPickerItem = ({
                 max={inventory.freeQuantity.toFixed(6)}
                 value={getUsing(inventory).toFixed(6)}
                 onChange={(e) => {
-                  updateUsing(inventory, new Decimal(e.target.value));
+                  const value = e?.target.value;
+                  if (value !== "" && !isNaN(Number(value))) {
+                    updateUsing(inventory, new Decimal(Number(value)));
+                  }
                 }}
               />
             </span>

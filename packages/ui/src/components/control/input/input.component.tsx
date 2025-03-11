@@ -4,6 +4,7 @@ import type { ComponentPropsWithRef } from "react";
 import { useRef } from "react";
 import { cva } from "class-variance-authority";
 import * as Aria from "react-aria-components";
+import { useImmer } from "use-immer";
 
 import { faMinus, faPlus } from "@repo/pro-solid-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
@@ -70,7 +71,7 @@ const variants = {
         },
         isNumeric: {
           true: [
-            "px-[calc(theme(spacing[3.5])+18px)] text-right tabular-nums sm:px-[calc(theme(spacing[3])+18px)]",
+            "text-right tabular-nums",
             "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
             "[&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0",
             "[-moz-appearance:_textfield]",
@@ -99,46 +100,7 @@ export const Input = ({ className, step = "any", ...props }: InputProps) => {
             isNumeric: props.type === "number",
           }),
         )}
-        step={props.type === "number" ? step : undefined}
       />
-      {props.type === "number" && (
-        <>
-          <button
-            type="button"
-            className="absolute bottom-0 left-0 top-0 aspect-square h-full text-content-muted hover:text-content"
-            onClick={() => {
-              if (ref.current) {
-                const value = ref.current.value;
-                const increment = step === "any" ? 1 : step;
-                ref.current.value = (Number(value) + increment).toString();
-                ref.current.dispatchEvent(
-                  new Event("input", { bubbles: true }),
-                );
-              }
-            }}
-            aria-label="Increment"
-          >
-            <Icon icon={faPlus} />
-          </button>
-          <button
-            type="button"
-            className="absolute right-0 top-0 aspect-square h-full"
-            onClick={() => {
-              if (ref.current) {
-                const value = ref.current.value;
-                const increment = step === "any" ? 1 : step;
-                ref.current.value = (Number(value) - increment).toString();
-                ref.current.dispatchEvent(
-                  new Event("input", { bubbles: true }),
-                );
-              }
-            }}
-            aria-label="Increment"
-          >
-            <Icon icon={faMinus} />
-          </button>
-        </>
-      )}
     </span>
   );
 };
