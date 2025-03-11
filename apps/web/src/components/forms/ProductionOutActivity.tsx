@@ -3,10 +3,10 @@ import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Combobox, Input } from "@repo/ui/components/control";
+import { Combobox, NumberInput } from "@repo/ui/components/control";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
@@ -40,7 +40,7 @@ export function ProductionOutTaskForm({
 
   const { mutate: processProduction } =
     api.production.processOutput.useMutation({
-      onSuccess: async () => {
+      onSuccess: () => {
         onSave();
         addToast({
           type: "success",
@@ -173,7 +173,11 @@ export function ProductionOutTaskForm({
           <Field name="quantity" layout="row" valueAsNumber>
             <Field.Label>Quantity</Field.Label>
             <Field.Control>
-              <Input type="number" />
+              <Controller
+                control={form.control}
+                name="quantity"
+                render={({ field }) => <NumberInput {...field} />}
+              />
             </Field.Control>
           </Field>
         </>

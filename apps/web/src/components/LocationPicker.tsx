@@ -3,10 +3,10 @@ import { api } from "@/utils/trpc/react";
 import { Decimal } from "decimal.js";
 import { useImmer } from "use-immer";
 
-import type { RouterInputs, RouterOutputs } from "@repo/api";
+import type { RouterOutputs } from "@repo/api";
 import { faHashtag, faShelves } from "@repo/pro-light-svg-icons";
 import { cn } from "@repo/ui";
-import { Input, Switch } from "@repo/ui/components/control";
+import { NumberInput, Switch } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
@@ -74,7 +74,7 @@ const LocationPickerItem = ({
   value,
   onChange,
 }: LocationPickerItemProps) => {
-  const [quantity, setQuantity] = useImmer(defaultQuantity);
+  const [quantity, setQuantity] = useImmer<Decimal>(defaultQuantity);
   const [inventory, setInventory] = useImmer<InventoryType[]>([]);
 
   const { data: component } = api.component.get.useQuery({
@@ -137,7 +137,7 @@ const LocationPickerItem = ({
       if (location.overridden && !location.blocked && location.using.gt(0)) {
         batches.push({
           locationId: location.locationId,
-          batchId: location.batchId ?? undefined,
+          batchId: location.batchId,
           quantity: location.using,
           componentId: id,
         });
@@ -184,7 +184,7 @@ const LocationPickerItem = ({
         batch.locationId === inventory.locationId &&
         batch.batchId === inventory.batchId,
     );
-    return existing?.quantity ?? 0;
+    return existing?.quantity ?? new Decimal(0);
   };
 
   const updateUsing = (inventory: InventoryType, quantity: Decimal) => {
@@ -222,12 +222,10 @@ const LocationPickerItem = ({
         </Text>
         <span className="flex flex-row items-baseline space-x-2">
           <Text>Required:</Text>
-          <Input
-            type="number"
+          <NumberInput
             className="w-24"
-            value={quantity.toFixed(6)}
-            min={0}
-            onChange={(e) => setQuantity(new Decimal(e.target.value))}
+            value={quantity}
+            onChange={(value) => setQuantity(value)}
           />
         </span>
       </div>
@@ -261,17 +259,11 @@ const LocationPickerItem = ({
             </Text>
             <span className="flex flex-row items-center justify-end space-x-2 text-content-muted">
               <Text>Using:</Text>
-              <Input
-                type="number"
+              <NumberInput
                 className="flex-1"
-                min={0}
-                max={inventory.freeQuantity.toFixed(6)}
-                value={getUsing(inventory).toFixed(6)}
-                onChange={(e) => {
-                  const value = e?.target.value;
-                  if (value !== "" && !isNaN(Number(value))) {
-                    updateUsing(inventory, new Decimal(Number(value)));
-                  }
+                value={getUsing(inventory)}
+                onChange={(value) => {
+                  updateUsing(inventory, value);
                 }}
               />
             </span>

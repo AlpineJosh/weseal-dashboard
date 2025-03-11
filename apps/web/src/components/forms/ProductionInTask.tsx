@@ -1,15 +1,21 @@
+import type { TRPCClientErrorLike } from "@trpc/client";
 import { useEffect } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
 import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TRPCClientErrorLike } from "@trpc/client";
+import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { faPlus } from "@repo/pro-solid-svg-icons";
-import { Combobox, Input, Select } from "@repo/ui/components/control";
+import {
+  Combobox,
+  Input,
+  NumberInput,
+  Select,
+} from "@repo/ui/components/control";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider, Icon } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
@@ -63,7 +69,7 @@ export const ProductionTaskForm = ({
     defaultValues: {
       type: "production-existing",
       assignedToId: "",
-      quantity: 1,
+      quantity: new Decimal(1),
       items: [],
     },
   });
@@ -310,12 +316,16 @@ export const ProductionTaskForm = ({
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        <Field name="quantity" layout="row" valueAsNumber>
+        <Field name="quantity" layout="row">
           <Field.Label>
             {type === "production-new" ? "Quantity" : "Additional Quantity"}
           </Field.Label>
           <Field.Control>
-            <Input type="number" />
+            <Controller
+              control={form.control}
+              name="quantity"
+              render={({ field }) => <NumberInput {...field} />}
+            />
           </Field.Control>
         </Field>
 

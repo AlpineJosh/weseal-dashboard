@@ -1,13 +1,13 @@
+import type { Decimal } from "decimal.js";
 import { useEffect } from "react";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { useForm } from "react-hook-form";
 import { useImmer } from "use-immer";
 import { z } from "zod";
 
-import { Combobox, Input } from "@repo/ui/components/control";
+import { Combobox, NumberInput } from "@repo/ui/components/control";
 import { Table } from "@repo/ui/components/display";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button } from "@repo/ui/components/element";
@@ -199,16 +199,15 @@ export function PurchaseReceiptTaskForm({
                     {data.quantityOrdered.toFixed(6)}
                   </Table.Cell>
                   <Table.Cell id="quantityReceived">
-                    <Input
-                      type="number"
-                      defaultValue={data.quantity.toFixed(6)}
-                      onChange={(e) => {
+                    <NumberInput
+                      defaultValue={data.quantity}
+                      onChange={(value) => {
                         setItems((draft) => {
                           const item = draft.find(
                             (i) => i.componentId === data.componentId,
                           );
                           if (item) {
-                            item.quantityReceived = new Decimal(e.target.value);
+                            item.quantityReceived = value;
                           }
                         });
                       }}

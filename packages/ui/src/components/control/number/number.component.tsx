@@ -1,27 +1,14 @@
 "use client";
 
-import type { ComponentPropsWithRef } from "react";
-import { useRef } from "react";
+import { useEffect } from "react";
 import { cva } from "class-variance-authority";
-import * as Aria from "react-aria-components";
+import { Decimal } from "decimal.js";
 import { useImmer } from "use-immer";
 
-import { faMinus, faPlus } from "@repo/pro-solid-svg-icons";
 import { cn } from "@repo/ui/lib/class-merge";
 
-import { Icon } from "../../element/icon/icon.component";
-
-const dateTypes = ["date", "datetime-local", "month", "time", "week"] as const;
-type DateType = (typeof dateTypes)[number];
-type InputType =
-  | "email"
-  | "number"
-  | "password"
-  | "search"
-  | "tel"
-  | "text"
-  | "url"
-  | DateType;
+import type { Controllable } from "./use-controllable.hook";
+import { useControllable } from "./use-controllable.hook";
 
 const variants = {
   control: cva([
@@ -82,27 +69,60 @@ const variants = {
   ),
 };
 
-export type InputProps = {
-  type: InputType;
-  step?: number | "any";
-} & Omit<ComponentPropsWithRef<"input">, "type" | "step">;
+export type NumberInputProps = Controllable<Decimal> & {
+  className?: string;
+};
 
-export const Input = ({ className, ...props }: InputProps) => {
-  const ref = useRef<HTMLInputElement>(null);
+export const NumberInput = ({
+  className,
+  value,
+  onChange,
+  defaultValue = new Decimal(0),
+  ...props
+}: NumberInputProps) => {
+  const [controlledValue, setControlledValue] = useControllable<Decimal>({
+    value,
+    onChange,
+    defaultValue,
+  });
+
+  const [rawInput, setRawInput] = useImmer<string>(controlledValue.toString());
+
+  useEffect(() => {
+    setRawInput(controlledValue.toString());
+  }, [controlledValue, setRawInput]);
+
   return (
     <span data-slot="control" className={cn([variants.control(), className])}>
-      <Aria.Input
-        ref={ref}
+      <input
         {...props}
-        className={cn(
-          variants.input({
-            isDate: dateTypes.includes(props.type as DateType),
-            isNumeric: props.type === "number",
-          }),
-        )}
+        type="text"
+        value={rawInput}
+        onChange={(event) => {
+          const value = event.target.value;
+
+          if (!/^-?\d*\.?\d*$/.test(value)) {
+            return;
+          }
+
+          setRawInput(value);
+
+          if (value.endsWith(".") || value.endsWith("0") || value === "-") {
+            return;
+          }
+
+          if (value === "") {
+            if (!controlledValue.eq(0)) {
+              setControlledValue(new Decimal(0));
+            }
+          } else {
+            setControlledValue(new Decimal(value));
+          }
+        }}
+        className={variants.input({
+          isNumeric: true,
+        })}
       />
     </span>
   );
 };
-
-Input.displayName = "Input";
