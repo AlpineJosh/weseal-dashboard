@@ -107,7 +107,11 @@ export const NumberInput = ({
 
           setRawInput(value);
 
-          if (value.endsWith(".") || value.endsWith("0") || value === "-") {
+          if (
+            value.endsWith(".") ||
+            (value.includes(".") && value.endsWith("0")) ||
+            value === "-"
+          ) {
             return;
           }
 
