@@ -28,7 +28,11 @@ interface ProductionTaskFormProps {
 
 const taskItemInput = z.object({
   componentId: z.string(),
-  batchId: z.number().optional(),
+  batchId: z
+    .number()
+    .nullable()
+    .transform((x) => x ?? undefined)
+    .optional(),
   locationId: z.number(),
   quantity: decimal(),
 });
