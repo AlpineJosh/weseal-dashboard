@@ -79,7 +79,7 @@ export default datatable(
     isComplete: "boolean",
     isOpen: "boolean",
     createdAt: "date",
-    lastModified: "string",
+    lastModified: "date",
     totalItems: "number",
     incompleteItems: "number",
   },
