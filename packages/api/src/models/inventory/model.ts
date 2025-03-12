@@ -1,17 +1,7 @@
 import Decimal from "decimal.js";
 
 import type { Schema } from "@repo/db";
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  gt,
-  ne,
-  publicSchema,
-  schema,
-  sql,
-} from "@repo/db";
+import { and, asc, desc, eq, gt, schema, sql } from "@repo/db";
 
 import type { Transaction } from "../../db";
 import { db } from "../../db";
@@ -422,7 +412,7 @@ export const completeTaskAllocation = async (
 
   const allocation = allocations[0];
 
-  if (!allocation || !allocation.type) {
+  if (!allocation?.type) {
     throw new Error("Task allocation not found");
   }
 
@@ -593,7 +583,7 @@ export const processProductionOut = async (
         locationId: schema.productionJobAllocation.locationId,
         remainingQuantity: schema.productionJobAllocation.remainingQuantity,
         usedQuantity: schema.productionJobAllocation.usedQuantity,
-        quantity: schema.productionJobAllocationLot.quantity,
+        totalQuantity: schema.productionJobAllocation.totalQuantity,
       })
       .from(schema.productionJobAllocation)
       .where(

@@ -39,7 +39,7 @@ export default datatable(
     outputLocationId: "number",
     outputLocationName: "string",
     isComplete: "boolean",
-    createdAt: "string",
+    createdAt: "date",
   },
   overview,
 );

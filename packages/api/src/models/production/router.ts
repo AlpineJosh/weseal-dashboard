@@ -1,13 +1,12 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, eq, publicSchema } from "@repo/db";
+import { schema } from "@repo/db";
 
 import { db } from "../../db";
 import { decimal } from "../../lib/decimal";
 import { publicProcedure } from "../../trpc";
 import { allocateToTask, processProductionOut } from "../inventory/model";
-// import { processAllocateLedgerEntry } from "../inventory/model";
 import overview from "./model";
 
 const uniqueProductionJobInput = z.object({
@@ -60,7 +59,7 @@ export const productionRouter = {
         let batchId: number | undefined;
         if (input.batchReference) {
           const batches = await tx
-            .insert(publicSchema.batch)
+            .insert(schema.batch)
             .values({
               batchReference: input.batchReference,
               componentId: input.componentId,
@@ -76,7 +75,7 @@ export const productionRouter = {
         }
 
         const jobs = await tx
-          .insert(publicSchema.productionJob)
+          .insert(schema.productionJob)
           .values({
             componentId: input.componentId,
             batchId,
@@ -92,7 +91,7 @@ export const productionRouter = {
         }
 
         const tasks = await tx
-          .insert(publicSchema.task)
+          .insert(schema.task)
           .values({
             type: "production",
             productionJobId: job.id,
@@ -127,7 +126,7 @@ export const productionRouter = {
     .mutation(async ({ input, ctx }) => {
       return await db.transaction(async (tx) => {
         const tasks = await tx
-          .insert(publicSchema.task)
+          .insert(schema.task)
           .values({
             type: "production",
             productionJobId: input.id,
