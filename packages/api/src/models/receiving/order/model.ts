@@ -78,7 +78,7 @@ export default datatable(
     isCancelled: "boolean",
     isComplete: "boolean",
     isOpen: "boolean",
-    createdAt: "string",
+    createdAt: "date",
     lastModified: "string",
     totalItems: "number",
     incompleteItems: "number",
