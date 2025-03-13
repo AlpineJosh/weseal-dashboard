@@ -719,6 +719,10 @@ export const processReceipt = async (
   purchaseReceiptItemId: number,
   userId: string,
 ) => {
+  if (quantity.lte(0)) {
+    throw new Error("Receipt quantity must be greater than 0");
+  }
+
   const entry = await createInboundEntry(
     tx,
     reference,

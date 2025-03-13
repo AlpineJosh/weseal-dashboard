@@ -74,8 +74,11 @@ const LocationPickerItem = ({
   value,
   onChange,
 }: LocationPickerItemProps) => {
-  const [quantity, setQuantity] = useImmer<Decimal>(defaultQuantity);
+  const [initialQuantity, setInitialQuantity] =
+    useImmer<Decimal>(defaultQuantity);
+  const [quantity, setQuantity] = useImmer<Decimal>(initialQuantity);
   const [inventory, setInventory] = useImmer<InventoryType[]>([]);
+  console.log(quantity.toString());
 
   const { data: component } = api.component.get.useQuery({
     id,
@@ -126,8 +129,14 @@ const LocationPickerItem = ({
   }, [quantities, setInventory]);
 
   useEffect(() => {
-    setQuantity(defaultQuantity);
-  }, [defaultQuantity, setQuantity]);
+    if (!defaultQuantity.eq(initialQuantity)) {
+      setInitialQuantity(defaultQuantity);
+    }
+  }, [defaultQuantity, initialQuantity, setInitialQuantity]);
+
+  useEffect(() => {
+    setQuantity(initialQuantity);
+  }, [initialQuantity, setQuantity]);
 
   useEffect(() => {
     const batches = [];

@@ -80,11 +80,16 @@ export const NumberInput = ({
   defaultValue = new Decimal(0),
   ...props
 }: NumberInputProps) => {
-  const [controlledValue, setControlledValue] = useControllable<Decimal>({
-    value,
-    onChange,
-    defaultValue,
-  });
+  const [controlledValue, setControlledValue] = useControllable<Decimal>(
+    {
+      value,
+      onChange,
+      defaultValue,
+    },
+    {
+      requiresState: true,
+    },
+  );
 
   const [rawInput, setRawInput] = useImmer<string>(controlledValue.toString());
 
@@ -99,7 +104,9 @@ export const NumberInput = ({
         type="text"
         value={rawInput}
         onChange={(event) => {
-          const value = event.target.value;
+          const value = event.target.value
+            .replace(/,/g, "") // Remove commas
+            .replace(/\s+/g, ""); // Remove all whitespace
 
           if (!/^-?\d*\.?\d*$/.test(value)) {
             return;

@@ -18,7 +18,10 @@ const taskSchema = z.object({
   items: z.array(
     z.object({
       componentId: z.string(),
-      batchId: z.number(),
+      batchId: z
+        .number()
+        .nullable()
+        .transform((val) => val ?? undefined),
       quantity: decimal(),
       locationId: z.number(),
     }),
@@ -159,7 +162,7 @@ export function SalesDespatchTaskForm({
                     target: {
                       value: items.map((item) => ({
                         ...item,
-                        quantityReceived: new Decimal(item.quantity),
+                        quantity: new Decimal(item.quantity),
                       })),
                     },
                   });

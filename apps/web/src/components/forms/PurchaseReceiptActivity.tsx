@@ -1,10 +1,9 @@
 import type { Decimal } from "decimal.js";
-import { useEffect } from "react";
+import { decimal } from "@/utils/decimal";
 import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { useForm } from "react-hook-form";
-import { useImmer } from "use-immer";
 import { z } from "zod";
 
 import { Combobox, NumberInput } from "@repo/ui/components/control";
@@ -14,8 +13,14 @@ import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
-  purchaseOrderId: z.coerce.number(),
-  putLocationId: z.coerce.number(),
+  orderId: z.coerce.number(),
+  locationId: z.coerce.number(),
+  items: z.array(
+    z.object({
+      componentId: z.string(),
+      quantity: decimal(),
+    }),
+  ),
 });
 
 export function PurchaseReceiptTaskForm({
@@ -31,52 +36,29 @@ export function PurchaseReceiptTaskForm({
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      purchaseOrderId: undefined,
-      putLocationId: undefined,
+      orderId: undefined,
+      locationId: undefined,
+      items: [],
     },
   });
 
-  const purchaseOrderId = form.watch("purchaseOrderId");
+  const orderId = form.watch("orderId");
+  const items = form.watch("items");
+
+  console.log(form.watch());
 
   const { data: orderItems } = api.receiving.order.item.list.useQuery(
     {
       filter: {
         orderId: {
-          eq: purchaseOrderId,
+          eq: orderId,
         },
       },
     },
-    { enabled: !!purchaseOrderId },
+    { enabled: !!orderId },
   );
 
-  const [items, setItems] = useImmer<
-    {
-      componentId: string;
-      componentDescription: string;
-      quantityOrdered: Decimal;
-      quantityReceived: Decimal | null;
-      quantity: Decimal;
-    }[]
-  >([]);
-
-  const state = form.watch();
-  console.log(state);
-
-  useEffect(() => {
-    if (orderItems) {
-      setItems(
-        orderItems.rows.map((item) => ({
-          componentId: item.componentId,
-          componentDescription: item.componentDescription,
-          quantityOrdered: item.quantityOrdered,
-          quantityReceived: item.sageQuantityReceived,
-          quantity: item.quantityOrdered.sub(item.quantityReceived),
-        })),
-      );
-    }
-  }, [orderItems, setItems]);
-
-  const { mutate: receiveOrder } = api.receiving.order.receive.useMutation({
+  const { mutate: receiveOrder } = api.receiving.receipt.receive.useMutation({
     onSuccess: async () => {
       await utils.receiving.order.item.list.invalidate();
       onSave();
@@ -93,15 +75,21 @@ export function PurchaseReceiptTaskForm({
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof taskSchema>) => {
-    receiveOrder({
-      id: values.purchaseOrderId,
-      putLocationId: values.putLocationId,
-      items: items.map((item) => ({
-        componentId: item.componentId,
-        quantity: item.quantity,
-      })),
-    });
+  const handleChange = (componentId: string, quantity: Decimal) => {
+    const existingItem = items.find((item) => item.componentId === componentId);
+    if (existingItem) {
+      existingItem.quantity = quantity;
+    } else {
+      items.push({
+        componentId,
+        quantity,
+      });
+    }
+    form.setValue("items", items);
+  };
+
+  const handleSubmit = (value: z.infer<typeof taskSchema>) => {
+    receiveOrder(value);
   };
 
   return (
@@ -113,7 +101,7 @@ export function PurchaseReceiptTaskForm({
         form={form}
       >
         <>
-          <Field name="purchaseOrderId" layout="row">
+          <Field name="orderId" layout="row">
             <Field.Label>Purchase Order</Field.Label>
             <Field.Control>
               <AsyncCombobox
@@ -147,7 +135,7 @@ export function PurchaseReceiptTaskForm({
               </AsyncCombobox>
             </Field.Control>
           </Field>
-          <Field name="putLocationId" layout="row">
+          <Field name="locationId" layout="row">
             <Field.Label>Receiving Location</Field.Label>
             <Field.Control>
               <AsyncCombobox
@@ -176,7 +164,7 @@ export function PurchaseReceiptTaskForm({
             </Field.Control>
           </Field>
         </>
-        {purchaseOrderId && (
+        {orderId && (
           <Table className="">
             <Table.Head>
               <Table.Column id="componentId">Component</Table.Column>
@@ -188,7 +176,7 @@ export function PurchaseReceiptTaskForm({
                 Quantity Received
               </Table.Column>
             </Table.Head>
-            <Table.Body data={items}>
+            <Table.Body data={orderItems?.rows ?? []}>
               {({ data }) => (
                 <Table.Row key={data.componentId}>
                   <Table.Cell id="componentId">{data.componentId}</Table.Cell>
@@ -200,16 +188,11 @@ export function PurchaseReceiptTaskForm({
                   </Table.Cell>
                   <Table.Cell id="quantityReceived">
                     <NumberInput
-                      defaultValue={data.quantity}
+                      defaultValue={data.quantityOrdered.minus(
+                        data.quantityReceived,
+                      )}
                       onChange={(value) => {
-                        setItems((draft) => {
-                          const item = draft.find(
-                            (i) => i.componentId === data.componentId,
-                          );
-                          if (item) {
-                            item.quantityReceived = value;
-                          }
-                        });
+                        handleChange(data.componentId, value);
                       }}
                     />
                   </Table.Cell>
@@ -223,7 +206,7 @@ export function PurchaseReceiptTaskForm({
             Cancel
           </Button>
           <Button
-            isDisabled={!purchaseOrderId}
+            isDisabled={!orderId}
             variant="solid"
             color="primary"
             type="submit"
