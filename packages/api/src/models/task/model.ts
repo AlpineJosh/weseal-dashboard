@@ -308,19 +308,6 @@ export const completeTaskAllocation = async (
     })),
   };
 
-  console.log(entry);
-
-  await updateInventory(
-    tx,
-    { locationId: allocation.pickLocationId, ...entry },
-    "deallocation",
-  );
-  await updateInventory(
-    tx,
-    { locationId: allocation.pickLocationId, ...entry },
-    "outbound",
-  );
-
   const details: LedgerEntryDetails = {
     userId,
     type: allocation.task.type,
@@ -356,6 +343,25 @@ export const completeTaskAllocation = async (
       },
     );
   }
+
+  await updateInventory(
+    tx,
+    { locationId: allocation.pickLocationId, ...entry },
+    "deallocation",
+  );
+
+  await updateInventory(
+    tx,
+    { locationId: allocation.pickLocationId, ...entry },
+    "outbound",
+  );
+
+  await logToLedger(
+    tx,
+    "outbound",
+    { locationId: allocation.pickLocationId, ...entry },
+    details,
+  );
 
   if (allocation.putLocationId) {
     await updateInventory(

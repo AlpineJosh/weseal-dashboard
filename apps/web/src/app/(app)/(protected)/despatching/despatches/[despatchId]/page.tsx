@@ -10,19 +10,19 @@ import { Heading, TextLink } from "@repo/ui/components/typography";
 export default function ReceiptsOverview({
   params,
 }: {
-  params: { receiptId: string };
+  params: { despatchId: string };
 }) {
-  const id = +params.receiptId;
+  const id = +params.despatchId;
 
   return (
     <div className="flex h-[calc(100vh-10rem)] max-h-full grow flex-col gap-4">
       <Heading level={1}>Despatch #{id}</Heading>
 
       <DatatableQueryProvider
-        endpoint={api.receiving.receipt.item.list}
+        endpoint={api.despatching.despatch.item.list}
         defaultInput={{
           filter: {
-            receiptId: {
+            despatchId: {
               eq: id,
             },
           },

@@ -76,8 +76,6 @@ export function SalesDespatchTaskForm({
 
   const handleSave = (task: z.infer<typeof taskSchema>) => {
     createTask(task);
-    addToast({ message: "Despatch task created", type: "success" });
-    onSave();
   };
 
   return (

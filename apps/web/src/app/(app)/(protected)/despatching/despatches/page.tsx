@@ -54,9 +54,10 @@ export default function DespatchesOverview() {
                       #{data.orderId}
                     </TextLink>
                   </Datatable.Cell>
-                  <Datatable.Cell id="despatchDate">
-                    {data.despatchDate?.toLocaleDateString()}
-                  </Datatable.Cell>
+                  <Datatable.DateTimeCell
+                    id="despatchDate"
+                    value={data.despatchDate}
+                  />
                   <Datatable.Cell id="itemCount">
                     {data.itemCount}
                   </Datatable.Cell>
