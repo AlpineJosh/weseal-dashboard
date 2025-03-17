@@ -119,7 +119,7 @@ export function StockAdjustmentTaskForm({
                         eq: componentId,
                       },
                       totalQuantity: {
-                        gt: 0,
+                        neq: 0,
                       },
                     },
                     search: { query },
@@ -156,7 +156,7 @@ export function StockAdjustmentTaskForm({
         </Field>
 
         <Field name="quantity" layout="row" valueAsNumber>
-          <Field.Label>Adjust By (+/-)</Field.Label>
+          <Field.Label>New Quantity</Field.Label>
           <Field.Control>
             <Controller
               control={form.control}

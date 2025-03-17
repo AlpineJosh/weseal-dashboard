@@ -692,16 +692,49 @@ export const adjustInventory = async (
   type: "correction" | "wastage" | "lost" | "found",
   userId: string,
 ) => {
+  const currentInventory = await tx
+    .select({
+      freeQuantity: schema.inventory.freeQuantity,
+    })
+    .from(schema.inventory)
+    .where(
+      and(
+        eq(schema.inventory.componentId, reference.componentId),
+        eq(schema.inventory.locationId, locationId),
+        reference.batchId
+          ? eq(schema.inventory.batchId, reference.batchId)
+          : sql`inventory.batch_id IS NULL`,
+      ),
+    )
+    .limit(1);
+
+  const currentQuantity = currentInventory[0]?.freeQuantity ?? new Decimal(0);
+  const difference = quantity.sub(currentQuantity);
+
+  if (difference.eq(0)) {
+    return; // No adjustment needed
+  }
   let entry;
-  if (quantity.gt(0)) {
-    entry = await calculateOutboundEntry(tx, reference, locationId, quantity);
+
+  if (difference.lt(0)) {
+    entry = await calculateOutboundEntry(
+      tx,
+      reference,
+      locationId,
+      difference.abs(),
+    );
     await updateInventory(tx, entry, "outbound");
     await logToLedger(tx, "outbound", entry, {
       userId,
       type,
     });
   } else {
-    entry = await assignInboundEntry(tx, reference, locationId, quantity);
+    entry = await assignInboundEntry(
+      tx,
+      reference,
+      locationId,
+      difference.abs(),
+    );
     await updateInventory(tx, entry, "inbound");
     await logToLedger(tx, "inbound", entry, {
       userId,
