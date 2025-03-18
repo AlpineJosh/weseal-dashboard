@@ -55,10 +55,15 @@ export function StockAdjustmentTaskForm({
     locationId,
     quantity,
   }: z.infer<typeof taskSchema>) => {
-    const [locId, batchId] = locationId.split("-").map(Number) as [
+    let [locId, batchId] = locationId.split("-").map(Number) as [
       number,
-      number,
+      number | undefined,
     ];
+
+    if (batchId === undefined || isNaN(batchId)) {
+      batchId = undefined;
+    }
+
     adjustActivity({
       componentId,
       batchId,
