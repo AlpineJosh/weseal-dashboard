@@ -397,20 +397,8 @@ export class InventoryLedgerRepository {
 
   constructor(private identities: IdentityManager) {}
 
-  addEntry(
-    componentId: string,
-    batchId: number | null,
-    locationId: number,
-    quantity: Decimal,
-    details: LedgerEntryDetails,
-  ) {
-    this.ledger.push({
-      componentId,
-      batchId,
-      locationId,
-      quantity,
-      ...details,
-    });
+  addEntry(data: typeof schema.inventoryLedger.$inferInsert) {
+    this.ledger.push(data);
   }
 
   async save() {
@@ -1092,7 +1080,8 @@ export class InventoryBatchProcessor {
         locationId: entry.locationId,
         quantity:
           direction === "inbound" ? lot.quantity : lot.quantity.negated(),
-
+        createdAt: details.date,
+        lastModified: details.date,
         ...details,
       });
     }
@@ -1100,13 +1089,15 @@ export class InventoryBatchProcessor {
     // Log inventory-level entry
 
     for (const [batchId, quantity] of batches.entries()) {
-      this.inventoryLedger.addEntry(
-        entry.componentId,
+      this.inventoryLedger.addEntry({
+        componentId: entry.componentId,
         batchId,
-        entry.locationId,
-        direction === "inbound" ? quantity : quantity.negated(),
-        details,
-      );
+        locationId: entry.locationId,
+        quantity: direction === "inbound" ? quantity : quantity.negated(),
+        createdAt: details.date,
+        lastModified: details.date,
+        ...details,
+      });
     }
   }
 
