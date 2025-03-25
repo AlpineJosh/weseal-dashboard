@@ -7,6 +7,7 @@ import { db } from "../../db";
 import { decimal } from "../../lib/decimal";
 import { publicProcedure } from "../../trpc";
 import { allocateToTask, processProductionOut } from "../inventory/model";
+import { productionAllocationRouter } from "./allocation/router";
 import overview from "./model";
 
 const uniqueProductionJobInput = z.object({
@@ -43,6 +44,17 @@ const processOutputInput = z.object({
   quantity: decimal(),
 });
 
+const completeProductionJobInput = z.object({
+  id: z.number(),
+  remainingQuantities: z.array(
+    z.object({
+      componentId: z.string(),
+      batchId: z.number().optional(),
+      quantity: decimal(),
+    }),
+  ),
+});
+
 export const productionRouter = {
   get: publicProcedure
     .input(uniqueProductionJobInput)
@@ -52,6 +64,8 @@ export const productionRouter = {
   list: publicProcedure.input(overview.$schema).query(async ({ input }) => {
     return overview.findMany(input);
   }),
+
+  allocations: productionAllocationRouter,
   createJobTask: publicProcedure
     .input(createProductionTaskInput)
     .mutation(async ({ input, ctx }) => {
@@ -161,6 +175,14 @@ export const productionRouter = {
     .mutation(async ({ input, ctx }) => {
       return await db.transaction(async (tx) => {
         await processProductionOut(tx, input.id, input.quantity, ctx.user.id);
+      });
+    }),
+
+  completeJob: publicProcedure
+    .input(completeProductionJobInput)
+    .mutation(async ({ input, ctx }) => {
+      return await db.transaction(async (tx) => {
+        await completeProductionJob(tx, input.id, ctx.user.id);
       });
     }),
 } satisfies TRPCRouterRecord;

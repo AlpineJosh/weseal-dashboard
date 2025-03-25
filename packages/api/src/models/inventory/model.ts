@@ -1,9 +1,10 @@
 import Decimal from "decimal.js";
 
 import type { Schema } from "@repo/db";
-import { and, asc, desc, eq, gt, schema, sql } from "@repo/db";
+import { and, asc, desc, eq, gt, schema, sql, sum } from "@repo/db";
 
 import type { Transaction } from "../../db";
+import { productionJobAllocation } from "../../../../db/dist/schema/public";
 import { db } from "../../db";
 import { datatable } from "../../lib/datatables";
 
@@ -682,6 +683,78 @@ export const processProductionOut = async (
     userId,
     type: "production",
   });
+};
+
+export const completeProductionJob = async (
+  tx: Transaction,
+  productionJobId: number,
+  remainingQuantities: {
+    componentId: string;
+    batchId?: number;
+    quantity: Decimal;
+  }[],
+  userId: string,
+) => {
+  const allocations = await tx
+    .select({
+      componentId: schema.productionJobAllocation.componentId,
+      batchId: schema.productionJobAllocation.batchId,
+      locationId: schema.productionJobAllocation.locationId,
+      remainingQuantity: sum(schema.productionJobAllocation.remainingQuantity)
+        .mapWith(schema.productionJobAllocation.remainingQuantity)
+        .as("remaining_quantity"),
+      usedQuantity: sum(schema.productionJobAllocation.usedQuantity)
+        .mapWith(schema.productionJobAllocation.usedQuantity)
+        .as("used_quantity"),
+      totalQuantity: sum(schema.productionJobAllocation.totalQuantity)
+        .mapWith(schema.productionJobAllocation.totalQuantity)
+        .as("total_quantity"),
+    })
+    .from(schema.productionJobAllocation)
+    .where(eq(schema.productionJobAllocation.productionJobId, productionJobId))
+    .groupBy(
+      schema.productionJobAllocation.componentId,
+      schema.productionJobAllocation.batchId,
+      schema.productionJobAllocation.locationId,
+    );
+
+  for (const allocation of allocations) {
+    const remainingQuantity =
+      remainingQuantities.find(
+        (r) =>
+          r.componentId === allocation.componentId &&
+          r.batchId === allocation.batchId,
+      )?.quantity ?? new Decimal(0);
+
+    const difference = remainingQuantity.minus(allocation.remainingQuantity);
+
+    if (difference.gt(0)) {
+      // Find difference extra
+      // Deallocate actual remaining
+    } else if (difference.eq(0)) {
+      // Deallocate actual remaining
+    } else {
+      // Remove extra difference
+      // Deallocate actual remaining
+    }
+
+    // const lots = await
+
+    // await updateInventory(tx, {
+    //   componentId: allocation.componentId,
+    //   batchId: allocation.batchId ?? undefined,
+    //   locationId: allocation.locationId,
+    //   quantity: remainingQuantity,
+    // }, "deallocation");
+  }
+
+  //     await allocateToTask(tx, {
+  //       componentId: allocation.componentId,
+  //       batchId: allocation.batchId,
+  //     }, remainingQuantity.quantity, allocation.taskId, allocation.locationId, allocation.inputLocationId);
+
+  // await logToLedger(tx, "outbound", input.remainingQuantities, ctx.user.id);
+  // await completeProductionJob(tx, input.id, ctx.user.id);
 };
 
 export const adjustInventory = async (

@@ -12,7 +12,8 @@ import { Field, Form } from "@repo/ui/components/form";
 
 const taskSchema = z.object({
   componentId: z.string(),
-  locationId: z.string(),
+  batchId: z.number().optional(),
+  locationId: z.number(),
   quantity: decimal(),
 });
 
@@ -26,14 +27,22 @@ export function StockAdjustmentTaskForm({
   const { addToast } = useToast();
   const form = useForm<z.infer<typeof taskSchema>>({
     defaultValues: {
-      quantity: 1,
+      quantity: 0,
       locationId: undefined,
       componentId: undefined,
+      batchId: undefined,
     },
     resolver: zodResolver(taskSchema),
   });
 
   const componentId = form.watch("componentId");
+  const locationId = form.watch("locationId");
+  const batchId = form.watch("batchId");
+
+  const { data: component } = api.component.get.useQuery(
+    { id: componentId },
+    { enabled: !!componentId },
+  );
 
   const { mutate: adjustActivity } = api.inventory.adjust.useMutation({
     onSuccess: () => {
@@ -51,23 +60,37 @@ export function StockAdjustmentTaskForm({
     },
   });
 
+  const currentQuantity = api.inventory.get.useQuery(
+    { componentId, locationId, batchId },
+    { enabled: !!componentId && !!locationId && !!batchId },
+  );
+
   const handleSubmit = ({
+    componentId,
+    batchId,
     locationId,
     quantity,
   }: z.infer<typeof taskSchema>) => {
-    let [locId, batchId] = locationId.split("-").map(Number) as [
-      number,
-      number | undefined,
-    ];
+    if (component!.isBatchTracked && !batchId) {
+      addToast({
+        type: "error",
+        message: "Batch is required for batch tracked components",
+      });
+      return;
+    }
 
-    if (batchId === undefined || isNaN(batchId)) {
-      batchId = undefined;
+    if (quantity.lt(0)) {
+      addToast({
+        type: "error",
+        message: "Quantity cannot be negative",
+      });
+      return;
     }
 
     adjustActivity({
       componentId,
       batchId,
-      locationId: locId,
+      locationId,
       quantity,
       type: "correction",
     });
@@ -89,7 +112,7 @@ export function StockAdjustmentTaskForm({
               data={(query) => {
                 const { data, isLoading } = api.component.list.useQuery({
                   filter: {
-                    totalQuantity: { gt: 0 },
+                    isStockTracked: { eq: true },
                   },
                   search: { query },
                 });
@@ -111,48 +134,61 @@ export function StockAdjustmentTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
+        {component?.isBatchTracked && (
+          <Field name="batchId" layout="row">
+            <Field.Label>Batch</Field.Label>
+            <Field.Control>
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } = api.batch.list.useQuery(
+                    {
+                      filter: {
+                        componentId: { eq: componentId },
+                      },
+                      search: { query },
+                    },
+                    { enabled: component?.isBatchTracked },
+                  );
+                  return {
+                    isLoading: isLoading,
+                    items: data?.rows ?? [],
+                  };
+                }}
+                keyAccessor={(batch) => batch.id}
+                textValueAccessor={(batch) => batch.batchReference}
+              >
+                {(batch) => {
+                  return (
+                    <Combobox.Option id={batch.id}>
+                      {batch.batchReference}
+                    </Combobox.Option>
+                  );
+                }}
+              </AsyncCombobox>
+            </Field.Control>
+          </Field>
+        )}
 
         <Field name="locationId" layout="row">
           <Field.Label>Stock Location</Field.Label>
           <Field.Control>
             <AsyncCombobox
               data={(query) => {
-                const { data, isLoading } = api.inventory.list.useQuery(
-                  {
-                    filter: {
-                      componentId: {
-                        eq: componentId,
-                      },
-                      totalQuantity: {
-                        neq: 0,
-                      },
-                    },
-                    search: { query },
-                  },
-                  {
-                    enabled: !!componentId,
-                  },
-                );
+                const { data, isLoading } = api.location.list.useQuery({
+                  search: { query },
+                });
                 return {
                   isLoading: isLoading,
                   items: data?.rows ?? [],
                 };
               }}
-              keyAccessor={(location) =>
-                `${location.locationId}-${location.batchId}`
-              }
-              textValueAccessor={(location) =>
-                `${location.locationName} - ${location.batchReference}`
-              }
+              keyAccessor={(location) => location.id}
+              textValueAccessor={(location) => location.name}
             >
               {(location) => {
                 return (
-                  <Combobox.Option
-                    id={`${location.locationId}-${location.batchId}`}
-                    textValue={`Loc: ${location.locationName} Batch: ${location.batchReference}`}
-                  >
-                    Loc: {location.locationName} - Batch:{" "}
-                    {location.batchReference}
+                  <Combobox.Option id={location.id}>
+                    {location.name}
                   </Combobox.Option>
                 );
               }}
