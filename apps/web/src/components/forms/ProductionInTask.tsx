@@ -1,8 +1,4 @@
-import type { TRPCClientErrorLike } from "@trpc/client";
 import { useEffect } from "react";
-import { LocationPicker } from "@/components/LocationPicker";
-import { decimal } from "@/utils/decimal";
-import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
@@ -20,6 +16,11 @@ import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider, Icon } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 import { Heading } from "@repo/ui/components/typography";
+
+import type { TRPCClientErrorLike } from "@trpc/client";
+import { LocationPicker } from "@/components/LocationPicker";
+import { decimal } from "@/utils/decimal";
+import { api } from "@/utils/trpc/react";
 
 interface ProductionTaskFormProps {
   onExit: () => void;
@@ -107,7 +108,7 @@ export const ProductionTaskForm = ({
     { enabled: !!component },
   );
 
-  const { data: productionJobs } = api.production.list.useQuery(
+  const { data: productionJobs } = api.production.jobs.list.useQuery(
     {
       filter: {
         componentId: { eq: componentId },
@@ -128,7 +129,7 @@ export const ProductionTaskForm = ({
   }, [component, productionJobs, form]);
 
   const onSuccess = async () => {
-    await utils.task.item.list.invalidate();
+    await utils.task.allocations.list.invalidate();
     onSave();
     addToast({
       type: "success",
@@ -143,18 +144,27 @@ export const ProductionTaskForm = ({
     });
   };
 
-  const { mutate: createTask } = api.production.createJobTask.useMutation({
+  const { mutate: createTask } = api.production.jobs.createJobTask.useMutation({
     onSuccess,
     onError,
   });
 
-  const { mutate: addToTask } = api.production.addToJob.useMutation({
+  const { mutate: addToTask } = api.production.jobs.addToJob.useMutation({
     onSuccess,
     onError,
   });
 
   const handleSubmit = (input: z.infer<typeof productionTaskInput>) => {
-    console.log(input);
+    const allocations = input.items.map((item) => ({
+      quantity: item.quantity,
+      pickLocationId: item.locationId,
+      putLocationId: input.inputLocationId,
+      reference: {
+        componentId: item.componentId,
+        batchId: item.batchId ?? null,
+      },
+    }));
+
     if (input.type === "production-new") {
       createTask({
         componentId: input.outputComponentId,
@@ -162,14 +172,14 @@ export const ProductionTaskForm = ({
         assignedToId: input.assignedToId,
         outputLocationId: input.outputLocationId,
         targetQuantity: input.quantity,
-        items: input.items,
+        allocations,
         inputLocationId: input.inputLocationId,
       });
     } else {
       addToTask({
         id: input.productionJobId,
         assignedToId: input.assignedToId,
-        items: input.items,
+        allocations,
         inputLocationId: input.inputLocationId,
         additionalQuantity: input.quantity,
       });

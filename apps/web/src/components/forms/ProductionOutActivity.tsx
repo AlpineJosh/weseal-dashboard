@@ -1,5 +1,3 @@
-import { decimal } from "@/utils/decimal";
-import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
@@ -10,6 +8,9 @@ import { Combobox, NumberInput } from "@repo/ui/components/control";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+
+import { decimal } from "@/utils/decimal";
+import { api } from "@/utils/trpc/react";
 
 const taskSchema = z.object({
   componentId: z.string(),
@@ -39,7 +40,7 @@ export function ProductionOutTaskForm({
   const componentId = form.watch("componentId");
 
   const { mutate: processProduction } =
-    api.production.processOutput.useMutation({
+    api.production.jobs.processOutput.useMutation({
       onSuccess: () => {
         onSave();
         addToast({
@@ -109,7 +110,7 @@ export function ProductionOutTaskForm({
             <Field.Control>
               <AsyncCombobox
                 data={(query) => {
-                  const { data, isLoading } = api.production.list.useQuery(
+                  const { data, isLoading } = api.production.jobs.list.useQuery(
                     {
                       search: {
                         query,

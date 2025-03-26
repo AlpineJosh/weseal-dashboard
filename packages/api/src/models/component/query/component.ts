@@ -1,8 +1,8 @@
-import { eq, publicSchema, sql, sum } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
+import { coalesce } from "#lib/operators";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
-import { coalesce } from "@/lib/operators";
+import { eq, publicSchema, sql, sum } from "@repo/db";
 
 const { component, componentCategory, department, inventory } = publicSchema;
 

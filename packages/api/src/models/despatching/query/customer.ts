@@ -1,7 +1,7 @@
-import { and, count, eq, min, publicSchema } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
+import { and, count, eq, min, publicSchema } from "@repo/db";
 
 const { customer, salesOrder } = publicSchema;
 

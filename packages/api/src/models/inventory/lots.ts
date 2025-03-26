@@ -1,3 +1,4 @@
+import type { Transaction } from "#db";
 import Decimal from "decimal.js";
 
 import { and, asc, desc, eq, gt, schema, sql } from "@repo/db";
@@ -9,7 +10,6 @@ import type {
   InventoryQuantities,
   InventoryReference,
 } from "./types";
-import type { Transaction } from "@/db";
 
 export interface FetchLotInventoryParams {
   reference: InventoryReference;

@@ -1,10 +1,10 @@
+import { db } from "#db";
+import { completeTaskAllocation } from "#models/task/allocation";
+import { taskAllocationQuery } from "#models/task/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { db } from "@/db";
-import { completeTaskAllocation } from "@/models/task/allocation";
-import { taskAllocationQuery } from "@/models/task/query";
-import { publicProcedure } from "@/trpc";
 
 const uniqueTaskAllocationInput = z.object({
   id: z.number(),

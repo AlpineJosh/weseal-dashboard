@@ -1,8 +1,8 @@
-import { and, eq, publicSchema, sum } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
+import { coalesce } from "#lib/operators";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
-import { coalesce } from "@/lib/operators";
+import { and, eq, publicSchema, sum } from "@repo/db";
 
 const { purchaseOrderItem, component, purchaseReceipt, purchaseReceiptItem } =
   publicSchema;

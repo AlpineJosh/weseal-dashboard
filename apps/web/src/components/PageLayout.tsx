@@ -1,12 +1,12 @@
 "use client";
 
-import { NavigationMenu } from "@/components/NavigationMenu";
 import { ModalOverlay } from "react-aria-components";
 import { useImmer } from "use-immer";
 
 import {
   faArrowRightArrowLeft,
   faBars,
+  faCheck,
   faFluxCapacitor,
   faPlus,
   faSlidersSimple,
@@ -18,6 +18,8 @@ import { Button, Icon, Menu } from "@repo/ui/components/element";
 import { Sidebar } from "@repo/ui/components/navigation";
 import { Dialog } from "@repo/ui/components/utility";
 
+import { NavigationMenu } from "@/components/NavigationMenu";
+import { CompleteProductionActivity } from "./forms/CompleteProductionActivity";
 import { ProductionTaskForm } from "./forms/ProductionInTask";
 import { ProductionOutTaskForm } from "./forms/ProductionOutActivity";
 import { PurchaseReceiptTaskForm } from "./forms/PurchaseReceiptActivity";
@@ -40,6 +42,7 @@ const Modals: Record<
   "stock-adjust": StockAdjustmentTaskForm,
   "production-out": ProductionOutTaskForm,
   "sales-despatch": SalesDespatchTaskForm,
+  "complete-production": CompleteProductionActivity,
 };
 
 type ModalType =
@@ -49,7 +52,8 @@ type ModalType =
   | "stock-take"
   | "stock-adjust"
   | "production-out"
-  | "sales-despatch";
+  | "sales-despatch"
+  | "complete-production";
 
 const AddTaskMenuItems = () => {
   const [modal, setModal] = useImmer<ModalType | undefined>(undefined);
@@ -130,6 +134,14 @@ const AddTaskMenuItems = () => {
           >
             <Icon icon={faSlidersSimple} />
             Adjust Stock
+          </Menu.Item>
+          <Menu.Item
+            onAction={() => {
+              setModal("complete-production");
+            }}
+          >
+            <Icon icon={faCheck} />
+            Complete Production
           </Menu.Item>
           {/* <Menu.Item
             onAction={() => {

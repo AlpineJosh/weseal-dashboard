@@ -1,5 +1,4 @@
-import { decimal } from "@/utils/decimal";
-import { api } from "@/utils/trpc/react";
+import type Decimal from "decimal.js";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AsyncCombobox,
@@ -8,14 +7,21 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Input, NumberInput } from "@repo/ui/components/control";
-import { Table } from "@repo/ui/components/display";
-import { Divider } from "@repo/ui/components/element";
+import { NumberInput } from "@repo/ui/components/control";
+import { Table, useToast } from "@repo/ui/components/display";
+import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
 
+import { decimal } from "@/utils/decimal";
+import { api } from "@/utils/trpc/react";
+
+interface CompleteProductionActivityProps {
+  onExit: () => void;
+  onSave: () => void;
+}
 const remainingQuantitySchema = z.object({
   componentId: z.string(),
-  batchId: z.number().optional(),
+  batchId: z.number().nullable(),
   quantity: decimal(),
 });
 
@@ -24,7 +30,11 @@ const taskSchema = z.object({
   remainingQuantities: z.array(remainingQuantitySchema),
 });
 
-export function CompleteProductionActivity() {
+export function CompleteProductionActivity({
+  onExit,
+  onSave,
+}: CompleteProductionActivityProps) {
+  const { addToast } = useToast();
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -34,18 +44,62 @@ export function CompleteProductionActivity() {
   });
 
   const productionJobId = form.watch("productionJobId");
+  const remainingQuantities = form.watch("remainingQuantities");
+  const { data: productionJobAllocations } =
+    api.production.jobs.allocations.list.useQuery(
+      {
+        filter: {
+          jobId: { eq: productionJobId },
+        },
+      },
+      { enabled: !!productionJobId },
+    );
 
-  // const { data: productionJobAllocations } = api.production.items.list.useQuery(
-  //   {
-  //     filter: {
-  //       productionJobId: { eq: productionJobId },
-  //     },
-  //   },
-  //   { enabled: !!productionJobId },
-  // );
+  const { mutate: completeProductionJob } =
+    api.production.jobs.completeJob.useMutation({
+      onSuccess: () => {
+        addToast({
+          type: "success",
+          message: "Production Job Completed",
+        });
+        onSave();
+      },
+      onError: (error) => {
+        addToast({
+          type: "error",
+          message: error.message,
+        });
+      },
+    });
 
   const handleSubmit = (data: z.infer<typeof taskSchema>) => {
-    console.log(data);
+    completeProductionJob({
+      id: data.productionJobId,
+      remainingQuantities: data.remainingQuantities.map((item) => ({
+        quantity: item.quantity,
+        reference: { componentId: item.componentId, batchId: item.batchId },
+      })),
+    });
+  };
+
+  const handleChange = (
+    componentId: string,
+    batchId: number,
+    quantity: Decimal,
+  ) => {
+    const existingItem = remainingQuantities.find(
+      (item) => item.componentId === componentId && item.batchId === batchId,
+    );
+    if (existingItem) {
+      existingItem.quantity = quantity;
+    } else {
+      remainingQuantities.push({
+        componentId,
+        batchId,
+        quantity,
+      });
+    }
+    form.setValue("remainingQuantities", remainingQuantities);
   };
 
   return (
@@ -62,7 +116,7 @@ export function CompleteProductionActivity() {
           <Field.Control>
             <AsyncCombobox
               data={(query) => {
-                const { data, isLoading } = api.production.list.useQuery({
+                const { data, isLoading } = api.production.jobs.list.useQuery({
                   filter: {
                     isComplete: { eq: false },
                   },
@@ -88,16 +142,17 @@ export function CompleteProductionActivity() {
             </AsyncCombobox>
           </Field.Control>
         </Field>
-        {/* {productionJobId && (
+        {productionJobId && (
           <Table className="">
             <Table.Head>
               <Table.Column id="componentId">Component</Table.Column>
               <Table.Column id="componentDescription">Description</Table.Column>
-              <Table.Column id="quantityOrdered">
-                Quantity Expected
+              <Table.Column id="totalQuantity">Total Quantity</Table.Column>
+              <Table.Column id="remainingQuantity">
+                Expected Remaining
               </Table.Column>
-              <Table.Column id="quantityReceived">
-                Quantity Received
+              <Table.Column id="actualRemainingQuantity">
+                Actual Remaining
               </Table.Column>
             </Table.Head>
             <Table.Body data={productionJobAllocations?.rows ?? []}>
@@ -107,16 +162,20 @@ export function CompleteProductionActivity() {
                   <Table.Cell id="componentDescription">
                     {data.componentDescription}
                   </Table.Cell>
-                  <Table.Cell id="quantityOrdered">
-                    {data.quantityOrdered.toFixed(6)}
+                  <Table.Cell id="totalQuantity">
+                    {data.totalQuantity.toFixed(6)}
                   </Table.Cell>
-                  <Table.Cell id="quantityReceived">
+                  <Table.Cell id="usedQuantity">
+                    {data.usedQuantity.toFixed(6)}
+                  </Table.Cell>
+                  <Table.Cell id="remainingQuantity">
+                    {data.remainingQuantity.toFixed(6)}
+                  </Table.Cell>
+                  <Table.Cell id="actualRemainingQuantity">
                     <NumberInput
-                      defaultValue={data.quantityOrdered.minus(
-                        data.quantityReceived,
-                      )}
+                      defaultValue={data.remainingQuantity}
                       onChange={(value) => {
-                        handleChange(data.componentId, value);
+                        handleChange(data.componentId, data.batchId, value);
                       }}
                     />
                   </Table.Cell>
@@ -124,7 +183,15 @@ export function CompleteProductionActivity() {
               )}
             </Table.Body>
           </Table>
-        )} */}
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="plain" color="default" onPress={onExit}>
+            Cancel
+          </Button>
+          <Button variant="solid" color="primary" type="submit">
+            Complete Job
+          </Button>
+        </div>
       </Form>
     </div>
   );

@@ -1,8 +1,8 @@
+import { supplierQuery } from "#models/receiving/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { supplierQuery } from "@/models/receiving/query";
-import { publicProcedure } from "@/trpc";
 
 export const uniqueSupplierSchema = z.object({
   id: z.string(),

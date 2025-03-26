@@ -1,16 +1,15 @@
-import { Decimal } from "decimal.js";
-
-import { and, asc, eq, schema, sql } from "@repo/db";
-
-import type { Transaction } from "@/db";
+import type { Transaction } from "#db";
 import type {
   InventoryEntry,
   InventoryLotEntry,
   InventoryReference,
-} from "@/models/inventory/types";
-import { expectSingleRow } from "@/lib/utils";
-import { updateInventory } from "@/models/inventory/inventory";
-import { logToLedger } from "@/models/inventory/ledger";
+} from "#models/inventory/types";
+import { expectSingleRow } from "#lib/utils";
+import { updateInventory } from "#models/inventory/inventory";
+import { logToLedger } from "#models/inventory/ledger";
+import { Decimal } from "decimal.js";
+
+import { and, asc, eq, schema, sql } from "@repo/db";
 
 export interface CreateProductionJobAllocationParams {
   productionJobId: number;

@@ -1,11 +1,11 @@
+import { db } from "#db";
+import { locationGroupQuery } from "#models/location/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import { eq, publicSchema } from "@repo/db";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { db } from "@/db";
-import { locationGroupQuery } from "@/models/location/query";
-import { publicProcedure } from "@/trpc";
 
 export const uniqueLocationGroupSchema = z.object({
   id: z.number(),

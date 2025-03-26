@@ -1,8 +1,8 @@
+import { despatchItemQuery } from "#models/despatching/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { despatchItemQuery } from "@/models/despatching/query";
-import { publicProcedure } from "@/trpc";
 
 export const uniqueDespatchItemSchema = z.object({
   id: z.number(),

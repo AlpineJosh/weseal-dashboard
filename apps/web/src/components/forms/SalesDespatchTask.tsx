@@ -1,6 +1,3 @@
-import { LocationPicker } from "@/components/LocationPicker";
-import { decimal } from "@/utils/decimal";
-import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Decimal } from "decimal.js";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
@@ -11,6 +8,10 @@ import { Combobox } from "@repo/ui/components/control";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+
+import { LocationPicker } from "@/components/LocationPicker";
+import { decimal } from "@/utils/decimal";
+import { api } from "@/utils/trpc/react";
 
 const taskSchema = z.object({
   orderId: z.number(),
@@ -50,7 +51,7 @@ export function SalesDespatchTaskForm({
 
   const orderId = form.watch("orderId");
 
-  const { data: orderItems } = api.despatching.order.item.list.useQuery(
+  const { data: orderItems } = api.despatching.order.items.list.useQuery(
     {
       filter: {
         orderId: { eq: orderId },
@@ -62,7 +63,7 @@ export function SalesDespatchTaskForm({
   const { mutate: createTask } =
     api.despatching.despatch.createDespatchTask.useMutation({
       onSuccess: async () => {
-        await utils.task.item.list.invalidate();
+        await utils.despatching.order.items.list.invalidate();
         onSave();
         addToast({
           type: "success",
@@ -78,7 +79,18 @@ export function SalesDespatchTaskForm({
     });
 
   const handleSave = (task: z.infer<typeof taskSchema>) => {
-    createTask(task);
+    createTask({
+      orderId: task.orderId,
+      assignedToId: task.assignedToId,
+      allocations: task.items.map((item) => ({
+        quantity: item.quantity,
+        reference: {
+          componentId: item.componentId,
+          batchId: item.batchId ?? null,
+        },
+        pickLocationId: item.locationId,
+      })),
+    });
   };
 
   return (

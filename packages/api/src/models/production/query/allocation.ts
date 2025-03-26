@@ -1,9 +1,8 @@
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
 import { eq, sum } from "drizzle-orm";
 
 import { schema } from "@repo/db";
-
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
 
 const { batch, component, productionJobAllocation } = schema;
 

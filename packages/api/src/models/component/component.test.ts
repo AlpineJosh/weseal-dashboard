@@ -1,8 +1,8 @@
+import type { Transaction } from "#db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { eq, schema } from "@repo/db";
 
-import type { Transaction } from "@/db";
 import { getSubcomponents } from "./component";
 
 describe("getSubcomponents", () => {

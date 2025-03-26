@@ -1,11 +1,11 @@
+import { db } from "#db";
+import { locationQuery } from "#models/location/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import { eq, publicSchema } from "@repo/db";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { db } from "@/db";
-import { locationQuery } from "@/models/location/query";
-import { publicProcedure } from "@/trpc";
 import { locationGroupRouter } from "./location-group";
 import { locationTypeRouter } from "./location-type";
 

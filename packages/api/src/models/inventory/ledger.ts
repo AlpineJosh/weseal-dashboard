@@ -1,3 +1,4 @@
+import type { Transaction } from "#db";
 import type Decimal from "decimal.js";
 
 import { schema } from "@repo/db";
@@ -9,7 +10,6 @@ import type {
   LedgerDirection,
   LedgerEntryDetails,
 } from "./types";
-import type { Transaction } from "@/db";
 
 interface CreateLedgerEntryParams {
   reference: InventoryReference;

@@ -1,9 +1,8 @@
+import type { Transaction } from "#db";
+import type { InventoryReference } from "#models/inventory/types";
 import type { Decimal } from "decimal.js";
 
 import { schema } from "@repo/db";
-
-import type { Transaction } from "@/db";
-import type { InventoryReference } from "@/models/inventory/types";
 
 interface CreateSalesDespatchItemParams {
   despatchId: number;

@@ -1,4 +1,7 @@
 import type Decimal from "decimal.js";
+import { createSalesDespatchItem } from "#models/despatching/despatch-item";
+import { logToLedger } from "#models/inventory/ledger";
+import { createProductionJobAllocation } from "#models/production/allocation";
 
 import { eq, schema } from "@repo/db";
 
@@ -9,9 +12,6 @@ import type {
   InventoryReference,
   LedgerEntryDetails,
 } from "../inventory/types";
-import { createSalesDespatchItem } from "@/models/despatching/despatch-item";
-import { logToLedger } from "@/models/inventory/ledger";
-import { createProductionJobAllocation } from "@/models/production/allocation";
 import { expectSingleRow } from "../../lib/utils";
 import { updateInventory } from "../inventory/inventory";
 import { calculateOutboundEntry } from "../inventory/lots";

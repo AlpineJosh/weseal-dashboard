@@ -1,7 +1,7 @@
-import { aliasedTable, eq, schema, sql } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
+import { aliasedTable, eq, schema, sql } from "@repo/db";
 
 // Create aliased tables for locations and location groups
 const pickLocation = aliasedTable(schema.location, "pick_location");

@@ -1,13 +1,14 @@
+import { db } from "#db";
+import { decimal } from "#lib/decimal";
+import { createDespatchTask } from "#models/despatching/despatch";
+import { despatchQuery } from "#models/despatching/query";
+import { despatchItemRouter } from "#routes/despatching/despatch-item";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import { eq, publicSchema } from "@repo/db";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { db } from "@/db";
-import { decimal } from "@/lib/decimal";
-import { createDespatchTask } from "@/models/despatching/despatch";
-import { despatchQuery } from "@/models/despatching/query";
-import { publicProcedure } from "@/trpc";
 
 export const uniqueDespatchSchema = z.object({
   id: z.number(),
@@ -67,6 +68,7 @@ export const despatchRouter = {
         });
       });
     }),
+  items: despatchItemRouter,
 } satisfies TRPCRouterRecord;
 
 export type DespatchRouter = typeof despatchRouter;

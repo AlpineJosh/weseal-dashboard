@@ -1,5 +1,3 @@
-import { decimal } from "@/utils/decimal";
-import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { Controller, useForm } from "react-hook-form";
@@ -9,6 +7,9 @@ import { Combobox, NumberInput } from "@repo/ui/components/control";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button, Divider } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+
+import { decimal } from "@/utils/decimal";
+import { api } from "@/utils/trpc/react";
 
 const taskSchema = z.object({
   componentId: z.string(),
@@ -41,7 +42,7 @@ export function StockTransferTaskForm({
 
   const { mutate: createTask } = api.inventory.createTransferTask.useMutation({
     onSuccess: async () => {
-      await utils.task.item.list.invalidate();
+      await utils.task.allocations.list.invalidate();
       onSave();
       addToast({
         type: "success",
@@ -66,12 +67,15 @@ export function StockTransferTaskForm({
     createTask({
       assignedToId,
       putLocationId,
-      items: [
+      allocations: [
         {
-          componentId,
+          reference: {
+            componentId,
+            batchId: Number(pick[1]),
+          },
           quantity,
           pickLocationId: Number(pick[0]),
-          batchId: Number(pick[1]),
+          putLocationId,
         },
       ],
     });

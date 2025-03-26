@@ -1,11 +1,11 @@
-import { z } from "zod";
-
-import type { TRPCRouterRecord } from "@trpc/server";
 import {
   adjustInventory,
   createTransferTask,
-} from "@/models/inventory/inventory";
-import { inventoryQuery } from "@/models/inventory/query";
+} from "#models/inventory/inventory";
+import { inventoryQuery } from "#models/inventory/query";
+import { z } from "zod";
+
+import type { TRPCRouterRecord } from "@trpc/server";
 import { db } from "../../db";
 import { decimal } from "../../lib/decimal";
 import { resetInventory } from "../../models/reset/model";

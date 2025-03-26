@@ -1,7 +1,7 @@
-import { eq, publicSchema } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
+import { eq, publicSchema } from "@repo/db";
 
 const { salesDespatchItem, component, batch } = publicSchema;
 

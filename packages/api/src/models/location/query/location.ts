@@ -1,7 +1,7 @@
-import { eq, publicSchema, sql } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
+import { eq, publicSchema, sql } from "@repo/db";
 
 const { location, locationGroup, locationType } = publicSchema;
 

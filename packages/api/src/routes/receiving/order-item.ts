@@ -1,8 +1,8 @@
+import { orderItemQuery } from "#models/receiving/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { orderItemQuery } from "@/models/receiving/query";
-import { publicProcedure } from "@/trpc";
 
 const uniqueOrderItemInput = z.object({
   id: z.number(),

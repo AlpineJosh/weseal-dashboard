@@ -1,7 +1,7 @@
-import { publicSchema } from "@repo/db";
+import { db } from "#db";
+import { datatable } from "#lib/datatables";
 
-import { db } from "@/db";
-import { datatable } from "@/lib/datatables";
+import { publicSchema } from "@repo/db";
 
 const { profile } = publicSchema;
 

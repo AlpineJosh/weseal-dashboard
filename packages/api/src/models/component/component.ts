@@ -1,6 +1,6 @@
-import { eq, schema } from "@repo/db";
+import type { Transaction } from "#db";
 
-import type { Transaction } from "@/db";
+import { eq, schema } from "@repo/db";
 
 export const getSubcomponents = async (
   tx: Transaction,

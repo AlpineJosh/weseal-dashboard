@@ -1,9 +1,9 @@
-import { schema } from "@repo/db";
+import type { Transaction } from "#db";
+import type { TaskAllocation } from "#models/task/allocation";
+import { expectSingleRow } from "#lib/utils";
+import { createTask } from "#models/task/task";
 
-import type { Transaction } from "@/db";
-import type { TaskAllocation } from "@/models/task/allocation";
-import { expectSingleRow } from "@/lib/utils";
-import { createTask } from "@/models/task/task";
+import { schema } from "@repo/db";
 
 export interface CreateDespatchTaskParams {
   orderId: number;

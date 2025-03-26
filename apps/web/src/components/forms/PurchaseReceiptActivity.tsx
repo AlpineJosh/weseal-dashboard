@@ -1,6 +1,4 @@
 import type { Decimal } from "decimal.js";
-import { decimal } from "@/utils/decimal";
-import { api } from "@/utils/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsyncCombobox } from "node_modules/@repo/ui/src/components/control/combobox/combobox.component";
 import { useForm } from "react-hook-form";
@@ -11,6 +9,9 @@ import { Table } from "@repo/ui/components/display";
 import { useToast } from "@repo/ui/components/display/toaster";
 import { Button } from "@repo/ui/components/element";
 import { Field, Form } from "@repo/ui/components/form";
+
+import { decimal } from "@/utils/decimal";
+import { api } from "@/utils/trpc/react";
 
 const taskSchema = z.object({
   orderId: z.coerce.number(),
@@ -47,7 +48,7 @@ export function PurchaseReceiptTaskForm({
 
   console.log(form.watch());
 
-  const { data: orderItems } = api.receiving.order.item.list.useQuery(
+  const { data: orderItems } = api.receiving.order.items.list.useQuery(
     {
       filter: {
         orderId: {
@@ -60,7 +61,7 @@ export function PurchaseReceiptTaskForm({
 
   const { mutate: receiveOrder } = api.receiving.receipt.receive.useMutation({
     onSuccess: async () => {
-      await utils.receiving.order.item.list.invalidate();
+      await utils.receiving.order.items.list.invalidate();
       onSave();
       addToast({
         type: "success",
@@ -89,7 +90,14 @@ export function PurchaseReceiptTaskForm({
   };
 
   const handleSubmit = (value: z.infer<typeof taskSchema>) => {
-    receiveOrder(value);
+    receiveOrder({
+      orderId: value.orderId,
+      locationId: value.locationId,
+      items: value.items.map((item) => ({
+        quantity: item.quantity,
+        reference: { componentId: item.componentId, batchId: null },
+      })),
+    });
   };
 
   return (

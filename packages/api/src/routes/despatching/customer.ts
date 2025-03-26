@@ -1,8 +1,8 @@
+import { customerQuery } from "#models/despatching/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { customerQuery } from "@/models/despatching/query";
-import { publicProcedure } from "@/trpc";
 
 export const uniqueCustomerSchema = z.object({
   id: z.string(),

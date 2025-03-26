@@ -1,11 +1,11 @@
+import { db } from "#db";
+import { profileQuery } from "#models/profile/query";
+import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import { eq, publicSchema } from "@repo/db";
 
 import type { TRPCRouterRecord } from "@trpc/server";
-import { db } from "@/db";
-import { profileQuery } from "@/models/profile/query";
-import { publicProcedure } from "@/trpc";
 
 export const uniqueProfileSchema = z.object({
   id: z.string(),

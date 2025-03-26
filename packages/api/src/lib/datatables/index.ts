@@ -1,4 +1,4 @@
-import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
+import type { PgTable, SubqueryWithSelection } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
 import { and, Column, count, is, sql, SQL } from "@repo/db";
@@ -11,7 +11,6 @@ import type {
   DatatableInputSchema,
   DatatableManyQuery,
   DatatableOutput,
-  Field,
   Fields,
   FieldSelection,
 } from "./types";
@@ -26,13 +25,7 @@ export const datatable = <
   S extends FieldSelection<T>,
 >(
   definition: T,
-  view: SubqueryWithSelection<S, string> & {
-    _: {
-      isSelect: true;
-      alias: string;
-      selectedFields: Record<keyof S, Field>;
-    };
-  },
+  view: SubqueryWithSelection<S, string>,
 ): {
   $schema: DatatableInputSchema<T>;
   findMany: DatatableManyQuery<T>;
@@ -85,11 +78,14 @@ export const datatable = <
     const order = buildSortClause(fields, sort) ?? [];
     const limit = pagination.size;
     const offset = (pagination.page - 1) * pagination.size;
-    const total = await db.select({ count: count() }).from(view).where(where);
+    const total = await db
+      .select({ count: count() })
+      .from(view as unknown as PgTable)
+      .where(where);
 
     const results = await db
       .select()
-      .from(view)
+      .from(view as unknown as PgTable)
       .where(where)
       .orderBy(...order)
       .limit(limit)
@@ -116,7 +112,7 @@ export const datatable = <
 
     const results = await db
       .select()
-      .from(view)
+      .from(view as unknown as PgTable)
       .where(where)
       .orderBy(...order)
       .limit(1);
