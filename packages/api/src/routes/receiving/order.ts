@@ -16,7 +16,7 @@ export const orderRouter = {
   list: publicProcedure.input(orderQuery.$schema).query(async ({ input }) => {
     return orderQuery.findMany(input);
   }),
-  items: orderItemRouter,
+  item: orderItemRouter,
 } satisfies TRPCRouterRecord;
 
 export type OrderRouter = typeof orderRouter;

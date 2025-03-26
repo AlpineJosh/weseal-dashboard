@@ -1,12 +1,12 @@
 "use client";
 
-import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
-import { api } from "@/utils/trpc/react";
-
 import { faCheck, faXmark } from "@repo/pro-solid-svg-icons";
 import { Datatable } from "@repo/ui/components/display";
 import { Badge, Button, Icon } from "@repo/ui/components/element";
 import { Heading, TextLink } from "@repo/ui/components/typography";
+
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
+import { api } from "@/utils/trpc/react";
 
 interface TaskPageProps {
   params: { taskId: string };
@@ -19,7 +19,7 @@ export default function TaskPage({ params }: TaskPageProps) {
     id,
   });
 
-  const { mutate: completeTask } = api.task.item.complete.useMutation();
+  const { mutate: completeTask } = api.task.allocations.complete.useMutation();
 
   return (
     <div className="flex max-w-screen-xl grow flex-col space-y-4">
@@ -38,7 +38,7 @@ export default function TaskPage({ params }: TaskPageProps) {
       )}
 
       <DatatableQueryProvider
-        endpoint={api.task.item.list}
+        endpoint={api.task.allocations.list}
         defaultInput={{
           filter: {
             taskId: {

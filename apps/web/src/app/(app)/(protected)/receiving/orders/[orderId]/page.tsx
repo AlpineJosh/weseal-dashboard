@@ -1,11 +1,11 @@
 "use client";
 
+import { Datatable } from "@repo/ui/components/display";
+import { TextLink } from "@repo/ui/components/typography";
+
 import { component } from "@/models/component";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
-
-import { Datatable } from "@repo/ui/components/display";
-import { TextLink } from "@repo/ui/components/typography";
 
 export default function ReceivingPage({
   params,

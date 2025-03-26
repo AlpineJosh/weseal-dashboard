@@ -1,11 +1,11 @@
 "use client";
 
+import { Datatable } from "@repo/ui/components/display";
+import { Heading, TextLink } from "@repo/ui/components/typography";
+
 import { component } from "@/models/component";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
-
-import { Datatable } from "@repo/ui/components/display";
-import { Heading, TextLink } from "@repo/ui/components/typography";
 
 export default function ReceiptsOverview({
   params,
@@ -19,7 +19,7 @@ export default function ReceiptsOverview({
       <Heading level={1}>Despatch #{id}</Heading>
 
       <DatatableQueryProvider
-        endpoint={api.despatching.despatch.item.list}
+        endpoint={api.despatching.despatch.items.list}
         defaultInput={{
           filter: {
             despatchId: {

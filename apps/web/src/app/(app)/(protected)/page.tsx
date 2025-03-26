@@ -1,15 +1,15 @@
 "use client";
 
+import { Datatable, Modal } from "@repo/ui/components/display";
+import { Button, Divider } from "@repo/ui/components/element";
+import { Heading, Subheading, TextLink } from "@repo/ui/components/typography";
+
 import { ProductionTaskForm } from "@/components/forms/ProductionInTask";
 import { PurchaseReceiptTaskForm } from "@/components/forms/PurchaseReceiptActivity";
 import { SalesDespatchTaskForm } from "@/components/forms/SalesDespatchTask";
 import { StockTransferTaskForm } from "@/components/forms/StockTransferTask";
 import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
 import { api } from "@/utils/trpc/react";
-
-import { Datatable, Modal } from "@repo/ui/components/display";
-import { Button, Divider } from "@repo/ui/components/element";
-import { Heading, Subheading, TextLink } from "@repo/ui/components/typography";
 
 export const runtime = "edge";
 
@@ -26,11 +26,12 @@ export const runtime = "edge";
 
 export default function DashboardPage() {
   const utils = api.useUtils();
-  const { mutate: completeTaskItem } = api.task.item.complete.useMutation({
-    onSuccess: async () => {
-      await utils.task.item.list.invalidate();
-    },
-  });
+  const { mutate: completeTaskItem } =
+    api.task.allocations.complete.useMutation({
+      onSuccess: async () => {
+        await utils.task.allocations.list.invalidate();
+      },
+    });
 
   return (
     <div className="flex flex-col space-y-2">
@@ -83,7 +84,7 @@ export default function DashboardPage() {
       <Subheading level={2}>Tasks</Subheading>
 
       <DatatableQueryProvider
-        endpoint={api.task.item.list}
+        endpoint={api.task.allocations.list}
         defaultInput={{
           filter: {
             isComplete: { eq: false },

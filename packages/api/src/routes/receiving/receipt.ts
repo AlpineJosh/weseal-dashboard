@@ -6,6 +6,7 @@ import { publicProcedure } from "#trpc";
 import { z } from "zod";
 
 import type { TRPCRouterRecord } from "@trpc/server";
+import { receiptItemRouter } from "./receipt-item";
 
 export const uniqueReceiptSchema = z.object({
   id: z.number(),
@@ -42,6 +43,7 @@ export const receiptRouter = {
         });
       });
     }),
+  item: receiptItemRouter,
 } satisfies TRPCRouterRecord;
 
 export type ReceiptRouter = typeof receiptRouter;

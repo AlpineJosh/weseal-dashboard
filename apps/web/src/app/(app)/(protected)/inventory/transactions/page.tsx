@@ -1,12 +1,13 @@
 "use client";
 
-import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
-import { api } from "@/utils/trpc/react";
 import { format } from "date-fns";
 
 import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
 import { Heading } from "@repo/ui/components/typography";
+
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
+import { api } from "@/utils/trpc/react";
 
 const MOVEMENT_TYPES: Record<
   | "production"
@@ -37,7 +38,7 @@ export default function InventoryOverview() {
     <div className="flex flex-col gap-4">
       <Heading level={1}>Transaction Log</Heading>
       <DatatableQueryProvider
-        endpoint={api.inventory.movements.list}
+        endpoint={api.inventory.ledger.list}
         defaultInput={{
           sort: [{ field: "date", order: "desc" }],
         }}
@@ -72,8 +73,18 @@ export default function InventoryOverview() {
                   </Datatable.Cell>
                   <Datatable.Cell id="type">
                     {data.type && (
-                      <Badge color={MOVEMENT_TYPES[data.type].color}>
-                        {MOVEMENT_TYPES[data.type].title}
+                      <Badge
+                        color={
+                          MOVEMENT_TYPES[
+                            data.type as keyof typeof MOVEMENT_TYPES
+                          ].color
+                        }
+                      >
+                        {
+                          MOVEMENT_TYPES[
+                            data.type as keyof typeof MOVEMENT_TYPES
+                          ].title
+                        }
                       </Badge>
                     )}
                   </Datatable.Cell>
@@ -81,8 +92,7 @@ export default function InventoryOverview() {
                     {data.componentId}
                   </Datatable.Cell>
                   <Datatable.Cell id="batch">
-                    {data.batchReference ??
-                      data.batchEntryDate?.toLocaleDateString()}
+                    {data.batchReference}
                   </Datatable.Cell>
                   <Datatable.Cell id="location">
                     {data.locationName}

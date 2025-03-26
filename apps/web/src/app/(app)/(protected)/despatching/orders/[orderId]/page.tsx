@@ -1,12 +1,13 @@
 "use client";
 
-import { component } from "@/models/component";
-import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
-import { api } from "@/utils/trpc/react";
 import Decimal from "decimal.js";
 
 import { Datatable } from "@repo/ui/components/display";
 import { TextLink } from "@repo/ui/components/typography";
+
+import { component } from "@/models/component";
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
+import { api } from "@/utils/trpc/react";
 
 export default function DespatchingPage({
   params,
@@ -18,7 +19,7 @@ export default function DespatchingPage({
   return (
     <>
       <DatatableQueryProvider
-        endpoint={api.despatching.order.item.list}
+        endpoint={api.despatching.order.items.list}
         defaultInput={{
           filter: {
             orderId: {

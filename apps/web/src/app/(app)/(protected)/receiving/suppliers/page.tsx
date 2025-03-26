@@ -1,10 +1,10 @@
 "use client";
 
-import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
-import { api } from "@/utils/trpc/react";
-
 import { Datatable } from "@repo/ui/components/display";
 import { Heading, TextLink } from "@repo/ui/components/typography";
+
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
+import { api } from "@/utils/trpc/react";
 
 export default function SuppliersOverview() {
   return (
@@ -12,7 +12,7 @@ export default function SuppliersOverview() {
       <Heading level={1}>Suppliers</Heading>
 
       <DatatableQueryProvider
-        endpoint={api.receiving.suppliers.list}
+        endpoint={api.receiving.supplier.list}
         defaultInput={{
           sort: [{ field: "openOrderCount", order: "desc" }],
         }}
@@ -31,9 +31,6 @@ export default function SuppliersOverview() {
               </Datatable.Column>
               <Datatable.Column id="openOrderCount" isSortable>
                 Open Orders
-              </Datatable.Column>
-              <Datatable.Column id="nextExpectedReceipt" isSortable>
-                Next Due Date
               </Datatable.Column>
             </Datatable.Head>
             <Datatable.Body data={props.data}>
@@ -54,9 +51,6 @@ export default function SuppliersOverview() {
                   </Datatable.Cell>
                   <Datatable.Cell id="openOrderCount">
                     {data.openOrderCount}
-                  </Datatable.Cell>
-                  <Datatable.Cell id="nextExpectedReceipt">
-                    {data.nextExpectedReceipt?.toLocaleDateString()}
                   </Datatable.Cell>
                 </Datatable.Row>
               )}

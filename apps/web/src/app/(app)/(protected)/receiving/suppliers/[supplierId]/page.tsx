@@ -1,18 +1,18 @@
 "use client";
 
-import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
-import { api } from "@/utils/trpc/react";
-
 import { Datatable } from "@repo/ui/components/display";
 import { Badge } from "@repo/ui/components/element";
 import { Heading, Text, TextLink } from "@repo/ui/components/typography";
+
+import { DatatableQueryProvider } from "@/utils/trpc/QueryProvider";
+import { api } from "@/utils/trpc/react";
 
 export default function SupplierOverview({
   params,
 }: {
   params: { supplierId: string };
 }) {
-  const { data } = api.receiving.suppliers.get.useQuery({
+  const { data } = api.receiving.supplier.get.useQuery({
     id: params.supplierId,
   });
 
@@ -22,7 +22,7 @@ export default function SupplierOverview({
       <Text>Purchase Orders</Text>
 
       <DatatableQueryProvider
-        endpoint={api.receiving.orders.list}
+        endpoint={api.receiving.order.list}
         defaultInput={{
           filter: {
             supplierId: {
@@ -43,12 +43,7 @@ export default function SupplierOverview({
               <Datatable.Column id="orderDate" isSortable>
                 Order Date
               </Datatable.Column>
-              <Datatable.Column id="nextExpectedReceipt" isSortable>
-                Next Due Date
-              </Datatable.Column>
-              <Datatable.Column id="receiptCount" isSortable>
-                Deliveries Received
-              </Datatable.Column>
+
               <Datatable.Column id="remainingItemCount" isSortable>
                 Items Remaining
               </Datatable.Column>
@@ -69,7 +64,7 @@ export default function SupplierOverview({
                           ? "orange"
                           : data.isCancelled
                             ? "red"
-                            : data.remainingItemCount === 0
+                            : data.incompleteItems === 0
                               ? "green"
                               : "yellow"
                       }
@@ -78,7 +73,7 @@ export default function SupplierOverview({
                         ? "Quoted"
                         : data.isCancelled
                           ? "Cancelled"
-                          : data.remainingItemCount === 0
+                          : data.incompleteItems === 0
                             ? "Received"
                             : "Pending"}
                     </Badge>
@@ -86,14 +81,9 @@ export default function SupplierOverview({
                   <Datatable.Cell id="orderDate">
                     {data.orderDate?.toLocaleDateString()}
                   </Datatable.Cell>
-                  <Datatable.Cell id="nextExpectedReceipt">
-                    {data.nextExpectedReceipt?.toLocaleDateString()}
-                  </Datatable.Cell>
-                  <Datatable.Cell id="receiptCount">
-                    {data.receiptCount}
-                  </Datatable.Cell>
+
                   <Datatable.Cell id="remainingItemCount">
-                    {data.remainingItemCount}
+                    {data.incompleteItems}
                   </Datatable.Cell>
                 </Datatable.Row>
               )}
