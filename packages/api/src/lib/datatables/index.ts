@@ -11,6 +11,7 @@ import type {
   DatatableInputSchema,
   DatatableManyQuery,
   DatatableOutput,
+  Field,
   Fields,
   FieldSelection,
 } from "./types";
@@ -25,7 +26,13 @@ export const datatable = <
   S extends FieldSelection<T>,
 >(
   definition: T,
-  view: SubqueryWithSelection<S, string>,
+  view: SubqueryWithSelection<S, string> & {
+    _: {
+      isSelect: true;
+      alias: string;
+      selectedFields: Record<keyof S, Field>;
+    };
+  },
 ): {
   $schema: DatatableInputSchema<T>;
   findMany: DatatableManyQuery<T>;

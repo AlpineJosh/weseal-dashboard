@@ -14,12 +14,15 @@
 
   "prettier.ignorePath": ".gitignore",
 
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   // "typescript.preferences.autoImportFileExcludePatterns": [
   //   "next/router.d.ts",
   //   "next/dist/client/router.d.ts"
   // ],
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
 
   "files.associations": {
     "*.css": "tailwindcss"

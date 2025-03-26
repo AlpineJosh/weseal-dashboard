@@ -33,7 +33,7 @@
     "@repo/db": "workspace:*",
     "@types/better-sqlite3": "^7.6.11",
     "better-sqlite3": "^11.5.0",
-    "drizzle-orm": "^0.32.0",
+    "drizzle-orm": "^0.41.0",
     "fs-extra": "^11.2.0",
     "node-gyp": "^10.2.0",
     "node-schedule": "^2.1.1",
