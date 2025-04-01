@@ -14,6 +14,16 @@ import {
   createTRPCRouter,
 } from "./trpc";
 
+// Export order model functions
+export {
+  createPurchaseOrder,
+  createPurchaseOrderItem,
+} from "./models/receiving/order";
+export {
+  createSalesOrder,
+  createSalesOrderItem,
+} from "./models/despatching/order";
+
 const appRouter = createTRPCRouter({
   component: componentRouter,
   production: productionRouter,
