@@ -48,7 +48,7 @@ export function PurchaseReceiptTaskForm({
 
   console.log(form.watch());
 
-  const { data: orderItems } = api.receiving.order.items.list.useQuery(
+  const { data: orderItems } = api.receiving.order.item.list.useQuery(
     {
       filter: {
         orderId: {
@@ -61,7 +61,7 @@ export function PurchaseReceiptTaskForm({
 
   const { mutate: receiveOrder } = api.receiving.receipt.receive.useMutation({
     onSuccess: async () => {
-      await utils.receiving.order.items.list.invalidate();
+      await utils.receiving.order.item.list.invalidate();
       onSave();
       addToast({
         type: "success",

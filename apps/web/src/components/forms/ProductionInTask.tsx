@@ -29,11 +29,7 @@ interface ProductionTaskFormProps {
 
 const taskItemInput = z.object({
   componentId: z.string(),
-  batchId: z
-    .number()
-    .nullable()
-    .transform((x) => x ?? undefined)
-    .optional(),
+  batchId: z.number().nullable(),
   locationId: z.number(),
   quantity: decimal(),
 });
@@ -95,9 +91,8 @@ export const ProductionTaskForm = ({
     { enabled: !!componentId },
   );
   const jobReady =
-    (component && !component.isBatchTracked) ||
-    !!productionJobId ||
-    !!batchReference;
+    (component && !component.isBatchTracked) ??
+    (!!productionJobId || !!batchReference);
 
   const { data: subcomponents } = api.component.subcomponent.list.useQuery(
     {

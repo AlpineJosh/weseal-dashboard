@@ -13,7 +13,8 @@ import { api } from "@/utils/trpc/react";
 
 const taskSchema = z.object({
   componentId: z.string(),
-  pickLocationId: z.string(),
+  batchId: z.number().nullable(),
+  pickLocationId: z.number(),
   putLocationId: z.number(),
   assignedToId: z.string(),
   quantity: decimal(),
@@ -31,6 +32,7 @@ export function StockTransferTaskForm({
   const form = useForm<z.infer<typeof taskSchema>>({
     defaultValues: {
       quantity: 1,
+      batchId: null,
       assignedToId: undefined,
       pickLocationId: undefined,
       putLocationId: undefined,
@@ -39,6 +41,12 @@ export function StockTransferTaskForm({
     resolver: zodResolver(taskSchema),
   });
   const componentId = form.watch("componentId");
+  const batchId = form.watch("batchId");
+
+  const { data: component } = api.component.get.useQuery(
+    { id: componentId },
+    { enabled: !!componentId },
+  );
 
   const { mutate: createTask } = api.inventory.createTransferTask.useMutation({
     onSuccess: async () => {
@@ -62,8 +70,9 @@ export function StockTransferTaskForm({
     quantity,
     pickLocationId,
     putLocationId,
+    componentId,
+    batchId,
   }: z.infer<typeof taskSchema>) => {
-    const pick = pickLocationId.toString().split("-");
     createTask({
       assignedToId,
       putLocationId,
@@ -71,10 +80,10 @@ export function StockTransferTaskForm({
         {
           reference: {
             componentId,
-            batchId: Number(pick[1]),
+            batchId,
           },
           quantity,
-          pickLocationId: Number(pick[0]),
+          pickLocationId,
           putLocationId,
         },
       ],
@@ -123,6 +132,39 @@ export function StockTransferTaskForm({
             </AsyncCombobox>
           </Field.Control>
         </Field>
+        {component?.isBatchTracked && (
+          <Field name="batchId" layout="row">
+            <Field.Label>Batch</Field.Label>
+            <Field.Control>
+              <AsyncCombobox
+                data={(query) => {
+                  const { data, isLoading } = api.batch.list.useQuery({
+                    filter: {
+                      componentId: {
+                        eq: componentId,
+                      },
+                    },
+                    search: { query },
+                  });
+                  return {
+                    isLoading: isLoading,
+                    items: data?.rows ?? [],
+                  };
+                }}
+                keyAccessor={(batch) => batch.id}
+                textValueAccessor={(batch) => batch.batchReference}
+              >
+                {(batch) => {
+                  return (
+                    <Combobox.Option id={batch.id}>
+                      {batch.batchReference}
+                    </Combobox.Option>
+                  );
+                }}
+              </AsyncCombobox>
+            </Field.Control>
+          </Field>
+        )}
         <Field name="pickLocationId" layout="row">
           <Field.Label>Pick Location</Field.Label>
           <Field.Control>
@@ -134,6 +176,11 @@ export function StockTransferTaskForm({
                       componentId: {
                         eq: componentId,
                       },
+                      ...(batchId && {
+                        batchId: {
+                          eq: batchId,
+                        },
+                      }),
                       totalQuantity: {
                         gt: 0,
                       },
@@ -149,21 +196,16 @@ export function StockTransferTaskForm({
                   items: data?.rows ?? [],
                 };
               }}
-              keyAccessor={(location) =>
-                `${location.locationId}-${location.batchId}`
-              }
-              textValueAccessor={(location) =>
-                `${location.locationName} - ${location.batchReference}`
-              }
+              keyAccessor={(location) => location.locationId}
+              textValueAccessor={(location) => location.locationName}
             >
               {(location) => {
                 return (
                   <Combobox.Option
-                    id={`${location.locationId}-${location.batchId}`}
-                    textValue={`Loc: ${location.locationName} Batch: ${location.batchReference}`}
+                    id={location.locationId}
+                    textValue={location.locationName}
                   >
-                    Loc: {location.locationName} - Batch:{" "}
-                    {location.batchReference}
+                    {location.locationName}
                   </Combobox.Option>
                 );
               }}

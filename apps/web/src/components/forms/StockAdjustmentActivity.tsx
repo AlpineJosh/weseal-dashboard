@@ -13,7 +13,7 @@ import { api } from "@/utils/trpc/react";
 
 const taskSchema = z.object({
   componentId: z.string(),
-  batchId: z.number().optional(),
+  batchId: z.number().nullable(),
   locationId: z.number(),
   quantity: decimal(),
 });
@@ -31,14 +31,12 @@ export function StockAdjustmentTaskForm({
       quantity: 0,
       locationId: undefined,
       componentId: undefined,
-      batchId: undefined,
+      batchId: null,
     },
     resolver: zodResolver(taskSchema),
   });
 
   const componentId = form.watch("componentId");
-  const locationId = form.watch("locationId");
-  const batchId = form.watch("batchId");
 
   const { data: component } = api.component.get.useQuery(
     { id: componentId },
@@ -61,18 +59,13 @@ export function StockAdjustmentTaskForm({
     },
   });
 
-  const currentQuantity = api.inventory.get.useQuery(
-    { componentId, locationId, batchId },
-    { enabled: !!componentId && !!locationId && !!batchId },
-  );
-
   const handleSubmit = ({
     componentId,
     batchId,
     locationId,
     quantity,
   }: z.infer<typeof taskSchema>) => {
-    if (component!.isBatchTracked && !batchId) {
+    if (component?.isBatchTracked && !batchId) {
       addToast({
         type: "error",
         message: "Batch is required for batch tracked components",
@@ -147,7 +140,7 @@ export function StockAdjustmentTaskForm({
                       },
                       search: { query },
                     },
-                    { enabled: component?.isBatchTracked },
+                    { enabled: component.isBatchTracked },
                   );
                   return {
                     isLoading: isLoading,

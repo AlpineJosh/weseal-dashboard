@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { api } from "@/utils/trpc/react";
 import { Decimal } from "decimal.js";
 import { useImmer } from "use-immer";
 
@@ -10,10 +9,12 @@ import { NumberInput, Switch } from "@repo/ui/components/control";
 import { Icon } from "@repo/ui/components/element";
 import { Heading, Strong, Text } from "@repo/ui/components/typography";
 
+import { api } from "@/utils/trpc/react";
+
 interface TaskItem {
   componentId: string;
   locationId: number;
-  batchId?: number;
+  batchId: number | null;
   quantity: Decimal;
 }
 
