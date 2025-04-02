@@ -44,7 +44,7 @@ const taskInput = z.object({
 const newProductionTaskInput = taskInput.extend({
   type: z.literal("production-new"),
   outputComponentId: z.string(),
-  batchReference: z.string(),
+  batchReference: z.string().optional(),
   outputLocationId: z.number(),
 });
 
@@ -163,7 +163,7 @@ export const ProductionTaskForm = ({
     if (input.type === "production-new") {
       createTask({
         componentId: input.outputComponentId,
-        batchReference: input.batchReference,
+        batchReference: input.batchReference ?? null,
         assignedToId: input.assignedToId,
         outputLocationId: input.outputLocationId,
         targetQuantity: input.quantity,
