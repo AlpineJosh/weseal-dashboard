@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  faBook,
   faBox,
   faBoxes,
   faBuilding,
@@ -94,6 +95,10 @@ export const NavigationMenu = () => {
           </SidebarMenu.Item>
         </SidebarMenu.SubItems>
       </SidebarMenu.ItemGroup>
+      <SidebarMenu.Item href="/docs">
+        <Icon icon={faBook} />
+        <SidebarMenu.Label>Documentation</SidebarMenu.Label>
+      </SidebarMenu.Item>
 
       {/* <SidebarMenu.ItemGroup>
         <SidebarMenu.Item href="/production">

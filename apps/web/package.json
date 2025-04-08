@@ -16,6 +16,9 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@hookform/resolvers": "^3.9.0",
+    "@mdx-js/loader": "^3.1.0",
+    "@mdx-js/react": "^3.1.0",
+    "@next/mdx": "^15.2.4",
     "@repo/api": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/pro-light-svg-icons": "^6.5.2",
@@ -28,6 +31,7 @@
     "@trpc/client": "11.0.0-rc.458",
     "@trpc/react-query": "11.0.0-rc.458",
     "@trpc/server": "11.0.0-rc.458",
+    "@types/mdx": "^2.0.13",
     "date-fns": "^4.1.0",
     "decimal.js": "^10.4.3",
     "immer": "^10.1.1",
