@@ -147,8 +147,8 @@ const getCurrentInventory = async (): Promise<TargetInventory[]> => {
               FROM ${schema.binItem} bi
               INNER JOIN ${schema.bin} b ON bi."fk_Bin_ID" = b."pk_Bin_ID"
               WHERE bi."fk_StockItem_ID" = ${schema.stockItem.pk_StockItem_ID}
-              AND bi."QuantityInStock" != 0
-              AND b."fk_Warehouse_ID" != 1
+              AND bi."QuantityInStock" <> 0
+              AND b."fk_Warehouse_ID" <> 1
             )
           END,
           '[]'
@@ -260,6 +260,9 @@ const handleDespatchTransaction = (
     },
     1, // locationId
     transaction.quantity.abs(),
+    transaction.date,
+    transaction.createdAt,
+    transaction.lastModified,
   );
 
   processor.logToLedger("outbound", entry, {
@@ -320,6 +323,9 @@ const handleJobInputTransaction = (
     },
     1,
     transaction.quantity.abs(),
+    transaction.date,
+    transaction.createdAt,
+    transaction.lastModified,
   );
 
   processor.logToLedger("outbound", entry, {
@@ -433,6 +439,9 @@ const handleCorrectionTransaction = (
       },
       1,
       transaction.quantity.abs(),
+      transaction.date,
+      transaction.createdAt,
+      transaction.lastModified,
     );
 
     processor.logToLedger("outbound", entry, {
@@ -450,6 +459,7 @@ const balanceInventory = (
   current: (typeof schema.inventory.$inferSelect)[],
   target: (typeof schema.inventory.$inferSelect)[],
 ) => {
+  const entryDate = new Date();
   if (current.length === 0 && target.length === 0) {
     return;
   }
@@ -478,6 +488,8 @@ const balanceInventory = (
     locations.set(location.locationId, entry);
   }
 
+  console.log(locations);
+
   for (const [locationId, amounts] of locations) {
     if (amounts.current.gt(amounts.target)) {
       let excess = amounts.current.minus(amounts.target);
@@ -489,13 +501,16 @@ const balanceInventory = (
         const shortage = putAmounts.target.minus(putAmounts.current);
         if (shortage.lte(0)) continue;
 
-        const moveQuantity = Decimal.min(excess, shortage);
+        const moveQuantity = Decimal.clamp(shortage, 0, excess);
         if (moveQuantity.gt(0)) {
           // Calculate and process the transfer
           const entry = processor.calculateOutboundEntry(
             { componentId, batchId },
             locationId,
             moveQuantity,
+            entryDate,
+            entryDate,
+            entryDate,
           );
 
           processor.updateInventory(entry, "outbound");
@@ -518,7 +533,7 @@ const balanceInventory = (
           amounts.current = amounts.current.minus(moveQuantity);
           putAmounts.current = putAmounts.current.plus(moveQuantity);
 
-          if (amounts.current.eq(amounts.target)) break;
+          if (excess.lte(0)) break;
         }
       }
     }
@@ -530,9 +545,9 @@ const balanceInventory = (
         { componentId, batchId },
         locationId,
         amounts.target.minus(amounts.current),
-        new Date(),
-        new Date(),
-        new Date(),
+        entryDate,
+        entryDate,
+        entryDate,
       );
 
       processor.updateInventory(entry, "inbound");
@@ -546,6 +561,9 @@ const balanceInventory = (
         { componentId, batchId },
         locationId,
         amounts.current.minus(amounts.target),
+        entryDate,
+        entryDate,
+        entryDate,
       );
 
       processor.updateInventory(entry, "outbound");
@@ -620,7 +638,6 @@ export const resetInventory = async () => {
 
   console.log("Processing transactions");
   let index = 0;
-
   for (const transaction of transactions) {
     index++;
     try {
@@ -666,134 +683,138 @@ export const resetInventory = async () => {
   const currentInventory = processor.inventories.getAllInventories();
 
   console.log("Balancing inventory");
-
-  // Balance each component's inventory
-  for (const component of components) {
-    if (!component.isStockTracked) {
-      continue;
-    }
-    if (component.isBatchTracked) {
-      // First handle all batched inventory
-      const targetBatches = targetInventory
-        .filter((i) => i.componentId === component.id)
-        .flatMap((i) => i.items)
-        .reduce(
-          (acc, item) => {
-            if (!item.batchReference) return acc;
-
-            let batch = processor.batches.getBatch(
-              component.id,
-              item.batchReference,
-            );
-            if (!batch) {
-              batch = processor.batches.upsert({
-                id: 0,
-                componentId: component.id,
-                batchReference: item.batchReference,
-                createdAt: item.createdAt,
-                lastModified: item.createdAt,
-              });
-            }
-
-            const inventoryItem = {
-              locationId: item.locationId,
-              quantity: item.quantity,
-            };
-
-            const items = acc[batch.id] ?? [];
-            items.push(inventoryItem);
-            acc[batch.id] = items;
-
-            return acc;
-          },
-          {} as Record<number, { locationId: number; quantity: Decimal }[]>,
-        );
-
-      const currentBatches = currentInventory
-        .filter((i) => i.componentId === component.id && i.batchId !== null)
-        .reduce(
-          (acc, item) => {
-            if (item.batchId) {
-              acc[item.batchId] = [
-                ...(acc[item.batchId] ?? []),
-                {
-                  locationId: item.locationId,
-                  quantity: item.totalQuantity,
-                },
-              ];
-            }
-            return acc;
-          },
-          {} as Record<number, { locationId: number; quantity: Decimal }[]>,
-        );
-
-      // Process each batch separately
-      const batches = new Set([
-        ...Object.keys(currentBatches).map(Number),
-        ...Object.keys(targetBatches).map(Number),
-      ]);
-
-      for (const batchId of batches) {
-        const targetItems =
-          targetBatches[batchId]?.map((item) => ({
-            id: 0,
-            componentId: component.id,
-            batchId: batchId,
-            locationId: item.locationId,
-            totalQuantity: item.quantity,
-            allocatedQuantity: new Decimal(0),
-            freeQuantity: item.quantity,
-            entryDate: new Date(),
-            createdAt: new Date(),
-            lastModified: new Date(),
-          })) ?? [];
-
-        const currentItems =
-          currentBatches[batchId]?.map((item) => ({
-            id: 0,
-            componentId: component.id,
-            batchId: batchId,
-            locationId: item.locationId,
-            totalQuantity: item.quantity,
-            allocatedQuantity: new Decimal(0),
-            freeQuantity: item.quantity,
-            entryDate: new Date(),
-            createdAt: new Date(),
-            lastModified: new Date(),
-          })) ?? [];
-
-        balanceInventory(processor, currentItems, targetItems);
+  try {
+    // Balance each component's inventory
+    for (const component of components) {
+      if (!component.isStockTracked) {
+        continue;
       }
-
-      // Clear any unbatched inventory since this is a batch-tracked item
-      const unbatchedCurrent = currentInventory.filter(
-        (i) => i.componentId === component.id && i.batchId === null,
-      );
-
-      balanceInventory(processor, unbatchedCurrent, []);
-    } else {
-      // Handle non-batch-tracked items normally
-      balanceInventory(
-        processor,
-        currentInventory.filter((i) => i.componentId === component.id),
-        targetInventory
+      if (component.isBatchTracked) {
+        // First handle all batched inventory
+        const targetBatches = targetInventory
           .filter((i) => i.componentId === component.id)
-          .flatMap((item) => {
-            return item.items.map((i) => ({
+          .flatMap((i) => i.items)
+          .reduce(
+            (acc, item) => {
+              if (!item.batchReference) return acc;
+
+              let batch = processor.batches.getBatch(
+                component.id,
+                item.batchReference,
+              );
+              if (!batch) {
+                batch = processor.batches.upsert({
+                  id: 0,
+                  componentId: component.id,
+                  batchReference: item.batchReference,
+                  createdAt: item.createdAt,
+                  lastModified: item.createdAt,
+                });
+              }
+
+              const inventoryItem = {
+                locationId: item.locationId,
+                quantity: item.quantity,
+              };
+
+              const items = acc[batch.id] ?? [];
+              items.push(inventoryItem);
+              acc[batch.id] = items;
+
+              return acc;
+            },
+            {} as Record<number, { locationId: number; quantity: Decimal }[]>,
+          );
+
+        const currentBatches = currentInventory
+          .filter((i) => i.componentId === component.id && i.batchId !== null)
+          .reduce(
+            (acc, item) => {
+              if (item.batchId) {
+                acc[item.batchId] = [
+                  ...(acc[item.batchId] ?? []),
+                  {
+                    locationId: item.locationId,
+                    quantity: item.totalQuantity,
+                  },
+                ];
+              }
+              return acc;
+            },
+            {} as Record<number, { locationId: number; quantity: Decimal }[]>,
+          );
+
+        // Process each batch separately
+        const batches = new Set([
+          ...Object.keys(currentBatches).map(Number),
+          ...Object.keys(targetBatches).map(Number),
+        ]);
+
+        for (const batchId of batches) {
+          const targetItems =
+            targetBatches[batchId]?.map((item) => ({
               id: 0,
               componentId: component.id,
-              batchId: null,
-              locationId: i.locationId,
-              totalQuantity: i.quantity,
+              batchId: batchId,
+              locationId: item.locationId,
+              totalQuantity: item.quantity,
               allocatedQuantity: new Decimal(0),
-              freeQuantity: i.quantity,
+              freeQuantity: item.quantity,
               entryDate: new Date(),
               createdAt: new Date(),
               lastModified: new Date(),
-            }));
-          }),
-      );
+            })) ?? [];
+
+          const currentItems =
+            currentBatches[batchId]?.map((item) => ({
+              id: 0,
+              componentId: component.id,
+              batchId: batchId,
+              locationId: item.locationId,
+              totalQuantity: item.quantity,
+              allocatedQuantity: new Decimal(0),
+              freeQuantity: item.quantity,
+              entryDate: new Date(),
+              createdAt: new Date(),
+              lastModified: new Date(),
+            })) ?? [];
+
+          balanceInventory(processor, currentItems, targetItems);
+        }
+
+        // Clear any unbatched inventory since this is a batch-tracked item
+        const unbatchedCurrent = currentInventory.filter(
+          (i) => i.componentId === component.id && i.batchId === null,
+        );
+
+        balanceInventory(processor, unbatchedCurrent, []);
+      } else {
+        // Handle non-batch-tracked items normally
+        balanceInventory(
+          processor,
+          currentInventory.filter((i) => i.componentId === component.id),
+          targetInventory
+            .filter((i) => i.componentId === component.id)
+            .flatMap((item) => {
+              return item.items.map((i) => ({
+                id: 0,
+                componentId: component.id,
+                batchId: null,
+                locationId: i.locationId,
+                totalQuantity: i.quantity,
+                allocatedQuantity: new Decimal(0),
+                freeQuantity: i.quantity,
+                entryDate: new Date(),
+                createdAt: new Date(),
+                lastModified: new Date(),
+              }));
+            }),
+        );
+      }
     }
+  } catch (error) {
+    console.error("Error balancing inventory", error);
+    throw error;
   }
   // console.log("Testing inventory");
 

@@ -889,6 +889,9 @@ export class InventoryBatchProcessor {
     reference: InventoryReference,
     locationId: number,
     quantity: Decimal,
+    entryDate: Date,
+    createdAt: Date,
+    lastModified: Date,
   ): InventoryEntry {
     if (quantity.lte(0)) {
       throw new Error("Quantity must be greater than 0");
@@ -903,9 +906,9 @@ export class InventoryBatchProcessor {
         id: 0,
         componentId: reference.componentId,
         batchId: reference.batchId,
-        entryDate: new Date("2016-01-01"),
-        createdAt: new Date("2016-01-01"),
-        lastModified: new Date("2016-01-01"),
+        entryDate,
+        createdAt,
+        lastModified,
         purchaseReceiptItemId: null,
         productionJobId: null,
       });
@@ -918,21 +921,24 @@ export class InventoryBatchProcessor {
         totalQuantity: new Decimal(0),
         allocatedQuantity: new Decimal(0),
         freeQuantity: new Decimal(0),
-        createdAt: new Date("2016-01-01"),
-        lastModified: new Date("2016-01-01"),
+        createdAt,
+        lastModified,
       });
     }
 
     const lots = componentLots.flatMap((lot) =>
-      this.inventoryLots.getForId(lot.id).map((l) =>
-        l === undefined
-          ? undefined
-          : {
-              componentId: lot.componentId,
-              batchId: lot.batchId,
-              ...l,
-            },
-      ),
+      this.inventoryLots
+        .getForId(lot.id)
+        .filter((lot) => lot?.locationId === locationId)
+        .map((l) =>
+          l === undefined
+            ? undefined
+            : {
+                componentId: lot.componentId,
+                batchId: lot.batchId,
+                ...l,
+              },
+        ),
     );
 
     let remainingQuantity = quantity;
@@ -1091,7 +1097,7 @@ export class InventoryBatchProcessor {
     for (const [batchId, quantity] of batches.entries()) {
       this.inventoryLedger.addEntry({
         componentId: entry.componentId,
-        batchId,
+        batchId: batchId === 0 ? null : batchId,
         locationId: entry.locationId,
         quantity: direction === "inbound" ? quantity : quantity.negated(),
         createdAt: details.date,
@@ -1169,7 +1175,7 @@ export class InventoryBatchProcessor {
       this.inventories.upsert({
         id: 0,
         componentId: entry.componentId,
-        batchId: batchId,
+        batchId: batchId === 0 ? null : batchId,
         locationId: entry.locationId,
         totalQuantity: getTotal(quantity),
         allocatedQuantity: getAllocated(quantity),

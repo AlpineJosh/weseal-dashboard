@@ -261,13 +261,13 @@ export const updateLotQuantities = async (
     throw new Error("Failed to update lot quantities");
   }
 
-  if (
-    updated.freeQuantity.lt(0) ||
-    updated.allocatedQuantity.lt(0) ||
-    updated.totalQuantity.lt(0)
-  ) {
-    throw new Error("Invalid lot quantities");
-  }
+  // if (
+  //   updated.freeQuantity.lt(0) ||
+  //   updated.allocatedQuantity.lt(0) ||
+  //   updated.totalQuantity.lt(0)
+  // ) {
+  //   throw new Error("Invalid lot quantities");
+  // }
 
   return updated;
 };
