@@ -224,13 +224,6 @@ export const updateLotQuantities = async (
   params: UpdateLotQuantitiesParams,
 ) => {
   const { entry, quantities } = params;
-  if (
-    quantities.totalQuantity.lt(0) ||
-    quantities.allocatedQuantity.lt(0) ||
-    quantities.freeQuantity.lt(0)
-  ) {
-    throw new Error("Quantities cannot be negative");
-  }
 
   const results = await tx
     .insert(schema.inventoryLot)
@@ -268,13 +261,13 @@ export const updateLotQuantities = async (
     throw new Error("Failed to update lot quantities");
   }
 
-  if (
-    updated.freeQuantity.lt(0) ||
-    updated.allocatedQuantity.lt(0) ||
-    updated.totalQuantity.lt(0)
-  ) {
-    throw new Error("Invalid lot quantities");
-  }
+  // if (
+  //   updated.freeQuantity.lt(0) ||
+  //   updated.allocatedQuantity.lt(0) ||
+  //   updated.totalQuantity.lt(0)
+  // ) {
+  //   throw new Error("Invalid lot quantities");
+  // }
 
   return updated;
 };

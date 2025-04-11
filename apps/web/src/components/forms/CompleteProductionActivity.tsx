@@ -132,10 +132,10 @@ export function CompleteProductionActivity({
                 `${job.componentId} - ${job.batchReference}`
               }
             >
-              {(productionJob) => {
+              {(job) => {
                 return (
-                  <Combobox.Option id={productionJob.id}>
-                    {productionJob.id}
+                  <Combobox.Option id={job.id}>
+                    {job.componentId} - {job.batchReference}
                   </Combobox.Option>
                 );
               }}

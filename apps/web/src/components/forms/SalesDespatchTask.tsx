@@ -19,10 +19,7 @@ const taskSchema = z.object({
   items: z.array(
     z.object({
       componentId: z.string(),
-      batchId: z
-        .number()
-        .nullable()
-        .transform((val) => val ?? undefined),
+      batchId: z.number().nullable(),
       quantity: decimal(),
       locationId: z.number(),
     }),

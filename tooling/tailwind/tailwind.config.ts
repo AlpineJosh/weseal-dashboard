@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import typography from "@tailwindcss/typography";
 import animate from "tailwindcss-animate";
 import aria from "tailwindcss-react-aria-components";
 
@@ -69,7 +70,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate, aria({ prefix: "rac" })],
+  plugins: [animate, aria({ prefix: "rac" }), typography],
 };
 
 export default config satisfies Config;

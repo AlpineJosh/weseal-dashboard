@@ -32,7 +32,7 @@ const createProductionTaskInput = z.object({
   componentId: z.string(),
   outputLocationId: z.number(),
   inputLocationId: z.number(),
-  batchReference: z.string(),
+  batchReference: z.string().nullable(),
   targetQuantity: decimal(),
   allocations: z.array(taskAllocationInput),
 });
