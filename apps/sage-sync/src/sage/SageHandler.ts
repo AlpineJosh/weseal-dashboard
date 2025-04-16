@@ -1,5 +1,7 @@
-import { Job, scheduleJob } from "node-schedule";
-import { Pool, pool } from "odbc";
+import type { Job } from "node-schedule";
+import type { Pool } from "odbc";
+import { scheduleJob } from "node-schedule";
+import { pool } from "odbc";
 
 import { schema } from "@repo/db";
 
@@ -13,8 +15,7 @@ export class SageHandler {
 
   private source: Pool | undefined = undefined;
 
-  constructor() {
-  }
+  constructor() {}
 
   async start() {
     this.source = await pool({
@@ -24,16 +25,10 @@ export class SageHandler {
       maxSize: 12,
     });
 
-    const components = new SageTable(
-      this.source,
-      schema.sage.STOCK,
-      ["STOCK_CODE"],
-    );
-    const stockTrans = new SageTable(
-      this.source,
-      schema.sage.STOCK_TRAN,
-      ["TRAN_NUMBER"],
-    );
+    const components = new SageTable(this.source, schema.STOCK, ["STOCK_CODE"]);
+    const stockTrans = new SageTable(this.source, schema.STOCK_TRAN, [
+      "TRAN_NUMBER",
+    ]);
     this.jobs.push(
       scheduleJob(config.syncSchedules.components, async () => {
         const date = new Date();
@@ -42,26 +37,18 @@ export class SageHandler {
       }),
     );
 
-    const purchaseLedger = new SageTable(
-      this.source,
-      schema.sage.PURCHASE_LEDGER,
-      ["ACCOUNT_REF"],
-    );
-    const purchaseOrders = new SageTable(
-      this.source,
-      schema.sage.PURCHASE_ORDER,
-      ["ORDER_NUMBER"],
-    );
-    const popItems = new SageTable(
-      this.source,
-      schema.sage.POP_ITEM,
-      ["ITEMID"],
-    );
-    const grnItems = new SageTable(
-      this.source,
-      schema.sage.GRN_ITEM,
-      ["GRN_NUMBER", "ITEM_NUMBER", "ORDER_NUMBER"],
-    );
+    const purchaseLedger = new SageTable(this.source, schema.PURCHASE_LEDGER, [
+      "ACCOUNT_REF",
+    ]);
+    const purchaseOrders = new SageTable(this.source, schema.PURCHASE_ORDER, [
+      "ORDER_NUMBER",
+    ]);
+    const popItems = new SageTable(this.source, schema.POP_ITEM, ["ITEMID"]);
+    const grnItems = new SageTable(this.source, schema.GRN_ITEM, [
+      "GRN_NUMBER",
+      "ITEM_NUMBER",
+      "ORDER_NUMBER",
+    ]);
     this.jobs.push(
       scheduleJob(config.syncSchedules.receiving, async () => {
         const date = new Date();
@@ -72,26 +59,18 @@ export class SageHandler {
       }),
     );
 
-    const salesLedger = new SageTable(
-      this.source,
-      schema.sage.SALES_LEDGER,
-      ["ACCOUNT_REF"],
-    );
-    const salesOrders = new SageTable(
-      this.source,
-      schema.sage.SALES_ORDER,
-      ["ORDER_NUMBER"],
-    );
-    const sopItems = new SageTable(
-      this.source,
-      schema.sage.SOP_ITEM,
-      ["ITEMID"],
-    );
-    const gdnItems = new SageTable(
-      this.source,
-      schema.sage.GDN_ITEM,
-      ["GDN_NUMBER", "ITEM_NUMBER", "ORDER_NUMBER"],
-    );
+    const salesLedger = new SageTable(this.source, schema.SALES_LEDGER, [
+      "ACCOUNT_REF",
+    ]);
+    const salesOrders = new SageTable(this.source, schema.SALES_ORDER, [
+      "ORDER_NUMBER",
+    ]);
+    const sopItems = new SageTable(this.source, schema.SOP_ITEM, ["ITEMID"]);
+    const gdnItems = new SageTable(this.source, schema.GDN_ITEM, [
+      "GDN_NUMBER",
+      "ITEM_NUMBER",
+      "ORDER_NUMBER",
+    ]);
     this.jobs.push(
       scheduleJob(config.syncSchedules.despatching, async () => {
         const date = new Date();
@@ -102,16 +81,12 @@ export class SageHandler {
       }),
     );
 
-    const departments = new SageTable(
-      this.source,
-      schema.sage.DEPARTMENT,
-      ["NUMBER"],
-    );
-    const stockCategories = new SageTable(
-      this.source,
-      schema.sage.STOCK_CAT,
-      ["NUMBER"],
-    );
+    const departments = new SageTable(this.source, schema.DEPARTMENT, [
+      "NUMBER",
+    ]);
+    const stockCategories = new SageTable(this.source, schema.STOCK_CAT, [
+      "NUMBER",
+    ]);
 
     this.jobs.push(
       scheduleJob(config.syncSchedules.misc, async () => {

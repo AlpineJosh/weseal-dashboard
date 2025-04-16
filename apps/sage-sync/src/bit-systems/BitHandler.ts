@@ -24,27 +24,23 @@ export class BitHandler {
 
     if (!this.source) throw new Error("Error setting up sqlite connection");
 
-    const stockItems = new BitTable(this.source, schema.bitSystems.stockItem, [
+    const stockItems = new BitTable(this.source, schema.stockItem, [
       "pk_StockItem_ID",
     ]);
-    const binItems = new BitTable(this.source, schema.bitSystems.binItem, [
+    const binItems = new BitTable(this.source, schema.binItem, [
       "pk_BinItem_ID",
     ]);
-    const bins = new BitTable(this.source, schema.bitSystems.bin, [
-      "pk_Bin_ID",
-    ]);
-    const warehouses = new BitTable(this.source, schema.bitSystems.warehouse, [
+    const bins = new BitTable(this.source, schema.bin, ["pk_Bin_ID"]);
+    const warehouses = new BitTable(this.source, schema.warehouse, [
       "pk_Warehouse_ID",
     ]);
-    const traceableItems = new BitTable(
-      this.source,
-      schema.bitSystems.traceableItem,
-      ["pk_TraceableItem_ID"],
-    );
+    const traceableItems = new BitTable(this.source, schema.traceableItem, [
+      "pk_TraceableItem_ID",
+    ]);
 
     const traceableBinItems = new BitTable(
       this.source,
-      schema.bitSystems.traceableBinItem,
+      schema.traceableBinItem,
       ["pk_TraceableBinItem_ID"],
     );
 

@@ -70,10 +70,5 @@
     "tsx": "^4.19.2",
     "typescript": "catalog:"
   },
-  "pnpm": {
-    "neverBuiltDependencies": [
-      "node-windows"
-    ]
-  },
   "prettier": "@repo/prettier-config"
 }

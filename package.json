@@ -28,5 +28,10 @@
   "engines": {
     "node": ">=20"
   },
+  "pnpm": {
+    "neverBuiltDependencies": [
+      "node-windows"
+    ]
+  },
   "prettier": "@repo/prettier-config"
 }
