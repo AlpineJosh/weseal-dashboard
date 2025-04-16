@@ -13,6 +13,8 @@ const overview = db
     quantity: purchaseReceiptItem.quantity,
     componentDescription: component.description,
     componentUnit: component.unit,
+    componentStockTracked: component.isStockTracked,
+    componentBatchTracked: component.isBatchTracked,
     createdAt: purchaseReceiptItem.createdAt,
     lastModified: purchaseReceiptItem.lastModified,
   })
@@ -28,6 +30,8 @@ export const receiptItemQuery = datatable(
     quantity: "decimal",
     componentDescription: "string",
     componentUnit: "string",
+    componentStockTracked: "boolean",
+    componentBatchTracked: "boolean",
     createdAt: "string",
     lastModified: "string",
   },

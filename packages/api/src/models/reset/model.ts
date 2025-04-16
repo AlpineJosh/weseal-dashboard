@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 
 import { eq, schema, sql } from "@repo/db";
 
-import { serverDb as db } from "../../db";
+import { db } from "../../db";
 import { InventoryBatchProcessor } from "./inventory";
 
 const USER_ID = "b0e69002-1391-462e-ac20-11e640ff81a1";

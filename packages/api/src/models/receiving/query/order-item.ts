@@ -38,6 +38,8 @@ const overview = db
     isDeleted: purchaseOrderItem.isDeleted,
     componentDescription: component.description,
     componentUnit: component.unit,
+    componentStockTracked: component.isStockTracked,
+    componentBatchTracked: component.isBatchTracked,
   })
   .from(purchaseOrderItem)
   .leftJoin(component, eq(purchaseOrderItem.componentId, component.id))
@@ -63,6 +65,8 @@ export const orderItemQuery = datatable(
     isDeleted: "boolean",
     componentDescription: "string",
     componentUnit: "string",
+    componentStockTracked: "boolean",
+    componentBatchTracked: "boolean",
   },
   overview,
 );

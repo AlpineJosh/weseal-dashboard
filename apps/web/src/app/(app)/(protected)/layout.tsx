@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
+
 import PageLayout from "@/components/PageLayout";
-import { createClient } from "@/utils/supabase/server";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-const Authenticated = async ({ children }: { children: React.ReactNode }) => {
-  const supabase = createClient();
+export default async function AppLayout({ children }: AppLayoutProps) {
+  const supabase = await createSupabaseServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -15,14 +16,5 @@ const Authenticated = async ({ children }: { children: React.ReactNode }) => {
   if (!session) {
     redirect("/sign-in");
   }
-
-  return <>{children}</>;
-};
-
-export default function AppLayout({ children }: AppLayoutProps) {
-  return (
-    <Authenticated>
-      <PageLayout>{children}</PageLayout>
-    </Authenticated>
-  );
+  return <PageLayout>{children}</PageLayout>;
 }

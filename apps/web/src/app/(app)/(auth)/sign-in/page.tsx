@@ -1,19 +1,21 @@
 "use client";
 
-import { signInAction } from "@/app/actions";
-import { signInSchema } from "@/utils/supabase/schemas";
+import { use } from "react";
 
 import { Input } from "@repo/ui/components/control";
 import { Button } from "@repo/ui/components/element";
 import { Field, FieldGroup, ManagedForm } from "@repo/ui/components/form";
 import { Heading, Text, TextLink } from "@repo/ui/components/typography";
 
+import { signInAction } from "@/app/actions";
+import { signInSchema } from "@/utils/supabase/schemas";
+
 export default function Signin({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const error = searchParams.error;
+  const error = use(searchParams).error;
 
   return (
     <ManagedForm

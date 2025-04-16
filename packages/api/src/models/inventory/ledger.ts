@@ -25,6 +25,7 @@ export const createLedgerEntry = async (
 ) => {
   const { reference, locationId, quantity, direction, details } = params;
 
+  console.log(params);
   return tx
     .insert(schema.inventoryLedger)
     .values({
@@ -49,6 +50,8 @@ export const createLotLedgerEntries = async (
   params: CreateLotLedgerEntriesParams,
 ) => {
   const { lots, locationId, direction, details } = params;
+  console.log("Creating lot ledger entries");
+  console.log(lots);
 
   return tx
     .insert(schema.inventoryLotLedger)
@@ -76,20 +79,18 @@ export const logToLedger = async (
 ) => {
   const { direction, entry, details } = params;
 
-  await Promise.all([
-    createLedgerEntry(tx, {
-      reference: entry.reference,
-      locationId: entry.locationId,
-      quantity: entry.quantity,
-      direction,
-      details,
-    }),
+  await createLedgerEntry(tx, {
+    reference: entry.reference,
+    locationId: entry.locationId,
+    quantity: entry.quantity,
+    direction,
+    details,
+  });
 
-    createLotLedgerEntries(tx, {
-      lots: entry.lots,
-      locationId: entry.locationId,
-      direction,
-      details,
-    }),
-  ]);
+  await createLotLedgerEntries(tx, {
+    lots: entry.lots,
+    locationId: entry.locationId,
+    direction,
+    details,
+  });
 };

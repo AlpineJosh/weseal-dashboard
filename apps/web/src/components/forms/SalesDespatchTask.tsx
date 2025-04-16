@@ -47,11 +47,13 @@ export function SalesDespatchTaskForm({
   const { addToast } = useToast();
 
   const orderId = form.watch("orderId");
+  console.log(form.watch());
 
   const { data: orderItems } = api.despatching.order.items.list.useQuery(
     {
       filter: {
         orderId: { eq: orderId },
+        componentStockTracked: { eq: true },
       },
     },
     { enabled: !!orderId },

@@ -1,19 +1,20 @@
 "use server";
 
+import type { z } from "zod";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { encodedRedirect } from "@/utils/helpers";
-import {
+
+import type {
   forgotPasswordSchema,
   signInSchema,
   signUpSchema,
 } from "@/utils/supabase/schemas";
-import { createClient } from "@/utils/supabase/server";
-import { z } from "zod";
+import { encodedRedirect } from "@/utils/helpers";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 export const signUpAction = async (data: z.infer<typeof signUpSchema>) => {
-  const supabase = createClient();
-  const origin = headers().get("origin");
+  const supabase = await createSupabaseServerClient();
+  const origin = await headers().then((headers) => headers.get("origin"));
 
   if (!data.email || !data.password) {
     return { error: "Email and password are required" };
@@ -40,7 +41,7 @@ export const signUpAction = async (data: z.infer<typeof signUpSchema>) => {
 };
 
 export const signInAction = async (data: z.infer<typeof signInSchema>) => {
-  const supabase = createClient();
+  const supabase = await createSupabaseServerClient();
 
   const { error } = await supabase.auth.signInWithPassword(data);
 
@@ -54,8 +55,8 @@ export const signInAction = async (data: z.infer<typeof signInSchema>) => {
 export const forgotPasswordAction = async (
   data: z.infer<typeof forgotPasswordSchema>,
 ) => {
-  const supabase = createClient();
-  const origin = headers().get("origin");
+  const supabase = await createSupabaseServerClient();
+  const origin = await headers().then((headers) => headers.get("origin"));
 
   const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
     redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
@@ -78,7 +79,7 @@ export const forgotPasswordAction = async (
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
-  const supabase = createClient();
+  const supabase = await createSupabaseServerClient();
 
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
@@ -115,7 +116,7 @@ export const resetPasswordAction = async (formData: FormData) => {
 };
 
 export const signOutAction = async () => {
-  const supabase = createClient();
+  const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };

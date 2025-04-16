@@ -54,6 +54,9 @@ export function PurchaseReceiptTaskForm({
         orderId: {
           eq: orderId,
         },
+        componentStockTracked: {
+          eq: true,
+        },
       },
     },
     { enabled: !!orderId },
@@ -184,7 +187,7 @@ export function PurchaseReceiptTaskForm({
                 Quantity Received
               </Table.Column>
             </Table.Head>
-            <Table.Body data={orderItems?.rows ?? []}>
+            <Table.Body data={orderItems.rows ?? []}>
               {({ data }) => (
                 <Table.Row key={data.componentId}>
                   <Table.Cell id="componentId">{data.componentId}</Table.Cell>

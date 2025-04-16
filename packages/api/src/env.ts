@@ -3,9 +3,12 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string(),
+    POSTGRES_URL: z.string(),
+    VERCEL_ENV: z.string().optional(),
   },
   experimental__runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
+    POSTGRES_URL: process.env.POSTGRES_URL,
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
+    VERCEL_ENV: process.env.VERCEL_ENV,
   },
 });

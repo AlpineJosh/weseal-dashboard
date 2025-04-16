@@ -1,8 +1,11 @@
+"use server";
+
 import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { env } from "@/env";
 import { createServerClient } from "@supabase/ssr";
+
+import { env } from "@/env";
 
 export const updateSession = async (request: NextRequest) => {
   // Create an unmodified response

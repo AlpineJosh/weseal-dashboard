@@ -152,6 +152,7 @@ export const createInboundEntry = async (
       componentId: schema.componentLot.componentId,
       batchId: schema.componentLot.batchId,
     });
+  console.log("Created component lot:", lots);
 
   const lot = lots[0];
 
@@ -224,6 +225,20 @@ export const updateLotQuantities = async (
   params: UpdateLotQuantitiesParams,
 ) => {
   const { entry, quantities } = params;
+
+  console.log(
+    JSON.stringify(
+      entry.lots.map((lot) => ({
+        componentLotId: lot.id,
+        locationId: entry.locationId,
+        totalQuantity: quantities.totalQuantity,
+        allocatedQuantity: quantities.allocatedQuantity,
+        freeQuantity: quantities.freeQuantity,
+      })),
+      null,
+      2,
+    ),
+  );
 
   const results = await tx
     .insert(schema.inventoryLot)

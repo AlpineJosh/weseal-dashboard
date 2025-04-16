@@ -3,8 +3,6 @@ import Decimal from "decimal.js";
 import SuperJSON from "superjson";
 import { ZodError } from "zod";
 
-import { db } from "./db";
-
 SuperJSON.registerCustom<Decimal, string>(
   {
     isApplicable: (v): v is Decimal => v instanceof Decimal,
@@ -15,13 +13,11 @@ SuperJSON.registerCustom<Decimal, string>(
 );
 
 export interface TRPCContext {
-  db: typeof db;
   user: { id: string };
 }
 
 export const createTRPCContext = (user: { id: string }): TRPCContext => {
   return {
-    db,
     user,
   };
 };

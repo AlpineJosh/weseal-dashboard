@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { db } from "#db";
 import { completeTaskAllocation } from "#models/task/allocation";
 import { taskAllocationQuery } from "#models/task/query";
@@ -20,8 +21,17 @@ export const taskAllocationRouter = {
     }),
   list: publicProcedure
     .input(taskAllocationQuery.$schema)
-    .query(async ({ input }) => {
-      return taskAllocationQuery.findMany(input);
+    .query(async ({ input, ctx }) => {
+      try {
+        const results = await taskAllocationQuery.findMany(input);
+        return results;
+      } catch (error) {
+        console.error(error);
+        if (error instanceof TRPCError) {
+          console.error(error.message);
+        }
+        throw error;
+      }
     }),
   complete: publicProcedure
     .input(uniqueTaskAllocationInput)

@@ -1,17 +1,9 @@
-import type { NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
-import type { PgTransaction } from "drizzle-orm/pg-core";
-
-import type { ExtractTablesWithRelations, Schema } from "@repo/db";
-import { createServerClient, createServerlessClient } from "@repo/db";
+import type { DatabaseTransaction } from "@repo/db";
+import { createDatabaseClient } from "@repo/db";
 
 import { env } from "./env";
 
-export const db = createServerlessClient(env.DATABASE_URL);
+const dev = env.VERCEL_ENV === undefined;
+export const db = createDatabaseClient(env.POSTGRES_URL, dev);
 
-export const serverDb = createServerClient(env.DATABASE_URL);
-
-export type Transaction = PgTransaction<
-  NeonQueryResultHKT,
-  Schema,
-  ExtractTablesWithRelations<Schema>
->;
+export type Transaction = DatabaseTransaction;

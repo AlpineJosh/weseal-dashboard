@@ -17,6 +17,8 @@ const overview = db
     batchReference: batch.batchReference,
     createdAt: salesDespatchItem.createdAt,
     lastModified: salesDespatchItem.lastModified,
+    componentStockTracked: component.isStockTracked,
+    componentBatchTracked: component.isBatchTracked,
   })
   .from(salesDespatchItem)
   .leftJoin(component, eq(salesDespatchItem.componentId, component.id))
@@ -35,6 +37,8 @@ export const despatchItemQuery = datatable(
     batchReference: "string",
     createdAt: "string",
     lastModified: "string",
+    componentStockTracked: "boolean",
+    componentBatchTracked: "boolean",
   },
   overview,
 );

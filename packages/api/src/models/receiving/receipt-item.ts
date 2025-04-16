@@ -54,6 +54,8 @@ export const processReceiptItem = async (
     },
   });
 
+  console.log(JSON.stringify(entry, null, 2));
+
   await updateInventory(tx, {
     entry,
     type: "inbound",

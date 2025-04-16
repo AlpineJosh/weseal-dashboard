@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@domchristie/tailwind-utopia": "^1.1.1",
+    "@tailwindcss/typography": "^0.5.16",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.4",
     "tailwindcss-animate": "^1.0.7",
